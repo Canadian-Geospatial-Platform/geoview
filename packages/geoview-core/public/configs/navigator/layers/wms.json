@@ -128,9 +128,9 @@
         ]
       },
       {
-        "geoviewLayerId": "ows-mundialis",
-        "geoviewLayerName": "OWS Mundialis",
-        "metadataAccessPath": "https://ows.mundialis.de/services/service",
+        "geoviewLayerId": "ows-terrestris",
+        "geoviewLayerName": "OWS Terrestris",
+        "metadataAccessPath": "https://ows.terrestris.de/osm/service",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {

@@ -27,7 +27,12 @@ Read only the linked section of each doc: search for its heading and read to the
 
 - Put `Test.assert*` calls in `callbackAssert`, never in the execution `callback`; return observations for assertion, use `callbackFinalize` for cleanup, and match `Test<T>` to the result.
 - Use `test.addStep`, generated IDs, shared constants, instance helpers and `testError` for expected errors.
+- Shared readonly test constants live in `TestConstants` in `testers/constants.ts`; tester-specific constants stay with their tester.
 - Map-state-changing tests run sequentially after independent parallel tests.
+- When `onLaunchTestSuite()` calls change, review and update `getDescriptionAsHtml()` to reflect the
+  current coverage in source call order. Group only adjacent related tests; split nonadjacent topics.
+  Parallel calls follow launch order, not completion order
+  ([suite authoring](../../docs/app/testing/creating-tests.md#step-2-create-a-test-suite)).
 - Keep each changed suite's `getTestsTotalFinal()` aligned with its full-pipeline calls; include heavy-gated
   tests and exclude debug/commented calls. The catalog is unnumbered and the release checklist has no test
   totals, so test changes do not require documentation count reconciliation.
@@ -38,11 +43,30 @@ Read only the linked section of each doc: search for its heading and read to the
   ([helper contract](../../docs/app/testing/creating-tests.md#helper-methods)). Preserve source options,
   legend acceptance flags, sibling waits, and metadata-derived paths when extracting setup. Keep
   subsequent queries/reloads/visibility changes in the test; a readiness wait after a reload is not fixture addition.
-- Fixture helpers own generated IDs. Caller assertions and cleanup derive paths from the returned
-  layer, or `result.gvLayer` when observations are returned alongside it. Keep a layer-instance
-  fallback for teardown when execution fails after setup; do not retain caller-generated IDs for cleanup.
+- Fixture helpers return a single layer promise. Capture the assigned root and selected config paths in
+  `onLayerPath(rootLayerPath, configLayerPath)` and await
+  optional `onConfig` before the load/legend wait. Preserve distinct config and layer wait paths and
+  legend flags. Use the provided root for fixture cleanup; never use the unsuffixed UUID to clean up
+  a duplicate GeoCore fixture.
+- Pass callbacks to `addLayerOnMap` or `addLayerOnMapFromUUID`; these helpers invoke them.
+  GeoPackage reports both paths before reading the file, then passes only
+  `onConfig` to `addLayerOnMap` to avoid reporting the path twice.
 
 ### Gotchas & Pitfalls
+
+- Layer-add panel checks for configuration-based fixtures can await
+  `LayerTester.#waitForLayerBoxInPanels` in `onConfig` before awaiting the helper's layer promise.
+  Preserve the fixture's empty-legend option and any preceding sibling waits. The panel wait does not expand
+  groups or switch tabs; a child hidden beneath a collapsed group cannot have a rendered legend box.
+  Use the path-based `DomHelper` getters, not names that can repeat across fixtures
+  ([coverage contract](../../docs/app/testing/test-catalog.md#21-layers-epsg-3978--3857)).
+- For raster initial-visibility tests, wait for the first load before reading OpenLayers visibility:
+  `AbstractGVLayer` applies the configured value on that transition. Inspect the store directly when
+  testing initial collapsed state, without expanding groups or requiring hidden child boxes to render.
+
+- Data-table global-filter UI checks must edit the search input: `useGlobalFilter` initializes local state
+  from the store and subsequently writes local changes back, but does not consume later programmatic store changes.
+  Target `.data-table-filter-map input` for the map-filter switch rather than any disabled switch in the map.
 
 Read the canonical [gotchas](../../docs/app/testing/test-templates.md#gotchas--pitfalls).
 Source boundaries most likely to produce misleading tests:
@@ -61,12 +85,17 @@ Source boundaries most likely to produce misleading tests:
 - In overlay tests, retain the dialog and close-control references for finalization before awaiting initial focus.
   A focus-settlement timeout must not prevent cleanup from closing an already mounted overlay.
 - Query visibility is parent visibility plus current OL resolution limits; a hidden/out-of-range result is empty, not an error.
+- GeoChart starts hidden without configured charts. Tests registering charts dynamically must use `geoChartController.addChart`
+  and call `uiController.showTabButton('geochart')`, matching layer-creator registration; changing the chart store alone does not show the tab.
 - Layer visibility DOM checks must pass the Layers panel's `containerType` to `DomHelper.getVisibleButton` and
   `getVisibleButtonVisibility`; suffix-only row matching can select another panel's entry.
 - MUI's automatic icon `data-testid` attributes are development-only. The Layers visibility toggle explicitly supplies
   its icon IDs so `getVisibleButtonVisibility` also works in production; keep those props when changing the icons.
 - Prefer `waitForLayerToGetRegistered`; polling is fallback only when no event exists.
-- Map recreation must reassign both viewer and controllers. Overrides use `null` to remove keys.
+- Map recreation must reassign both viewer and controllers. GeoView suites bind the API's current map to themselves
+  and their testers at launch, before eligibility checks. `replaceMap()` emits a replacement event that synchronizes
+  the owning suite and its testers immediately. Do not retain controller locals across replacement.
+  See [test isolation](../../docs/app/testing/creating-tests.md#test-isolation). Overrides use `null` to remove keys.
 - Guard async result-set handlers when removal can delete the entry before settlement.
 - Instance cleanup/helpers differ from LayerTester static assertions requiring mapId.
 

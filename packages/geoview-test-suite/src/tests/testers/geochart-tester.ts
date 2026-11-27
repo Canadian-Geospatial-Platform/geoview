@@ -1,11 +1,15 @@
 import type { Coordinate } from 'ol/coordinate';
+
+import { TestConstants } from './constants';
 import { Test } from '../core/test';
+import { TestError } from '../core/exceptions';
 import { GVAbstractTester } from './abstract-gv-tester';
+import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import type { GeoViewGeoChartConfig } from 'geoview-core/api/config/reader/uuid-config-reader';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/states/ui-state';
 import { getStoreGeochartChartsConfig, getStoreGeochartSelectedLayerPath } from 'geoview-core/core/stores/states/geochart-state';
-import { TestError } from '../core/exceptions';
-import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
 
 /**
  * Main Map testing class.
@@ -21,19 +25,100 @@ export class GeochartTester extends GVAbstractTester {
   }
 
   /**
-   * Tests opening the Geochart for a given layer path.
+   * Tests opening the polygon layer's chart after querying an Ontario coordinate.
    *
-   * @param layerPath - The layer path of the layer
-   * @param lonlat - The coordinate on the map to query
-   * @returns A promise that resolves when the test completes
+   * @returns A promise that resolves with the queried polygon layer
    */
-  testGeochartOpenForLayerMapClick(layerPath: string, lonlat: Coordinate): Promise<Test<AbstractGVLayer>> {
+  testGeochartPolygonsClick(): Promise<Test<AbstractGVLayer>> {
+    const geochartConfig = {
+      layers: [
+        {
+          layerId: 'TBD-BELOW',
+          propertyValue: 'data',
+          propertyDisplay: 'label',
+        },
+      ],
+      chart: 'pie',
+      geochart: {
+        xAxis: {
+          property: 'label',
+        },
+        yAxis: {
+          property: 'data',
+        },
+      },
+      category: {
+        property: 'location',
+      },
+      datasources: [
+        {
+          display: 'Feature',
+          items: [
+            {
+              data: 92,
+              label: 'Hockey',
+              location: 'Victoria',
+            },
+            {
+              data: 43.54,
+              label: 'Baseball',
+              location: 'Victoria',
+            },
+            {
+              data: 12.3,
+              label: 'Basketball',
+              location: 'Victoria',
+            },
+            {
+              data: 66,
+              label: 'Football',
+              location: 'Victoria',
+            },
+            {
+              data: 75,
+              label: 'Soccer',
+              location: 'Victoria',
+            },
+            {
+              data: 553,
+              label: 'Hockey',
+              location: 'Toronto',
+            },
+            {
+              data: 54,
+              label: 'Baseball',
+              location: 'Toronto',
+            },
+          ],
+        },
+      ],
+    } as GeoViewGeoChartConfig;
+
     // Test
+    let gvLayer: AbstractBaseGVLayer;
+    let rootLayerPath: string | undefined;
     return this.test(
-      `Test Geochart on layer ${layerPath}...`,
-      (test) => {
+      `Test Geochart on GeoJSON Polygons...`,
+      async (test) => {
+        const { geoChartController, uiController } = this.getControllersRegistry();
+        if (!geoChartController) throw new TestError('The GeoChart controller is unavailable.');
+
+        // Add the Polygons layer
+        gvLayer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+
+        // Set the layer path in the geochart configuration
+        geochartConfig.layers[0].layerId = gvLayer.getLayerPath();
+
+        // Make sure the configuration is set
+        geoChartController.addChart(gvLayer.getLayerPath(), geochartConfig);
+        uiController.showTabButton('geochart');
+
         // Continue the test and return the layer
-        return this.waitForLayerQueryLonLatSelectLayerInPanel(test, layerPath, lonlat);
+        return this.queryLonLatSelectLayerInPanel(test, gvLayer.getLayerPath(), TestConstants.ONTARIO_CENTER_LONLAT);
       },
       (test) => {
         // Perform assertions
@@ -42,8 +127,12 @@ export class GeochartTester extends GVAbstractTester {
         Test.assertIsEqual(getStoreUIActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
-        test.addStep(`Verifying ${layerPath} is the selected layer for the geochart...`);
-        Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), layerPath);
+        test.addStep(`Verifying ${gvLayer.getLayerPath()} is the selected layer for the geochart...`);
+        Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), gvLayer.getLayerPath());
+      },
+      (test) => {
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -54,67 +143,50 @@ export class GeochartTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes.
    */
   testAddGeocoreLayerUUIDForGeochartAirborne(): Promise<Test<AbstractGVLayer>> {
-    // Test it
-    return this.testAddGeocoreLayerUUIDForGeochart(
-      GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID,
-      GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX,
-      GVAbstractTester.AIRBORNE_RADIOACTIVITY_GROUP,
-      GVAbstractTester.OTTAWA_LONLAT,
-      {
-        [GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX]: {
-          layers: [
-            {
-              layerId: GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX,
-              propertyValue: 'OBJECTID',
-              propertyDisplay: 'Location_Emplacement',
-            },
-          ],
-          chart: 'line',
-          query: {
-            type: 'esriRegular',
-            url: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3',
-            queryOptions: {
-              whereClauses: [
-                {
-                  field: 'Location_Emplacement',
-                  prefix: "'",
-                  valueFrom: 'Location_Emplacement',
-                  suffix: "'",
-                },
-              ],
-              orderByField: 'CollectionStart_DebutPrelevement',
-            },
+    const expectedGeochartChartsConfig = {
+      [TestConstants.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX]: {
+        layers: [
+          {
+            layerId: TestConstants.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX,
+            propertyValue: 'OBJECTID',
+            propertyDisplay: 'Location_Emplacement',
+          },
+        ],
+        chart: 'line',
+        query: {
+          type: 'esriRegular',
+          url: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3',
+          queryOptions: {
+            whereClauses: [
+              {
+                field: 'Location_Emplacement',
+                prefix: "'",
+                valueFrom: 'Location_Emplacement',
+                suffix: "'",
+              },
+            ],
+            orderByField: 'CollectionStart_DebutPrelevement',
           },
         },
-      }
-    );
-  }
+      },
+    };
 
-  /**
-   * Tests adding a Geocore layer, launching a query layers at a given lonlat, set the active footerbar tab to geochart and select the layer in the geochart panel.
-   *
-   * @param uuid - The uuid of the Gecoore layer
-   * @param layerPathAdd - The layer path of the layer that was added
-   * @param layerPathRemove - The layer path of the layer to remove once the test terminates
-   * @param lonlat - The coordinate on the map to query
-   * @param expectedGeochartChartsConfig - The expected geochart charts configuration to validate
-   */
-  testAddGeocoreLayerUUIDForGeochart(
-    uuid: string,
-    layerPathAdd: string,
-    layerPathRemove: string,
-    lonlat: Coordinate,
-    expectedGeochartChartsConfig: Record<string, unknown>
-  ): Promise<Test<AbstractGVLayer>> {
     // Test
+    let rootLayerPath: string | undefined;
+    let configLayerPath: string | undefined;
     return this.test(
       'Test Geochart',
       async (test) => {
         // Add the geoview layer by geocore uuid
-        await this.addLayerOnMapFromUUID(test, uuid);
+        const addedLayer = await this.addLayerEsriDynamicAirborneViaGeocore(test, undefined, undefined, {
+          onLayerPath: (rootPath, configPath): void => {
+            rootLayerPath = rootPath;
+            configLayerPath = configPath;
+          },
+        });
 
         // Continue the test and return the layer
-        return this.waitForLayerQueryLonLatSelectLayerInPanel(test, layerPathAdd, lonlat);
+        return this.queryLonLatSelectLayerInPanel(test, addedLayer.getLayerPath(), TestConstants.OTTAWA_LONLAT);
       },
       (test) => {
         // Perform assertions
@@ -127,12 +199,12 @@ export class GeochartTester extends GVAbstractTester {
         Test.assertIsEqual(getStoreUIActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
-        test.addStep(`Verifying ${layerPathAdd} is the selected layer for the geochart...`);
-        Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), layerPathAdd);
+        test.addStep(`Verifying ${configLayerPath} is the selected layer for the geochart...`);
+        Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), configLayerPath);
       },
       (test) => {
-        // Redirect to LayerTest to help test the removal of the layer
-        this.removeLayerConfigAndAssert(test, layerPathRemove);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -151,9 +223,8 @@ export class GeochartTester extends GVAbstractTester {
    * @throws {TestError} When the controller is unavailable or the query returns no processed features
    * @throws {Error} When the current query does not reach the batched GeoChart data before the timeout
    */
-  async waitForLayerQueryLonLatSelectLayerInPanel<T>(test: Test<T>, layerPath: string, lonlat: Coordinate): Promise<AbstractGVLayer> {
+  async queryLonLatSelectLayerInPanel<T>(test: Test<T>, layerPath: string, lonlat: Coordinate): Promise<AbstractGVLayer> {
     const { layerController, uiController, geoChartController } = this.getControllersRegistry();
-    if (!geoChartController) throw new TestError('The GeoChart controller is unavailable.');
 
     // Get the layer
     test.addStep(`Getting the layer with the geochart ${layerPath}...`);
@@ -173,11 +244,11 @@ export class GeochartTester extends GVAbstractTester {
 
     // Select the right layer path
     test.addStep(`Selecting the geochart for the added layer...`);
-    geoChartController.setSelectedLayerPath(layerPath);
+    geoChartController?.setSelectedLayerPath(layerPath);
     await DomHelper.waitForReactIdle();
 
     // Wait for fun so that we can see the actual chart in the UI before terminating the test
-    await GVAbstractTester.waitForFun();
+    await test.waitForFun();
 
     // Return the layer
     return layer;

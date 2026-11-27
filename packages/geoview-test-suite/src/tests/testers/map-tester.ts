@@ -2,31 +2,20 @@ import type { Coordinate } from 'ol/coordinate';
 import type { Size } from 'ol/size';
 import { Draw } from 'geoview-core/geo/interaction/draw';
 
+import { TestConstants } from './constants';
 import { TestError } from '../core/exceptions';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { delay, generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
-import {
-  MAP_CENTER,
-  MAP_ZOOM_LEVEL,
-  type Extent,
-  type TypeBasemapId,
-  type TypeInteraction,
-  type TypeMapState,
-  type TypeMapMouseInfo,
-  type TypeValidMapProjectionCodes,
-  type TypeViewportBoundaryLonLat,
-  type TypeFeatureInfoEntry,
+import type {
+  Extent,
+  TypeBasemapId,
+  TypeMapState,
+  TypeMapMouseInfo,
+  TypeValidMapProjectionCodes,
 } from 'geoview-core/api/types/map-schema-types';
-import { InvalidViewportMidpointsError, MapViewportUnavailableError } from 'geoview-core/core/exceptions/geoview-exceptions';
-import { CancelledError } from 'geoview-core/core/exceptions/core-exceptions';
 import { PAGE_SCROLL_GAP_PX } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
-import {
-  getStoreDetailsFeatures,
-  getStoreDetailsSelectedLayerPath,
-  type TypeHoverFeatureInfo,
-} from 'geoview-core/core/stores/states/feature-info-state';
 import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab, getStoreUIFooterTabs } from 'geoview-core/core/stores/states/ui-state';
 import {
   getStoreAppHeight,
@@ -37,15 +26,12 @@ import {
 } from 'geoview-core/core/stores/states/app-state';
 import {
   getStoreMapConfigViewSettingsProjection,
-  getStoreMapHoverFeatureInfo,
   getStoreMapPointerPosition,
   getStoreMapStateJson,
   setStoreMapPointerPosition,
 } from 'geoview-core/core/stores/states/map-state';
 import { getStoreLayerOrderedLayerPaths } from 'geoview-core/core/stores/states/layer-state';
-import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { Projection } from 'geoview-core/geo/utils/projection';
-import { VectorTiles } from 'geoview-core/geo/layer/geoview-layers/raster/vector-tiles';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 
 /**
@@ -65,352 +51,6 @@ export class MapTester extends GVAbstractTester {
   }
 
   // #endregion OVERRIDES
-
-  // #region PUBLIC METHODS - VIEWPORT BOUNDARY
-
-  /**
-   * Tests fitting midpoint coordinates in the map-config suite's existing container.
-   *
-   * @param projection - Source projection
-   * @param rotation - Optional rotation in radians
-   * @param interaction - Optional interaction mode
-   * @param change - Optional change to viewport aspect ratio or projection before fitting
-   * @param useAnimation - Optional animation flag
-   * @param center - Optional source center in longitude/latitude
-   * @param useRotation - Whether the fit should restore the source rotation or preserve the changed rotation
-   * @returns A promise that resolves with the fit outcome
-   */
-  testFitViewportToMidpointsLonLat(
-    projection: TypeValidMapProjectionCodes,
-    rotation = 0,
-    interaction: TypeInteraction = 'dynamic',
-    change: 'none' | 'resize' | 'projection' = 'none',
-    useAnimation = false,
-    center: Coordinate = MAP_CENTER[projection],
-    useRotation = true
-  ): Promise<Test<TypeViewportMidpointFitResult>> {
-    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
-    const originalWidth = gvRootElement.style.width;
-    return this.test(
-      `Test fitting viewport midpoints EPSG:${projection}, rotation ${rotation}, ${interaction}, ${change}, animated ${useAnimation}, align ${useRotation}`,
-      async (test): Promise<TypeViewportMidpointFitResult> => {
-        const viewer = await this.#createViewportFixture(test, gvRootElement, projection, interaction, center, rotation);
-        viewer.getView().padding = interaction === 'dynamic' ? [15, 25, 60, 35] : [0, 0, 0, 0];
-        viewer.map.renderSync();
-        const before = MapTester.#captureViewportBoundary(viewer);
-        const input = before.boundary.midpointWSENCoords;
-        const original = input.map((coordinate) => [...coordinate]);
-        test.addStep('Changing the view before fitting the captured WSEN coordinates...');
-        if (change === 'resize') {
-          gvRootElement.style.width = '540px';
-          viewer.map.updateSize();
-        }
-        if (change === 'projection') {
-          viewer.setView({ projection: 3857, initialView: { zoomAndCenter: [5, MAP_CENTER[3857]] }, rotation });
-        }
-        const view = viewer.getView();
-        view.setRotation(rotation + 0.7);
-        view.setZoom(view.getZoom()! + 2);
-        const currentCenter = view.getCenter()!;
-        view.setCenter([currentCenter[0] + view.getResolution()! * 100, currentCenter[1]]);
-        viewer.map.renderSync();
-        test.addStep('Fitting the captured coordinates through the public viewer API...');
-        await viewer.fitViewportToMidpointsLonLat(input, useRotation, useAnimation);
-        return {
-          snapshot: MapTester.#captureViewportBoundary(viewer),
-          original,
-          input,
-          pixels: original.map((coordinate) => viewer.map.getPixelFromCoordinate(viewer.convertCoordinateLonLatToMapProj(coordinate))),
-          originalPixels: [before.expectedPixels[7], before.expectedPixels[6], before.expectedPixels[5], before.expectedPixels[4]],
-          rotation,
-        };
-      },
-      (test, result): void => {
-        test.addStep('Verifying containment, rotation, input preservation, and exact compatible-view round trip...');
-        Test.assertIsArrayEqualJsons(result.input, result.original);
-        if (!useRotation) Test.assertIsEqualWithinTolerance(result.snapshot.rotation, result.rotation + 0.7, 1e-9);
-        else if (change !== 'projection') Test.assertIsEqualWithinTolerance(result.snapshot.rotation, result.rotation, 1e-9);
-        else {
-          const [west, south, east, north] = result.pixels;
-          Test.assertIsDefined('west', west);
-          Test.assertIsDefined('south', south);
-          Test.assertIsDefined('east', east);
-          Test.assertIsDefined('north', north);
-          const eastAngle = Math.atan2(-(east[1] - west[1]), east[0] - west[0]);
-          const northAngle = Math.atan2(-(north[1] - south[1]), north[0] - south[0]) - Math.PI / 2;
-          Test.assertIsEqualWithinTolerance(eastAngle + northAngle, 0, 1e-6);
-        }
-        const [left, top] = result.snapshot.expectedPixels[0];
-        const [right, bottom] = result.snapshot.expectedPixels[2];
-        result.pixels.forEach((pixel, index): void => {
-          Test.assertIsDefined('pixel', pixel);
-          Test.assertIsEqual(pixel[0] >= left - 0.5 && pixel[0] <= right + 0.5, true);
-          Test.assertIsEqual(pixel[1] >= top - 0.5 && pixel[1] <= bottom + 0.5, true);
-          if (change === 'none' && useRotation)
-            pixel.forEach((value, axis): void => Test.assertIsEqualWithinTolerance(value, result.originalPixels[index][axis], 0.5));
-        });
-        const pixels = result.pixels.filter((pixel) => pixel !== null);
-        const minX = Math.min(...pixels.map((pixel) => pixel[0]));
-        const maxX = Math.max(...pixels.map((pixel) => pixel[0]));
-        const minY = Math.min(...pixels.map((pixel) => pixel[1]));
-        const maxY = Math.max(...pixels.map((pixel) => pixel[1]));
-        Test.assertIsEqual(
-          (Math.abs(minX - left) < 0.5 && Math.abs(maxX - right) < 0.5) || (Math.abs(minY - top) < 0.5 && Math.abs(maxY - bottom) < 0.5),
-          true
-        );
-      },
-      (): void => {
-        this.#resetViewportFixture(gvRootElement, originalWidth);
-      }
-    );
-  }
-
-  /**
-   * Tests that invalid midpoint input rejects without modifying the view.
-   *
-   * @returns A promise that resolves with errors and unchanged boundaries for each invalid input
-   */
-  testInvalidViewportMidpoints(): Promise<
-    Test<{ error: InvalidViewportMidpointsError | undefined; boundary: TypeViewportBoundaryLonLat }[]>
-  > {
-    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
-    const originalWidth = gvRootElement.style.width;
-    let original: TypeViewportBoundaryLonLat | undefined;
-    return this.test(
-      'Test invalid viewport midpoint inputs without recreating the map',
-      async (test): Promise<{ error: InvalidViewportMidpointsError | undefined; boundary: TypeViewportBoundaryLonLat }[]> => {
-        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
-        original = viewer.getViewportBoundaryLonLat();
-        const results: { error: InvalidViewportMidpointsError | undefined; boundary: TypeViewportBoundaryLonLat }[] = [];
-        for (const condition of ['count', 'nonfinite', 'latitude', 'coincident', 'orientation']) {
-          const input = original.midpointWSENCoords.map((coordinate) => [...coordinate]);
-          test.addStep(`Passing invalid midpoint coordinates (${condition})...`);
-          if (condition === 'count') input.pop();
-          else if (condition === 'nonfinite') input[0][0] = Number.NaN;
-          else if (condition === 'latitude') input[0][1] = 91;
-          else if (condition === 'orientation') [input[1], input[3]] = [input[3], input[1]];
-          else input.fill(input[0]);
-          let error: InvalidViewportMidpointsError | undefined;
-          try {
-            // eslint-disable-next-line no-await-in-loop -- Verify each rejection and unchanged view before reusing the fixture.
-            await viewer.fitViewportToMidpointsLonLat(input, true, false);
-          } catch (caught: unknown) {
-            if (!(caught instanceof InvalidViewportMidpointsError)) throw caught;
-            error = caught;
-          }
-          results.push({ error, boundary: viewer.getViewportBoundaryLonLat() });
-        }
-        return results;
-      },
-      (_test, results): void => {
-        Test.assertIsArrayLengthEqual(results, 5);
-        results.forEach((result): void => {
-          Test.assertIsInstance(result.error, InvalidViewportMidpointsError);
-          Test.assertJsonObject(result.boundary, original);
-        });
-      },
-      (): void => {
-        this.#resetViewportFixture(gvRootElement, originalWidth);
-      }
-    );
-  }
-
-  /**
-   * Tests that an interrupted animation rejects instead of reporting a completed fit.
-   *
-   * @returns A promise that resolves with the expected cancellation error
-   */
-  testErrorFitViewportMidpointsCancelled(): Promise<Test<CancelledError>> {
-    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
-    const originalWidth = gvRootElement.style.width;
-    return this.testError(
-      'Test viewport midpoint fit interrupted by another interaction',
-      CancelledError,
-      async (test): Promise<void> => {
-        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
-        const input = viewer.getViewportBoundaryLonLat().midpointWSENCoords;
-        viewer.getView().setZoom(8);
-        viewer.getView().setRotation(1);
-        viewer.map.renderSync();
-        test.addStep('Starting and immediately cancelling the animated fit...');
-        const fitting = viewer.fitViewportToMidpointsLonLat(input);
-        viewer.getView().cancelAnimations();
-        await fitting;
-      },
-      undefined,
-      (): void => {
-        this.#resetViewportFixture(gvRootElement, originalWidth);
-      }
-    );
-  }
-
-  /**
-   * Tests padded viewport samples in a fresh, network-independent map.
-   *
-   * @param projection - Projection to test
-   * @param rotation - Optional view rotation in radians
-   * @param interaction - Optional interaction mode
-   * @param center - Optional center in longitude/latitude
-   * @returns A promise that resolves with the boundary test
-   */
-  testViewportBoundaryLonLat(
-    projection: TypeValidMapProjectionCodes,
-    rotation = 0,
-    interaction: TypeInteraction = 'dynamic',
-    center: Coordinate = MAP_CENTER[projection]
-  ): Promise<Test<TypeViewportBoundarySnapshot>> {
-    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
-    const originalWidth = gvRootElement.style.width;
-    return this.test(
-      `Test viewport boundary EPSG:${projection}, rotation ${rotation}, ${interaction}, center ${center}`,
-      async (test): Promise<TypeViewportBoundarySnapshot> => {
-        test.addStep('Replacing the suite map and sampling the public viewer API...');
-        const viewer = await this.#createViewportFixture(test, gvRootElement, projection, interaction, center, rotation);
-        return MapTester.#captureViewportBoundary(viewer);
-      },
-      (test, result): void => {
-        test.addStep('Checking eight samples against independent view geometry and CSS pixels...');
-        MapTester.#assertViewportBoundary(result);
-        Test.assertIsEqualWithinTolerance(result.bottomPadding, result.infoHeight, 0.5);
-        Test.assertIsEqualWithinTolerance(result.rotation, rotation, 1e-9);
-        Test.assertIsArrayEqual(result.center, center, 6);
-        if (rotation !== 0) Test.assertIsEqual(Math.abs(result.boundary.midpoints.s[1] - result.extentSouth[1]) > 0.1, true);
-        if (projection === 3978 && rotation === 0 && center === MAP_CENTER[3978]) {
-          Test.assertIsEqual(result.boundary.midpoints.s[1] - result.boundary.corners.sw[1] > 0.1, true);
-          Test.assertIsEqual(result.boundary.midpoints.s[1] - result.boundary.corners.se[1] > 0.1, true);
-        }
-        if (projection === 3857 && rotation === 0) {
-          const { corners, midpoints } = result.boundary;
-          Test.assertIsEqualWithinTolerance(midpoints.w[0], corners.nw[0], 1e-6);
-          Test.assertIsEqualWithinTolerance(midpoints.e[0], corners.se[0], 1e-6);
-          Test.assertIsEqualWithinTolerance(midpoints.n[1], corners.ne[1], 1e-6);
-          Test.assertIsEqualWithinTolerance(midpoints.s[1], corners.sw[1], 1e-6);
-          if (center === GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT) Test.assertIsEqual(midpoints.e[0] > 180, true);
-        }
-        if (interaction === 'dynamic') Test.assertIsNotEqual(result.boundary.midpoints.s[1], result.canvasSouth[1]);
-        else Test.assertIsArrayEqual(result.boundary.midpoints.s, result.canvasSouth, 6);
-      },
-      (): void => {
-        this.#resetViewportFixture(gvRootElement, originalWidth);
-      }
-    );
-  }
-
-  /**
-   * Tests map-info height changes, asymmetric padding, and viewport resizing.
-   *
-   * @returns A promise that resolves with the boundary snapshots before and after each change
-   */
-  testViewportBoundaryPaddingAndResize(): Promise<Test<TypeViewportBoundarySnapshot[]>> {
-    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
-    const originalWidth = gvRootElement.style.width;
-    return this.test(
-      'Test viewport boundary after map-info height, padding, and size changes',
-      async (test): Promise<TypeViewportBoundarySnapshot[]> => {
-        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
-        const snapshots = [MapTester.#captureViewportBoundary(viewer)];
-        test.addStep('Increasing map-info bar height and updating view padding...');
-        const info = DomHelper.getMapInfo(viewer.mapId);
-        if (!info) throw new TestError('Viewport fixture has no map-info bar');
-        info.style.height = `${info.offsetHeight + 30}px`;
-        viewer.updateViewPadding();
-        viewer.map.renderSync();
-        snapshots.push(MapTester.#captureViewportBoundary(viewer));
-        test.addStep('Applying padding on all four sides...');
-        viewer.getView().padding = [20, 30, 70, 40];
-        viewer.map.renderSync();
-        snapshots.push(MapTester.#captureViewportBoundary(viewer));
-        test.addStep('Resizing the host and resampling...');
-        gvRootElement.style.width = '640px';
-        viewer.map.updateSize();
-        viewer.map.renderSync();
-        snapshots.push(MapTester.#captureViewportBoundary(viewer));
-        return snapshots;
-      },
-      (test, result): void => {
-        test.addStep('Verifying fresh geometry after each layout change...');
-        result.forEach(MapTester.#assertViewportBoundary);
-        Test.assertIsEqualWithinTolerance(result[1].bottomPadding, result[1].infoHeight, 0.5);
-        Test.assertIsEqual(result[1].bottomPadding > result[0].bottomPadding, true);
-        Test.assertIsNotEqual(result[2].expectedPixels[1][0], result[3].expectedPixels[1][0]);
-        Test.assertIsNotEqual(result[2].boundary.midpoints.e[0], result[3].boundary.midpoints.e[0]);
-      },
-      (): void => {
-        this.#resetViewportFixture(gvRootElement, originalWidth);
-      }
-    );
-  }
-
-  /**
-   * Tests unavailable viewport conditions using one fixture, restoring it after every condition.
-   *
-   * @returns A promise that resolves with the captured typed errors
-   */
-  testViewportBoundaryUnavailable(): Promise<Test<(MapViewportUnavailableError | undefined)[]>> {
-    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
-    const originalWidth = gvRootElement.style.width;
-    return this.test(
-      'Test unavailable viewport conditions without recreating the map',
-      async (test): Promise<(MapViewportUnavailableError | undefined)[]> => {
-        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
-        const results: (MapViewportUnavailableError | undefined)[] = [];
-        for (const condition of ['size', 'padding', 'nonfinite', 'negative-padding', 'unrendered']) {
-          viewer.getViewportBoundaryLonLat();
-          test.addStep(`Making viewport unavailable (${condition}) and sampling...`);
-          let error: MapViewportUnavailableError | undefined;
-          try {
-            if (condition === 'size') viewer.map.setSize([0, 0]);
-            else if (condition === 'padding') viewer.getView().padding = [0, 0, viewer.map.getSize()![1], 0];
-            else if (condition === 'nonfinite') viewer.map.setSize([Number.NaN, 600]);
-            else if (condition === 'negative-padding') viewer.getView().padding = [0, 0, -10, 0];
-            else viewer.map.setTarget(undefined);
-            viewer.getViewportBoundaryLonLat();
-          } catch (caught: unknown) {
-            if (!(caught instanceof MapViewportUnavailableError)) throw caught;
-            error = caught;
-          } finally {
-            this.#resetViewportFixture(gvRootElement, '800px');
-          }
-          results.push(error);
-        }
-        return results;
-      },
-      (_test, results): void => {
-        Test.assertIsArrayLengthEqual(results, 5);
-        results.forEach((error): void => Test.assertIsInstance(error, MapViewportUnavailableError));
-      },
-      (): void => {
-        this.#resetViewportFixture(gvRootElement, originalWidth);
-      }
-    );
-  }
-
-  /**
-   * Tests that fitting propagates an unavailable viewport error.
-   *
-   * @returns A promise that resolves with the expected typed error
-   */
-  testErrorFitViewportUnavailable(): Promise<Test<MapViewportUnavailableError>> {
-    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
-    const originalWidth = gvRootElement.style.width;
-    return this.testError(
-      'Test fitting an unavailable viewport',
-      MapViewportUnavailableError,
-      async (test): Promise<void> => {
-        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
-        const input = viewer.getViewportBoundaryLonLat().midpointWSENCoords;
-        test.addStep('Removing the usable viewport size and fitting...');
-        viewer.map.setSize([0, 0]);
-        await viewer.fitViewportToMidpointsLonLat(input, true, false);
-      },
-      undefined,
-      (): void => {
-        this.#resetViewportFixture(gvRootElement, originalWidth);
-      }
-    );
-  }
-
-  // #endregion PUBLIC METHODS - VIEWPORT BOUNDARY
 
   // #region PUBLIC METHODS - MAP FUNCTIONS
 
@@ -484,7 +124,8 @@ export class MapTester extends GVAbstractTester {
             uiController.setCrosshairActive(false);
 
             // eslint-disable-next-line no-await-in-loop -- Each case must commit crosshair deactivation before reactivation.
-            await delay(50);
+            await DomHelper.waitForReactIdle();
+
             view.padding = [0, 0, bottom, 0];
             view.setRotation(rotation);
             const center = view.getCenter()!;
@@ -496,7 +137,7 @@ export class MapTester extends GVAbstractTester {
             uiController.setCrosshairActive(true);
 
             // eslint-disable-next-line no-await-in-loop -- Observe the activation effect before dispatching this case's keys.
-            await delay(50);
+            await DomHelper.waitForReactIdle();
 
             const size = viewer.map.getSize()!;
             const mapRect = target.getBoundingClientRect();
@@ -598,7 +239,7 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a zoom
         test.addStep('Performing zoom...');
-        await this.getControllersRegistry().mapController.zoomMap(zoomEnd, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(zoomEnd, TestConstants.USE_ZOOM_ANIMATION);
 
         // Return the result
         return getStoreMapStateJson(this.getMapId()).currentZoom;
@@ -611,7 +252,7 @@ export class MapTester extends GVAbstractTester {
       async (test) => {
         // Unzooms to original position
         test.addStep('Unzooms to the original zoom...');
-        await this.getControllersRegistry().mapController.zoomMap(currentZoom, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(currentZoom, TestConstants.USE_ZOOM_ANIMATION);
       }
     );
   }
@@ -851,7 +492,7 @@ export class MapTester extends GVAbstractTester {
     zoomLevel: number
   ): Promise<Test<Extent>> {
     // Zoom to initial extent
-    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+    await this.getControllersRegistry().mapController.zoomToInitialExtent(TestConstants.USE_ZOOM_ANIMATION);
 
     // Get the current init extent
     const { mapExtent, currentProjection } = getStoreMapStateJson(this.getMapId());
@@ -872,7 +513,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`Performing zoom to level ${zoomLevel}...`);
 
         // Perform a zoom
-        await this.getControllersRegistry().mapController.zoomMap(zoomLevel, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(zoomLevel, TestConstants.USE_ZOOM_ANIMATION);
 
         // Update the step
         test.addStep('Performing projection switch to original...');
@@ -884,7 +525,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Performing zomm to inital extent...');
 
         // Zoom to initial extent
-        await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomToInitialExtent(TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for render
         await this.getMapViewer().waitForRender();
@@ -985,7 +626,7 @@ export class MapTester extends GVAbstractTester {
       async (test) => {
         // Zoom to extent
         test.addStep(`Zooming to extent ${extent.join(',')}...`);
-        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(extent, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(extent, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for render
         await this.getMapViewer().waitForRender();
@@ -1000,7 +641,7 @@ export class MapTester extends GVAbstractTester {
       (test, result) => {
         // The map adjusts extent to fit viewport aspect ratio, compare with tolerance for aspect ratio adjustment
         test.addStep('Verifying map zoomed to extent (with aspect ratio tolerance)...');
-        Test.assertIsArrayEqual(result, expectedExtent, 0);
+        Test.assertIsArrayEqualWithinTolerance(result, expectedExtent, 1);
       }
     );
   }
@@ -1021,7 +662,7 @@ export class MapTester extends GVAbstractTester {
 
         // Zoom to coordinate
         this.getMapViewer().setMapZoomLevel(8);
-        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(coordinates, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(coordinates, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for render
         await this.getMapViewer().waitForRender();
@@ -1050,9 +691,18 @@ export class MapTester extends GVAbstractTester {
   testFooterBarSelectTab(): Promise<Test<string>> {
     const targetTab = 'data-table';
 
+    let rootLayerPath: string | undefined;
     return this.test(
       'Test footer bar select tab',
       async (test) => {
+        // Making sure there's at least 1 layer with data, otherwise the footer bar tab might not be visible at all
+        await this.addLayerEsriFeatureTopProjects(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+
+        // Selecting the footer bar tab
         test.addStep(`Selecting footer bar tab '${targetTab}'...`);
 
         // Select the tab
@@ -1064,6 +714,10 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Verifying tab is selected...');
         const { tabId } = getStoreUIActiveFooterBarTab(this.getMapId());
         Test.assertIsEqual(tabId, result);
+      },
+      (test) => {
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -1300,7 +954,7 @@ export class MapTester extends GVAbstractTester {
         }
 
         test.addStep('Zooming to British Columbia extent...');
-        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(bcExtent, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(bcExtent, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for render
         await this.getMapViewer().waitForRender();
@@ -1331,177 +985,19 @@ export class MapTester extends GVAbstractTester {
   }
 
   /**
-   * Tests that non-queryable layers do not appear in details state when clicking on the map.
-   *
-   * This test performs the following operations:
-   * 1. Gets the first layer from the map
-   * 2. Sets the layer as non-queryable
-   * 3. Simulates a map click
-   * 4. Verifies that the layer results does not appear in the details state
-   *
-   * @param layerPath - The layer path to test
-   * @param lonlat - The coordinates to query
-   * @returns A promise that resolves with the layer and feature arrays before disabling queries, while disabled, and after re-enabling
-   */
-  testNonQueryableLayerNotInDetails(layerPath: string, lonlat: Coordinate): Promise<Test<LayerWithBeforeAfterFeature<AbstractGVLayer>>> {
-    return this.test(
-      'Test non-queryable layer not in details after map click',
-      async (test) => {
-        // Get the layer
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
-
-        // The layer should be initially queryable
-        if (!layer.getQueryable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially queryable.`);
-
-        // Wait for the layer to be loaded after the zoom, a guarantee
-        await layer.waitForLoadedStatus();
-
-        // Query the layer at the given coordinates
-        const layerDataOn = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
-
-        // Set layer non queryable, this will also clear the result set automatically
-        test.addStep(`Setting layer '${layerPath}' as non-queryable...`);
-        layer.setQueryable(false);
-
-        // Query the layer at the given coordinates
-        const layerDataOff = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
-
-        // Set layer queryable again
-        test.addStep(`Setting layer '${layerPath}' as queryable again...`);
-        layer.setQueryable(true);
-
-        // Query the layer at the given coordinates
-        const layerDataOn2 = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
-
-        // Return the test results
-        return { layer, results: [layerDataOn, layerDataOff, layerDataOn2] };
-      },
-      (test, result) => {
-        // Get the results
-        const [layerDataOn, layerDataOff, layerDataOn2] = result.results;
-
-        test.addStep('Verifying layer data features when queryable...');
-        Test.assertIsArray(layerDataOn);
-        Test.assertIsArrayLengthEqual(layerDataOn, 2);
-
-        test.addStep('Verifying no layer data features when non-queryable...');
-        Test.assertIsUndefined('features', layerDataOff);
-
-        test.addStep('Verifying layer data features when queryable again...');
-        Test.assertIsArray(layerDataOn2);
-        Test.assertIsArrayLengthEqual(layerDataOn2, 2);
-      },
-      (_test, result) => {
-        // Make sure to turn it back to queryable
-        result.layer.setQueryable(true);
-      }
-    );
-  }
-
-  /**
-   * Tests that non-hoverable layers do not appear in hover state when hovering on the map.
-   *
-   * This test performs the following operations:
-   * 1. Gets the first layer from the map
-   * 2. Sets the layer as non-hoverable
-   * 3. Simulates a map hover
-   * 4. Verifies that the layer results does not appear in the hover state
-   *
-   * @param layerPath - The layer path to test
-   * @param lonlat - The coordinates to query
-   * @returns A promise that resolves with the Test containing the hover states
-   */
-  testLayerHoverableState(layerPath: string, lonlat: Coordinate): Promise<Test<LayerWithBeforeAfterHover<AbstractGVLayer>>> {
-    return this.test(
-      'Test layer hoverable state in hoverFeatureInfoLayerSet',
-      async (test) => {
-        // Get the layer
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
-
-        // The layer should be initially hoverable
-        if (!layer.getHoverable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially hoverable.`);
-
-        // Wait for the layer to be loaded after the zoom, a guarantee
-        await layer.waitForLoadedStatus();
-
-        // Perform a hover query using the hover feature info layer set
-        test.addStep(`Perform query operation at given coordinates...`);
-        await this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
-
-        // Check if there is feature selected from the layer
-        test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOnTemp = getStoreMapHoverFeatureInfo(this.getMapId());
-
-        // Store a deep copy of the data before clearing to preserve it
-        const layerDataOn = layerDataOnTemp ? { ...layerDataOnTemp } : undefined;
-
-        // Set layer non queryable, this will also clear the result set automatically
-        test.addStep(`Setting layer '${layerPath}' as non-hoverable...`);
-        layer.setHoverable(false);
-
-        // Perform a hover query using the feature info layer set
-        test.addStep(`Perform query operation at given coordinates...`);
-        await this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
-
-        // Check if there is feature selected from the layer
-        test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOffTemp = getStoreMapHoverFeatureInfo(this.getMapId());
-
-        // Store a deep copy of the data before clearing to preserve it
-        const layerDataOff = layerDataOffTemp ? { ...layerDataOffTemp } : undefined;
-
-        // Set layer hoverable again
-        test.addStep(`Setting layer '${layerPath}' as hoverable again...`);
-        layer.setHoverable(true);
-
-        // Perform a hover query using the feature info layer set
-        test.addStep(`Perform query operation at given coordinates...`);
-        await this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
-
-        // Check if there is feature selected from the layer
-        test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOn2Temp = getStoreMapHoverFeatureInfo(this.getMapId());
-
-        // Store a deep copy of the data before clearing to preserve it
-        const layerDataOn2 = layerDataOn2Temp ? { ...layerDataOn2Temp } : undefined;
-
-        // Return the test results
-        return { layer, results: [layerDataOn, layerDataOff, layerDataOn2] };
-      },
-      (test, result) => {
-        test.addStep('Verifying layer data features when hoverable...');
-        Test.assertJsonObject(result.results[0], { fieldInfo: { value: 'Ontario' } });
-
-        test.addStep('Verifying layer data features when not hoverable...');
-        Test.assertIsUndefined('result.after', result.results[1]);
-
-        test.addStep('Verifying layer data features when hoverable again...');
-        Test.assertJsonObject(result.results[2], { fieldInfo: { value: 'Ontario' } });
-      },
-      (_test, result) => {
-        // Make sure to turn it back to hoverable
-        result.layer.setHoverable(true);
-      }
-    );
-  }
-
-  /**
    * Tests that switching projection with a vector tile layer loaded emits a warning notification.
    *
    * This test performs the following operations:
    * 1. Adds a vector tile layer (EPSG:3978) to the map
    * 2. Verifies the layer loads and appears in ordered layers
-   * 3. Records the notification count before projection switch
-   * 4. Switches projection to 3857
-   * 5. Verifies a warning notification about vector tiles was emitted
-   * 6. Restores projection to 3978 and removes the layer
+   * 3. Switches projection to 3857
+   * 4. Verifies a warning notification about vector tiles was emitted
+   * 5. Restores projection to 3978 and removes the layer
    *
    * @returns A promise that resolves with the Test containing the MapViewer instance
    */
   testVectorTileProjectionWarning(): Promise<Test<MapViewer>> {
-    const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.VECTOR_TILES_CBMT_3978_URL;
-    const gvLayerName = GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME;
+    let rootLayerPath: string | undefined;
 
     return this.test<MapViewer>(
       'Test vector tile projection warning on projection switch',
@@ -1513,25 +1009,20 @@ export class MapTester extends GVAbstractTester {
           await this.getControllersRegistry().mapController.setProjection(3978);
         }
 
-        // Create the VT layer config
-        test.addStep('Creating Vector Tiles layer configuration...');
-        const gvConfig = VectorTiles.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: '' }]);
-
-        // Add the layer to the map
-        test.addStep('Adding the Vector Tiles layer on the map...');
-        const result = this.getControllersRegistry().layerCreatorController.addGeoviewLayer(gvConfig);
-
-        // Wait for the layer to be added
-        test.addStep('Waiting for the layer to be added...');
-        await result.promiseLayer;
+        // Add the vector tile layer (CBMT)
+        const layer = await this.addLayerVectorTilesCBMT(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Verify the layer appears in ordered layers
         test.addStep('Verifying the layer is present in ordered layers...');
         const orderedLayersBefore = getStoreLayerOrderedLayerPaths(this.getMapId());
-        const layerPresent = orderedLayersBefore.some((path) => path.startsWith(gvLayerId));
+        const layerPresent = orderedLayersBefore.includes(layer.getLayerPath());
 
         if (!layerPresent) {
-          throw new TestError(`Vector tile layer ${gvLayerId} was not found in ordered layers after adding.`);
+          throw new TestError(`Vector tile layer ${layer.getLayerPath()} was not found in ordered layers after adding.`);
         }
 
         // Switch projection to 3857
@@ -1560,84 +1051,8 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Restoring projection to LCC (3978)...');
         await this.getControllersRegistry().mapController.setProjection(3978);
 
-        // Remove the layer using its path prefix
-        test.addStep('Removing the Vector Tiles layer...');
-        const orderedLayers = getStoreLayerOrderedLayerPaths(this.getMapId());
-        const vtLayerPath = orderedLayers.find((path) => path.startsWith(gvLayerId));
-        if (vtLayerPath) {
-          this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(vtLayerPath);
-        }
-      }
-    );
-  }
-
-  /**
-   * Tests that the selected layer in the details panel persists correctly
-   * when clicking on different map locations.
-   *
-   * Test flow:
-   * 1. Clicks on the map at the first location and verifies the auto-selected layer.
-   * 2. Manually switches selection to the alternate layer.
-   * 3. Clicks on a second map location.
-   * 4. Verifies the manually selected layer remains selected and that its
-   *    feature count is correct.
-   *
-   * @param layerPath1 - The path of the first candidate layer that may be auto-selected after the initial click
-   * @param layerPath2 - The path of the second candidate layer used as the alternate manual selection
-   * @param clickCoordinates1 - The map coordinates used for the first simulated click
-   * @param clickCoordinates2 - The map coordinates used for the second simulated click
-   * @returns A promise that resolves with details about the original selected layer,
-   * the persisted alternate layer, and the feature count after the second click
-   */
-  testDetailsLayerSelectionPersistence(
-    layerPath1: string,
-    layerPath2: string,
-    clickCoordinates1: Coordinate,
-    clickCoordinates2: Coordinate
-  ): Promise<Test<LayerDetails>> {
-    return this.test(
-      'Test details layer selection persistence across map clicks',
-      async (test) => {
-        // Simulate a map click at first location
-        await this.simulateMapClickWaitForBatchedQuery(test, clickCoordinates1);
-
-        // Check which layer is selected after first click
-        test.addStep('Checking selected layer after first click...');
-        const originalLayerPath = getStoreDetailsSelectedLayerPath(this.getMapId());
-        test.addStep(`First selected layer: ${originalLayerPath}`);
-
-        // The alternate layer
-        const altLayerPath = originalLayerPath === layerPath1 ? layerPath2 : layerPath1;
-
-        // Manually select the alternate layer
-        test.addStep(`Manually selecting the other layer '${altLayerPath}'...`);
-        this.getControllersRegistry().detailsController.setSelectedLayerPath(altLayerPath);
-
-        // Simulate a map click at second location
-        await this.simulateMapClickWaitForBatchedQuery(test, clickCoordinates2);
-
-        // Check which layer is still selected after second click
-        test.addStep('Checking selected layer after second click...');
-        const alternateLayerPath = getStoreDetailsSelectedLayerPath(this.getMapId());
-        test.addStep(`Second selected layer: ${alternateLayerPath}`);
-
-        // Get feature count for second layer
-        const secondLayerDataFeatures = getStoreDetailsFeatures(this.getMapId(), alternateLayerPath);
-        const secondFeatureCount = secondLayerDataFeatures?.length || 0;
-        test.addStep(`Second layer feature count: ${secondFeatureCount}`);
-
-        return {
-          originalLayerPath,
-          alternateLayerPath,
-          secondFeatureCount,
-        };
-      },
-      (test, result) => {
-        test.addStep('Verifying first and second layers were different...');
-        Test.assertIsNotEqual(result.originalLayerPath, result.alternateLayerPath);
-
-        test.addStep('Verifying second layer has exactly 1 feature...');
-        Test.assertIsEqual(result.secondFeatureCount, 1);
+        // Clear the fixture even if addition failed after its path was assigned.
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -1763,7 +1178,7 @@ export class MapTester extends GVAbstractTester {
    */
   static async #createScrollContext(test: Test, mapId: string): Promise<TypeScrollContext> {
     // The app-bar button only exists once the shell has rendered, so it doubles as the readiness signal
-    const button = await DomHelper.waitForLegendPanelButton(mapId, 'appBar', GVAbstractTester.UI_SCROLL_TIMEOUT_MS);
+    const button = await DomHelper.waitForLegendPanelButton(mapId, 'appBar', TestConstants.UI_SCROLL_TIMEOUT_MS);
 
     // Fail fast with a clear message if any control is missing, rather than a null error mid-scenario
     const section = MapTester.#requireElement(mapId, 'map');
@@ -1856,7 +1271,7 @@ export class MapTester extends GVAbstractTester {
     await MapTester.#positionSection(context, -section.getBoundingClientRect().height);
 
     // The footer must still be on screen, otherwise this is not the footer-view position
-    preconditions.push(footer.getBoundingClientRect().top >= -GVAbstractTester.UI_SCROLL_TOLERANCE_PX);
+    preconditions.push(footer.getBoundingClientRect().top >= -TestConstants.UI_SCROLL_TOLERANCE_PX);
     await MapTester.#activateAppBarFromClosed(context);
 
     // Last transition: the map-info bar while the map is clipped at the top
@@ -1934,7 +1349,7 @@ export class MapTester extends GVAbstractTester {
     test.addStep(`Footer bounds after activation: top=${footerRect.top}, bottom=${footerRect.bottom}, viewport=${window.innerHeight}`);
 
     // The helper must leave the footer's bottom edge at the viewport bottom minus its clearance
-    preconditions.push(Math.abs(footerRect.bottom - (window.innerHeight - helperOffset)) <= GVAbstractTester.UI_SCROLL_TOLERANCE_PX);
+    preconditions.push(Math.abs(footerRect.bottom - (window.innerHeight - helperOffset)) <= TestConstants.UI_SCROLL_TOLERANCE_PX);
   }
 
   /**
@@ -2037,7 +1452,7 @@ export class MapTester extends GVAbstractTester {
       Test.assertIsEqualWithinTolerance(
         result.measurements[1].scrollY,
         result.measurements[0].scrollY,
-        GVAbstractTester.UI_SCROLL_TOLERANCE_PX
+        TestConstants.UI_SCROLL_TOLERANCE_PX
       );
     }
   }
@@ -2050,7 +1465,7 @@ export class MapTester extends GVAbstractTester {
    * @param viewportHeight - The viewport height when the test ran
    */
   static #assertScrollMeasurement(scenario: TypeScrollScenario, measurement: TypeScrollMeasurement, viewportHeight: number): void {
-    const tolerance = GVAbstractTester.UI_SCROLL_TOLERANCE_PX;
+    const tolerance = TestConstants.UI_SCROLL_TOLERANCE_PX;
     const gap = PAGE_SCROLL_GAP_PX;
 
     // A section taller than the viewport cannot fit, so it is aligned with its top at the standard gap and nothing else applies
@@ -2105,9 +1520,9 @@ export class MapTester extends GVAbstractTester {
           previous = current;
           stableSince = performance.now();
         }
-        return performance.now() - stableSince >= GVAbstractTester.UI_SCROLL_SETTLE_MS;
+        return performance.now() - stableSince >= TestConstants.UI_SCROLL_SETTLE_MS;
       },
-      GVAbstractTester.UI_SCROLL_TIMEOUT_MS,
+      TestConstants.UI_SCROLL_TIMEOUT_MS,
       50
     );
   }
@@ -2124,207 +1539,11 @@ export class MapTester extends GVAbstractTester {
     const infoRect = info.getBoundingClientRect();
     return { top: rect.top, bottom: rect.bottom, infoTop: infoRect.top, infoBottom: infoRect.bottom, scrollY: window.scrollY };
   }
-
-  // #endregion STATIC PRIVATE METHODS - MAP SECTION SCROLL
-
-  // #region PRIVATE METHODS - VIEWPORT BOUNDARY
-
-  /**
-   * Restores layout and a usable viewport after a test, including detached and invalid-size cases.
-   *
-   * @param host - The suite's existing map root
-   * @param originalWidth - Inline width before the test
-   */
-  #resetViewportFixture(host: HTMLElement, originalWidth: string): void {
-    host.style.setProperty('width', originalWidth);
-    const viewer = this.getMapViewer();
-    viewer.map.setTarget(DomHelper.getMapTargetElement(this.getMapId()));
-    DomHelper.getMapInfo(this.getMapId())?.style.removeProperty('height');
-    viewer.setView({ projection: 3978, initialView: { zoomAndCenter: [MAP_ZOOM_LEVEL[3978], MAP_CENTER[3978]] } });
-    viewer.map.updateSize();
-    viewer.updateViewPadding();
-    viewer.map.renderSync();
-  }
-
-  /**
-   * Replaces the suite map with a fixed-size, layer-free map using the standard config-test lifecycle.
-   *
-   * @param test - Test instance used to record lifecycle steps
-   * @param host - The suite's existing map root
-   * @param projection - View projection
-   * @param interaction - Interaction mode
-   * @param center - Initial longitude/latitude center
-   * @param rotation - View rotation in radians
-   * @returns A promise that resolves with the rendered fixture
-   */
-  async #createViewportFixture(
-    test: Test,
-    host: HTMLElement,
-    projection: TypeValidMapProjectionCodes,
-    interaction: TypeInteraction,
-    center: Coordinate,
-    rotation: number
-  ): Promise<MapViewer> {
-    host.style.setProperty('width', '800px');
-    // Keep the near-pole round-trip fixture below the projection singularity.
-    const zoom = center === GVAbstractTester.VIEWPORT_POLAR_LONLAT ? 8 : MAP_ZOOM_LEVEL[projection];
-    const viewer = await this.replaceMap(test, host.id, {
-      map: {
-        interaction,
-        viewSettings: {
-          projection,
-          initialView: { zoomAndCenter: [zoom, center] },
-        },
-        basemapOptions: { basemapId: 'nogeom', shaded: false, labeled: false },
-        listOfGeoviewLayerConfig: [],
-      },
-      components: [],
-      navBar: [],
-      appBar: { tabs: { core: [] } },
-      footerBar: { tabs: { core: [] } },
-    });
-    // Remove extent constraints so edge/polar fixtures test the requested center rather than a clamped Canada view.
-    viewer.setView({
-      projection,
-      initialView: { zoomAndCenter: [zoom, [center[0], center[1]]] },
-      rotation,
-    });
-    viewer.map.updateSize();
-    viewer.updateViewPadding();
-    await viewer.waitForRender();
-    return viewer;
-  }
-
-  // #endregion PRIVATE METHODS - VIEWPORT BOUNDARY
-
-  // #region STATIC METHODS - VIEWPORT BOUNDARY
-
-  /**
-   * Captures actual samples and an independent affine view-geometry oracle.
-   *
-   * @param viewer - Rendered fixture
-   * @returns Snapshot used exclusively for assertions
-   */
-  static #captureViewportBoundary(viewer: MapViewer): TypeViewportBoundarySnapshot {
-    const boundary = viewer.getViewportBoundaryLonLat();
-    const repeatedBoundary = viewer.getViewportBoundaryLonLat();
-    const view = viewer.getView();
-    const [width, height] = viewer.map.getSize()!;
-    const [top, padRight, padBottom, left] = view.padding ?? [0, 0, 0, 0];
-    const right = width - padRight;
-    const bottom = height - padBottom;
-    const x = (left + right) / 2;
-    const y = (top + bottom) / 2;
-    const expectedPixels = [
-      [left, top],
-      [right, top],
-      [right, bottom],
-      [left, bottom],
-      [x, top],
-      [right, y],
-      [x, bottom],
-      [left, y],
-    ];
-    const center = view.getCenter()!;
-    const resolution = view.getResolution()!;
-    const cos = Math.cos(view.getRotation());
-    const sin = Math.sin(view.getRotation());
-    const expected = expectedPixels.map(([px, py]): Coordinate =>
-      viewer.convertCoordinateMapProjToLonLat([
-        center[0] + resolution * ((px - x) * cos + (py - y) * sin),
-        center[1] + resolution * ((px - x) * sin - (py - y) * cos),
-      ])
-    );
-    const coordinates = [...Object.values(boundary.corners), ...Object.values(boundary.midpoints)];
-    const extent = view.calculateExtent();
-    return {
-      boundary,
-      repeatedBoundary,
-      expected,
-      pixels: coordinates.map((coordinate) => viewer.map.getPixelFromCoordinate(viewer.convertCoordinateLonLatToMapProj(coordinate))),
-      expectedPixels,
-      bottomPadding: padBottom,
-      infoHeight: viewer.mapFeaturesConfig.map.interaction === 'static' ? 0 : DomHelper.getMapInfoOffsetHeight(viewer.mapId),
-      canvasSouth: viewer.convertCoordinateMapProjToLonLat(viewer.map.getCoordinateFromPixel([x, height])),
-      freshObjects: boundary !== repeatedBoundary && boundary.corners.nw !== repeatedBoundary.corners.nw,
-      rotation: view.getRotation(),
-      center: viewer.convertCoordinateMapProjToLonLat(center),
-      extentSouth: viewer.convertCoordinateMapProjToLonLat([(extent[0] + extent[2]) / 2, extent[1]]),
-    };
-  }
-
-  /**
-   * Verifies exact output shape, finite coordinates, and boundary positions.
-   *
-   * @param snapshot - Captured API result and independent expectations
-   */
-  static #assertViewportBoundary(snapshot: TypeViewportBoundarySnapshot): void {
-    Test.assertIsArrayEqual(Object.keys(snapshot.boundary), ['corners', 'midpoints', 'midpointWSENCoords']);
-    Test.assertIsArrayEqual(Object.keys(snapshot.boundary.corners), ['nw', 'ne', 'se', 'sw']);
-    Test.assertIsArrayEqual(Object.keys(snapshot.boundary.midpoints), ['n', 'e', 's', 'w']);
-    Test.assertJsonObject(snapshot.boundary, snapshot.repeatedBoundary);
-    Test.assertIsEqual(snapshot.freshObjects, true);
-    const { w, s, e, n } = snapshot.boundary.midpoints;
-    Test.assertIsArrayEqualJsons(snapshot.boundary.midpointWSENCoords, [w, s, e, n]);
-    const coordinates = [...Object.values(snapshot.boundary.corners), ...Object.values(snapshot.boundary.midpoints)];
-    coordinates.forEach((coordinate, index): void => {
-      Test.assertIsArrayLengthEqual(coordinate, 2);
-      Test.assertIsEqual(coordinate.every(Number.isFinite), true);
-      coordinate.forEach((value, axis): void => Test.assertIsEqualWithinTolerance(value, snapshot.expected[index][axis], 1e-6));
-      const pixel = snapshot.pixels[index];
-      Test.assertIsDefined('pixel', pixel);
-      pixel.forEach((value, axis): void => Test.assertIsEqualWithinTolerance(value, snapshot.expectedPixels[index][axis], 0.5));
-    });
-  }
-
-  // #endregion STATIC METHODS - VIEWPORT BOUNDARY
 }
+
+// #endregion STATIC PRIVATE METHODS - MAP SECTION SCROLL
 
 // #region TYPES AND INTERFACES
-
-/** Captured boundary samples and independent pixel/coordinate expectations. */
-interface TypeViewportBoundarySnapshot {
-  /** Public viewer result. */
-  boundary: TypeViewportBoundaryLonLat;
-  /** Second snapshot from the same rendered frame. */
-  repeatedBoundary: TypeViewportBoundaryLonLat;
-  /** Samples calculated from view center, resolution, rotation, and padding. */
-  expected: Coordinate[];
-  /** Returned coordinates projected back to viewport pixels. */
-  pixels: (number[] | null)[];
-  /** Expected screen positions. */
-  expectedPixels: number[][];
-  /** Bottom padding at sampling time. */
-  bottomPadding: number;
-  /** Actual map-info bar overlay height (zero for static maps). */
-  infoHeight: number;
-  /** Southern sample calculated at the full canvas bottom. */
-  canvasSouth: Coordinate;
-  /** Indicates independent objects were returned by consecutive calls. */
-  freshObjects: boolean;
-  /** Rendered view rotation in radians. */
-  rotation: number;
-  /** Rendered logical center in longitude/latitude. */
-  center: Coordinate;
-  /** Southern midpoint derived from the axis-aligned extent rather than the viewport. */
-  extentSouth: Coordinate;
-}
-
-/** Fit outcome captured before assertion so operations stay in the execution phase. */
-interface TypeViewportMidpointFitResult {
-  /** Rendered geometry after fitting. */
-  snapshot: TypeViewportBoundarySnapshot;
-  /** Original coordinates copied before fitting. */
-  original: Coordinate[];
-  /** Caller-owned array after fitting. */
-  input: Coordinate[];
-  /** Original coordinates projected to pixels after fitting. */
-  pixels: (number[] | null)[];
-  /** Original pixel positions before the view was changed. */
-  originalPixels: number[][];
-  /** Source rotation to restore when the projection is unchanged. */
-  rotation: number;
-}
 
 /** Crosshair activation and drawing observations from a rendered view. */
 interface TypeCrosshairCoordinateResult {
@@ -2376,30 +1595,6 @@ type TypeFullscreenViewRestorationResult = {
   afterInteractiveResizeExit: TypeFullscreenViewState;
   /** Whether a rejected fullscreen request restored the inactive state. */
   rejectedRequestIsInactive: boolean;
-};
-
-/** Represents a layer paired with feature information results collected before and after an operation (e.g., filtering, ordering, or updates). */
-type LayerWithBeforeAfterFeature<T> = LayerWithResults<T, (TypeFeatureInfoEntry[] | undefined)[]>;
-
-/** Represents a layer paired with hover feature information results collected before and after an operation. */
-type LayerWithBeforeAfterHover<T> = LayerWithResults<T, (TypeHoverFeatureInfo | undefined)[]>;
-
-/** Generic structure associating a layer with a set of related results. */
-type LayerWithResults<T, U> = {
-  /** The layer instance. */
-  layer: T;
-  /** The results associated with the layer. */
-  results: U;
-};
-
-/** Describes layer path information and comparison metadata used when evaluating differences between layers. */
-type LayerDetails = {
-  /** The path identifying the original layer. */
-  originalLayerPath: string;
-  /** The path identifying the alternate or comparison layer. */
-  alternateLayerPath: string;
-  /** The number of features found in the alternate layer. */
-  secondFeatureCount: number;
 };
 
 /** Isolated viewer scrolling regressions, scheduled sequentially by the UI suite. */

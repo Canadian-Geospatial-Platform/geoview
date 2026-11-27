@@ -761,7 +761,7 @@ export function AddNewLayer(): JSX.Element {
 
       if (!abortControllerRef.current.signal.aborted) {
         // Wait on the promise
-        addedLayer.promiseLayer
+        addedLayer.promiseLayerOnMap
           .then(() => {
             doneAdding();
             doneAddedShowMessage(addedLayer.layer);

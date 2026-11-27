@@ -1,19 +1,38 @@
-import type { Coordinate } from 'ol/coordinate';
 import { containsExtent, getCenter } from 'ol/extent';
 
+import { TestConstants } from './constants';
 import { Test } from '../core/test';
+import { TestSkippedError } from '../core/exceptions';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { Extent, TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
-import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import { NoExtentError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
 import { OL_ZOOM_FEATURE_MAX_SCALE } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { whenThisThen } from 'geoview-core/core/utils/utilities';
-import { getStoreDetailsFeatures } from 'geoview-core/core/stores/states/feature-info-state';
-import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/states/layer-state';
-import { getStoreMapHighlightedFeatures, getStoreMapClickMarker } from 'geoview-core/core/stores/states/map-state';
-import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
+import {
+  getStoreDetailsCurrentFeatureIndex,
+  getStoreDetailsFeatures,
+  getStoreDetailsSelectedLayerPath,
+  getStoreDetailsCoordinateInfoEnabled,
+  getStoreDetailsLayerDataArrayFeature,
+  getStoreDetailsQueryStatus,
+  LAYER_PATH_COORDINATE_INFO,
+} from 'geoview-core/core/stores/states/feature-info-state';
+import {
+  getStoreAppDisplayDateFormatDefault,
+  getStoreAppDisplayDateTimezone,
+  getStoreAppDisplayLanguage,
+} from 'geoview-core/core/stores/states/app-state';
+import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
+import { DateMgt, type TypeDisplayDateFormat } from 'geoview-core/core/utils/date-mgt';
+import {
+  getStoreMapHighlightedFeatures,
+  getStoreMapClickMarker,
+  getStoreMapClickCoordinates,
+} from 'geoview-core/core/stores/states/map-state';
+import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVVector } from 'geoview-core/geo/layer/gv-layers/vector/abstract-gv-vector';
 
 /**
@@ -30,83 +49,392 @@ export class DetailsTester extends GVAbstractTester {
   }
 
   /**
-   * Tests opening the Details panel for a given layer path.
+   * Tests the coordinate information toggle, rendered coordinates, and updates after map clicks.
    *
-   * @param layerPath - The layer path of the layer
-   * @param lonlat1 - The first coordinate on the map to query
-   * @param lonlat2 - The second coordinate on the map to query
-   * @returns A promise resolving when the test completes
+   * @returns A promise resolving with the observed toggle states and coordinate content
    */
-  testDetailsForGeoJSONOntarioAlberta(layerPath: string, lonlat1: Coordinate, lonlat2: Coordinate): Promise<Test<unknown>> {
-    // Test
+  testShowCoordinateInfoToggle(): Promise<Test<CoordinateInfoToggleResult>> {
+    const mapId = this.getMapId();
+
+    // Preserve the user's toggle, last click, layer selection, and panel visibility for cleanup.
+    const initialEnabled = getStoreDetailsCoordinateInfoEnabled(mapId);
+    const initialClick = getStoreMapClickCoordinates(mapId);
+    const initialSelectedLayer = getStoreDetailsSelectedLayerPath(mapId);
+    const initialPanelOpen = DomHelper.getAppBarButtonDetailsActive(mapId);
+
     return this.test(
-      `Test Details on layer ${layerPath}...`,
+      'Test Show coordinate info toggle and updates after map clicks...',
       async (test) => {
-        // Get the layer
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+        // Open the panel before accessing its controls, without changing the map view.
+        await this.toggleAppbarTabDetails(test, true);
+        const toggle = DomHelper.Details.getCoordinateInfoToggle(mapId);
+        if (!toggle) throw new Error('Coordinate information toggle was not rendered');
+        // The switch should be unavailable only when the map has no previous click.
+        const disabledBeforeClick = toggle.disabled;
 
-        // Query the lonlat coordinate
-        const resultsOntarioResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat1);
+        // A map click enables the switch; establish an unchecked baseline through the UI.
+        if (toggle.checked) {
+          toggle.click();
+          await DomHelper.waitForReactIdle();
+        }
 
-        // Select the right layer path
-        test.addStep(`Selecting the details for the added layer...`);
-        this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
+        // Store an Ottawa click while coordinate information is off; no coordinate content should appear yet.
+        await this.simulateMapClickWaitForBatchedQuery(test, TestConstants.OTTAWA_LONLAT);
+        await DomHelper.waitForReactIdle();
+        const enabledAfterClick = !toggle.disabled;
+        const hiddenBeforeEnable = !DomHelper.Details.getCoordinateInfoContent(mapId);
 
-        // Make the layer invisible
-        test.addStep(`Make the layer invisible...`);
-        layer.setVisible(false);
+        // Use the actual input so the test exercises the UI toggle handler, not just a store update.
+        test.addStep('Enabling coordinate information through the toggle...');
+        toggle.click();
+        await DomHelper.waitForReactIdle();
+        const first = await this.#readCoordinateInfo(TestConstants.OTTAWA_LONLAT, toggle);
 
-        // Query the lonlat coordinate
-        const resultsOntarioNoResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat1);
+        // Keep the toggle enabled and verify that a different click replaces the displayed coordinates.
+        test.addStep('Clicking another location and reading the updated coordinate information...');
+        await this.simulateMapClickWaitForBatchedQuery(test, TestConstants.QUEBEC_LONLAT);
+        const second = await this.#readCoordinateInfo(TestConstants.QUEBEC_LONLAT, toggle);
 
-        // Make the layer visible
-        test.addStep(`Make the layer visible...`);
-        layer.setVisible(true);
+        test.addStep('Disabling coordinate information and clicking while it is disabled...');
+        toggle.click();
+        await DomHelper.waitForReactIdle();
 
-        // Query in Alberta where there should be no results
-        const resultsAlbertaNoResults1 = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat2);
+        // Capture both DOM removal and coordinate-feature removal after switching off.
+        const uncheckedAfterDisable = !toggle.checked;
+        const hiddenAfterDisable = !DomHelper.Details.getCoordinateInfoContent(mapId);
+        const featureRemoved = !getStoreDetailsLayerDataArrayFeature(mapId);
 
-        // Make the Alberta polygon visible
-        let item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
-        await this.getControllersRegistry().layerController.toggleItemVisibility(layerPath, item, true);
+        // Clicking while disabled must not recreate either the coordinate feature or its content.
+        await this.simulateMapClickWaitForBatchedQuery(test, TestConstants.ALBERTA_CENTER_LONLAT);
+        await DomHelper.waitForReactIdle();
+        const hiddenAfterDisabledClick = !DomHelper.Details.getCoordinateInfoContent(mapId);
+        const featureAbsentAfterDisabledClick = !getStoreDetailsLayerDataArrayFeature(mapId);
 
-        // Query where there now should be some results
-        const resultsAlbertaResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat2);
+        // Re-enabling must use the Alberta click recorded while off, rather than the previous Quebec click.
+        test.addStep('Re-enabling coordinate information for the latest clicked location...');
+        toggle.click();
+        const reenabled = await this.#readCoordinateInfo(TestConstants.ALBERTA_CENTER_LONLAT, toggle);
 
-        // Make the Alberta polygon back to invisible
-        item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
-        await this.getControllersRegistry().layerController.toggleItemVisibility(layerPath, item, true);
-
-        // Query where there now should be no results
-        const resultsAlbertaNoResults2 = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat2);
-
-        // Return the results of the queries
-        return [resultsOntarioResults, resultsOntarioNoResults, resultsAlbertaNoResults1, resultsAlbertaResults, resultsAlbertaNoResults2];
+        // Return observations only; all behavioral assertions belong in the assertion callback.
+        return {
+          disabledBeforeClick,
+          enabledAfterClick,
+          hiddenBeforeEnable,
+          first,
+          second,
+          uncheckedAfterDisable,
+          hiddenAfterDisable,
+          featureRemoved,
+          hiddenAfterDisabledClick,
+          featureAbsentAfterDisabledClick,
+          reenabled,
+        };
       },
-      (test, results) => {
-        // Perform assertions
-        const [resultsOntarioResults, resultsOntarioNoResults, resultsAlbertaNoResults1, resultsAlbertaResults, resultsAlbertaNoResults2] =
-          results as unknown[][];
+      (test, result) => {
+        // Check switch availability and ensure disabling removes both the UI and its backing feature.
+        test.addStep('Verifying toggle availability and show/hide behavior...');
+        Test.assertIsEqual(result.disabledBeforeClick, !initialClick);
+        Test.assertIsEqual(result.enabledAfterClick, true);
+        Test.assertIsEqual(result.hiddenBeforeEnable, true);
+        Test.assertIsEqual(result.uncheckedAfterDisable, true);
+        Test.assertIsEqual(result.hiddenAfterDisable, true);
+        Test.assertIsEqual(result.featureRemoved, true);
+        Test.assertIsEqual(result.hiddenAfterDisabledClick, true);
+        Test.assertIsEqual(result.featureAbsentAfterDisabledClick, true);
 
-        // Check that there was 1 result for the Ontario
-        test.addStep('Verifying there is 2 feature info result for the Ontario query...');
-        Test.assertIsArrayLengthEqual(resultsOntarioResults, 2);
+        test.addStep('Verifying decimal and DMS coordinates match each clicked location...');
+        // Pair each captured state with the click that should have produced it.
+        const coordinates = [TestConstants.OTTAWA_LONLAT, TestConstants.QUEBEC_LONLAT, TestConstants.ALBERTA_CENTER_LONLAT];
+        [result.first, result.second, result.reenabled].forEach((observation, index) => {
+          const [longitude, latitude] = coordinates[index];
 
-        // Check that there was 0 result for the Ontario
-        test.addStep('Verifying there is 0 feature info result for the Ontario query...');
-        Test.assertIsArrayLengthEqual(resultsOntarioNoResults, 0);
+          // Native input state, accessible state, and store state must agree that the toggle is enabled.
+          Test.assertIsEqual(observation.checked, true);
+          Test.assertIsEqual(observation.ariaChecked, 'true');
+          Test.assertIsEqual(observation.enabled, true);
 
-        // Check that there was 0 result for the Alberta
-        test.addStep('Verifying there is 0 feature info result for the Alberta query...');
-        Test.assertIsArrayLengthEqual(resultsAlbertaNoResults1, 0);
+          // Check the backing feature independently from the text rendered in the panel.
+          Test.assertIsDefined('coordinate feature', observation.feature);
+          Test.assertIsEqual(observation.feature.fieldInfo.latitude?.value, latitude.toFixed(6));
+          Test.assertIsEqual(observation.feature.fieldInfo.longitude?.value, longitude.toFixed(6));
 
-        // Check that there was 1 result for the Alberta
-        test.addStep('Verifying there is 1 feature info result for the Alberta query...');
-        Test.assertIsArrayLengthEqual(resultsAlbertaResults, 1);
+          // Decimal coordinates include hemisphere markers; DMS coordinates use the shared geo formatter.
+          Test.assertIsEqual(observation.text.includes(`${latitude.toFixed(6)}\u00b0 N`), true);
+          Test.assertIsEqual(observation.text.includes(`${Math.abs(longitude).toFixed(6)}\u00b0 W`), true);
+          Test.assertIsEqual(observation.text.includes(GeoUtilities.coordFormatDMS(latitude)), true);
+          Test.assertIsEqual(observation.text.includes(GeoUtilities.coordFormatDMS(longitude)), true);
+        });
 
-        // Check that there was 0 result for the Alberta
-        test.addStep('Verifying there is 0 feature info result for the Alberta query...');
-        Test.assertIsArrayLengthEqual(resultsAlbertaNoResults2, 0);
+        // Catch stale panel content even when the toggle remains checked across successive clicks.
+        Test.assertIsEqual(result.first.text !== result.second.text, true);
+      },
+      async (test) => {
+        // Restore the toggle and previous selection without fitting or zooming the map.
+        const { mapController, detailsController } = this.getControllersRegistry();
+
+        // Disable first so restoring the old click does not start an intermediate coordinate lookup.
+        if (getStoreDetailsCoordinateInfoEnabled(mapId)) mapController.toggleCoordinateInfoEnabled(new AbortController().signal);
+        if (initialClick) mapController.setClickCoordinates(initialClick);
+
+        // Refresh the original coordinate information only if it was enabled before this test.
+        if (initialEnabled) {
+          mapController.toggleCoordinateInfoEnabled(new AbortController().signal);
+          await whenThisThen(
+            () => getStoreDetailsQueryStatus(mapId, LAYER_PATH_COORDINATE_INFO) === 'processed',
+            TestConstants.UI_STATE_TIMEOUT_MS,
+            50
+          );
+        }
+
+        // Restore the selected layer after the coordinate lookup has settled.
+        detailsController.setSelectedLayerPath(initialSelectedLayer);
+        await DomHelper.waitForReactIdle();
+
+        // Leave an initially open panel open; close it only when the test opened it.
+        if (!initialPanelOpen) await this.toggleAppbarTabDetails(test, false);
+      }
+    );
+  }
+
+  /**
+   * Tests the rendered polygon feature details and the map's configured date display format.
+   *
+   * @returns A promise resolving with the observed feature and rendered table fields
+   */
+  testPolygonFeatureDetailsTable(): Promise<Test<DetailsFeatureTableResult>> {
+    let rootLayerPath: string | undefined;
+
+    return this.test(
+      'Test polygon feature details table and configured date format...',
+      async (test) => {
+        // Save the cleanup path before loading, so a failed load can still be cleaned up.
+        const layer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+
+        const layerPath = layer.getLayerPath();
+        const mapId = this.getMapId();
+
+        test.addStep('Returning to the initial extent and querying the polygon fixture...');
+        await this.simulateMapClickWaitForBatchedQuery(test, TestConstants.ONTARIO_CENTER_LONLAT);
+        await this.toggleAppbarTabDetails(test, true);
+        this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
+        await DomHelper.waitForReactIdle();
+
+        // Capture the selected feature's raw values for comparison with the rendered table.
+        const selectedLayerPath = getStoreDetailsSelectedLayerPath(mapId);
+        const features = getStoreDetailsFeatures(mapId, layerPath);
+        const feature = features?.[getStoreDetailsCurrentFeatureIndex(mapId)];
+        const dateValue = feature?.fieldInfo.creationDate?.value;
+        const imageValue = feature?.fieldInfo.myImages?.value;
+        const legend = getStoreLayerLegendLayerByPath(mapId, layerPath);
+        const language = getStoreAppDisplayLanguage(mapId);
+
+        // Use the map's localized format and the effective layer timezone and temporal mode.
+        const dateFormat = getStoreAppDisplayDateFormatDefault(mapId).datetimeFormat[language];
+        const expectedDate =
+          dateValue instanceof Date
+            ? DateMgt.formatDate(
+                dateValue,
+                dateFormat,
+                language,
+                legend?.displayDateTimezone ?? getStoreAppDisplayDateTimezone(mapId),
+                legend?.dateTemporalMode ?? DateMgt.DEFAULT_TEMPORAL_MODE
+              )
+            : undefined;
+
+        test.addStep('Reading the rendered Details feature table...');
+        const panel = DomHelper.getAppBarPanelDetails(mapId);
+
+        // Only wait for a table when a feature exists; the assertion callback reports missing data.
+        const table = panel && feature ? await DomHelper.Details.waitForFeatureInfoTable(mapId) : undefined;
+        const rows = table ? DomHelper.Details.getFeatureInfoRows(table) : [];
+
+        return {
+          layerPath,
+          selectedLayerPath,
+          features,
+          feature,
+          dateValue,
+          imageValue,
+          expectedDate,
+          layerDateFormat: legend?.displayDateFormat,
+          rows,
+        };
+      },
+      (test, result) => {
+        test.addStep('Verifying the fixture feature is selected...');
+        Test.assertIsEqual(result.selectedLayerPath, result.layerPath);
+        Test.assertIsDefined('features', result.features);
+        Test.assertIsArrayLengthMinimal(result.features, 1);
+        Test.assertIsDefined('selected feature', result.feature);
+        Test.assertIsEqual(result.feature.fieldInfo.Province?.value, 'Ontario');
+
+        test.addStep('Verifying the rendered field labels and province...');
+        Test.assertIsArrayEqual(
+          result.rows.map((row) => row.label),
+          ['Province', 'Creation Date', 'My Images']
+        );
+        Test.assertIsEqual(result.rows[0].value, 'Ontario');
+
+        test.addStep('Verifying the date uses the map display format...');
+        Test.assertIsUndefined('layer display date format override', result.layerDateFormat);
+        Test.assertIsEqual(result.dateValue instanceof Date, true);
+        Test.assertIsDefined('expected formatted date', result.expectedDate);
+        Test.assertIsEqual(result.expectedDate.length > 0, true);
+        Test.assertIsEqual(result.rows[1].value, result.expectedDate);
+
+        test.addStep('Verifying the image field displays all fixture images...');
+        Test.assertIsEqual(typeof result.imageValue, 'string');
+        Test.assertIsEqual(result.rows[2].images.length, 3);
+        Test.assertIsArrayEqual(result.rows[2].images, typeof result.imageValue === 'string' ? result.imageValue.split(';') : []);
+      },
+      (test) => {
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests the rendered Airborne WMS feature details obtained through WFS.
+   *
+   * @param isRunningOnVPN - Whether the VPN-only service can be accessed
+   * @returns A promise resolving with the observed feature and rendered table fields
+   */
+  testAirborneFeatureDetailsTable(isRunningOnVPN: boolean): Promise<Test<WmsFeatureTableResult>> {
+    const initialExtent = this.getMapViewer().getView().calculateExtent();
+    const clickCoordinate = [-71.35, 46.7]; // Quebec
+
+    let rootLayerPath: string | undefined;
+    return this.test(
+      'Test Airborne WMS feature details table via WFS...',
+      async (test) => {
+        if (!isRunningOnVPN) throw new TestSkippedError('Not running on VPN');
+
+        // The Airborne fixture changes the zoom before adding the layer.
+        const layer = await this.addLayerWMSAirborneWithWFS(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+        const layerPath = layer.getLayerPath();
+        const mapId = this.getMapId();
+
+        // This layer is only visible within a certain zoom range, so zoom in before interacting with it.
+        await this.getControllersRegistry().mapController.zoomMap(4, TestConstants.USE_ZOOM_ANIMATION);
+
+        // Synchronize the render before querying, then wait for the Details store update.
+        await this.simulateMapClickWaitForBatchedQuery(test, clickCoordinate);
+        await this.toggleAppbarTabDetails(test, true);
+        this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
+        await DomHelper.waitForReactIdle();
+
+        const selectedLayerPath = getStoreDetailsSelectedLayerPath(mapId);
+        const features = getStoreDetailsFeatures(mapId, layerPath);
+        const feature = features?.[getStoreDetailsCurrentFeatureIndex(mapId)];
+
+        test.addStep('Reading the rendered Airborne Details feature table...');
+        const table = await DomHelper.Details.waitForFeatureInfoTable(mapId);
+        const rows = DomHelper.Details.getFeatureInfoRows(table);
+
+        return { layerPath, selectedLayerPath, features, feature, rows };
+      },
+      (test, result) => {
+        test.addStep('Verifying the Airborne fixture feature is selected...');
+        Test.assertIsEqual(result.selectedLayerPath, result.layerPath);
+        Test.assertIsDefined('features', result.features);
+        Test.assertIsArrayLengthMinimal(result.features, 1);
+        Test.assertIsDefined('selected feature', result.feature);
+        const { feature } = result;
+
+        // The service advertises its date fields as strings, not formatted date values.
+        test.addStep('Verifying rendered location, province and date fields...');
+        ['Location_Emplacement', 'Province', 'StartDate_DateDebut', 'EndDate_DateFin'].forEach((name) => {
+          const field = feature.fieldInfo[name];
+          Test.assertIsDefined(name, field);
+          Test.assertIsEqual(field.alias, name);
+          Test.assertIsEqual(typeof field.value, 'string');
+          const row = result.rows.find((entry) => entry.label === name);
+          Test.assertIsDefined(`rendered row ${name}`, row);
+          Test.assertIsEqual(row.value, typeof field.value === 'string' ? field.value.trim() : undefined);
+        });
+      },
+      async (test) => {
+        // Restore zoom extent
+        test.addStep('Restoring the pre-test map extent...');
+        await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
+
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests the rendered Cities WMS feature details obtained through WFS.
+   *
+   * @returns A promise resolving with the observed feature and rendered table fields
+   */
+  testCitiesFeatureDetailsTable(): Promise<Test<WmsFeatureTableResult>> {
+    let rootLayerPath: string | undefined;
+    const clickCoordinate = [-71.25, 46.8]; // Quebec city in the Cities WFS
+
+    return this.test(
+      'Test Cities WMS feature details table via WFS...',
+      async (test) => {
+        // Capture the fixture path before waiting for the layer to load.
+        const layer = await this.addLayerWMSCitiesWithWFS(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+        const layerPath = layer.getLayerPath();
+        const mapId = this.getMapId();
+
+        // Query after rendering and wait for the results to reach the Details store.
+        await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, clickCoordinate);
+        await GVAbstractTester.waitForBatchedQueryPropagation(test);
+        await this.toggleAppbarTabDetails(test, true);
+        this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
+        await DomHelper.waitForReactIdle();
+
+        const selectedLayerPath = getStoreDetailsSelectedLayerPath(mapId);
+        const features = getStoreDetailsFeatures(mapId, layerPath);
+        const feature = features?.[getStoreDetailsCurrentFeatureIndex(mapId)];
+
+        test.addStep('Reading the rendered Cities Details feature table...');
+        const table = await DomHelper.Details.waitForFeatureInfoTable(mapId);
+        const rows = DomHelper.Details.getFeatureInfoRows(table);
+
+        return { layerPath, selectedLayerPath, features, feature, rows };
+      },
+      (test, result) => {
+        test.addStep('Verifying the Cities fixture feature is selected...');
+        Test.assertIsEqual(result.selectedLayerPath, result.layerPath);
+        Test.assertIsDefined('features', result.features);
+        Test.assertIsArrayLengthMinimal(result.features, 1);
+        Test.assertIsDefined('selected feature', result.feature);
+        const name = result.feature.fieldInfo.NAME;
+        const population = result.feature.fieldInfo.POPULATION;
+        Test.assertIsDefined('NAME field', name);
+        Test.assertIsDefined('POPULATION field', population);
+        Test.assertIsEqual(name.value, 'Quebec');
+        Test.assertIsEqual(String(population.value), '641568');
+
+        test.addStep('Verifying the rendered city name and population...');
+        const nameRow = result.rows.find((row) => row.label === name.alias);
+        const populationRow = result.rows.find((row) => row.label === population.alias);
+        Test.assertIsDefined('rendered city name', nameRow);
+        Test.assertIsDefined('rendered population', populationRow);
+        Test.assertIsEqual(nameRow.value, 'Quebec');
+        Test.assertIsEqual(populationRow.value, '641568');
+      },
+      (test) => {
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -114,18 +442,23 @@ export class DetailsTester extends GVAbstractTester {
   /**
    * Tests that clearing all highlights removes highlighted features from the store.
    *
-   * @param lonlat - The coordinate on the map to query
    * @returns A promise resolving when the test completes
    */
-  testClearAllHighlights(lonlat: Coordinate): Promise<Test<TestDetailsHighlights>> {
+  testClearAllHighlights(): Promise<Test<TestDetailsHighlights>> {
+    let rootLayerPath: string | undefined;
+
     return this.test(
       `Test Clear all highlights across multiple layers...`,
       async (test) => {
-        // Wait for the layers to be loaded
-        await this.getControllersRegistry().layerController.waitForLayersLoaded();
+        // Add the Commemorative layer
+        await this.addLayerCommemorativeViaGeocore(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Simulate a map click — this queries ALL layers and auto-highlights the first feature from each layer with results
-        await this.simulateMapClickWaitForBatchedQuery(test, lonlat);
+        await this.simulateMapClickWaitForBatchedQuery(test, TestConstants.ONTARIO_CENTER_LONLAT);
 
         // Wait for the React UI to actually pick up on the store update
         test.addStep(`Waiting on UI to refresh and the details panel to open...`);
@@ -150,7 +483,7 @@ export class DetailsTester extends GVAbstractTester {
         const clickMarkerAfter = getStoreMapClickMarker(this.getMapId());
 
         // Simulate a map click — this queries ALL layers and auto-highlights the first feature from each layer with results
-        await this.simulateMapClickWaitForBatchedQuery(test, lonlat);
+        await this.simulateMapClickWaitForBatchedQuery(test, TestConstants.ONTARIO_CENTER_LONLAT);
 
         // Wait for the React UI to actually pick up on the store update
         test.addStep(`Waiting on UI to refresh and the details panel to open (should already be open in fact)...`);
@@ -160,13 +493,13 @@ export class DetailsTester extends GVAbstractTester {
         const highlighted2Before = getStoreMapHighlightedFeatures(this.getMapId());
 
         // Close the details panel which will remove the highlight
-        await this.toggleAppbarTab(test, 'details', false);
+        await this.toggleAppbarTabDetails(test, false);
 
         // Keep track of the store state
         const highlighted2After = getStoreMapHighlightedFeatures(this.getMapId());
 
         // Reshowing the details panel which will re-add the highlight
-        await this.toggleAppbarTab(test, 'details', true);
+        await this.toggleAppbarTabDetails(test, true);
 
         // Keep track of the store state
         const highlighted3After = getStoreMapHighlightedFeatures(this.getMapId());
@@ -210,82 +543,42 @@ export class DetailsTester extends GVAbstractTester {
         // Verify highlights were cleared while details panel was still open
         test.addStep('Verifying highlighted features were cleared after panel was reopened...');
         Test.assertIsArrayLengthEqual(result.highlighted3After, 1);
-      }
-    );
-  }
-
-  /**
-   * Tests that zoom-to-feature changes the map extent.
-   *
-   * @param layerPath - The layer path of the layer
-   * @param lonlat - The coordinate on the map to query
-   * @returns A promise resolving when the test completes
-   */
-  testZoomToFeature(
-    layerPath: string,
-    lonlat: Coordinate
-  ): Promise<Test<{ initialZoom: number | undefined; finalZoom: number | undefined }>> {
-    return this.test(
-      `Test Zoom to feature on layer ${layerPath}...`,
-      async (test) => {
-        // Get the layer
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
-
-        // Record initial zoom
-        test.addStep('Recording initial zoom level...');
-        const initialZoom = this.getMapViewer().getView().getZoom();
-
-        // Query the coordinate to get features
-        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
-
-        // Verify we have features with extent
-        test.addStep('Verifying feature has extent for zoom...');
-        Test.assertIsDefined('features', features);
-        Test.assertIsArrayLengthMinimal(features, 1);
-        const feature = features[0];
-        Test.assertIsDefined('feature.extent', feature.extent);
-
-        // Zoom to the feature extent (no animation = instant, no await needed)
-        test.addStep('Zooming to feature extent...');
-        await this.getControllersRegistry().mapController.zoomToExtent(feature.extent, GVAbstractTester.USE_ZOOM_ANIMATION, {
-          maxZoom: 13,
-        });
-
-        // Return the zoom level after zooming
-        return { initialZoom, finalZoom: this.getMapViewer().getView().getZoom() };
       },
-      (test, result) => {
-        // Verify zoom level changed
-        test.addStep('Verifying zoom level changed...');
-        Test.assertIsNotEqual(result.initialZoom, result.finalZoom);
+      (test) => {
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
 
   /**
    * Tests that zoom-to-feature keeps the feature visible next to an open app-bar panel.
+   * Restores the pre-test map extent during finalization, even if fixture removal fails.
    *
-   * @param layerPath - The layer path of the layer
-   * @param lonlat - The coordinate on the map to query
    * @returns A promise resolving when the test completes
    */
-  testZoomToFeatureWithPanelOffset(layerPath: string, lonlat: Coordinate): Promise<Test<TestZoomWithPanelOffset>> {
-    return this.test(
-      `Test Zoom to feature keeps the feature out of the open details panel on layer ${layerPath}...`,
-      async (test) => {
-        // Get the layer and query the coordinate to get features
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
-        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
+  testZoomToFeatureWithPanelOffset(): Promise<Test<TestZoomWithPanelOffset>> {
+    const initialExtent = this.getMapViewer().getView().calculateExtent();
+    let rootLayerPath: string | undefined;
 
-        // Verify we have features with extent
-        test.addStep('Verifying feature has extent for zoom...');
-        Test.assertIsDefined('features', features);
-        Test.assertIsArrayLengthMinimal(features, 1);
-        const feature = features[0];
-        Test.assertIsDefined('feature.extent', feature.extent);
+    return this.test(
+      `Test Zoom to feature keeps the feature out of the open details panel...`,
+      async (test) => {
+        // Add the GeoJson Polygons layer
+        const gvLayer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+
+        // Get the layer and query the coordinate to get features
+        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, TestConstants.ONTARIO_CENTER_LONLAT);
+
+        const feature = features?.[0];
+        if (!feature?.extent) return { features };
 
         // Make sure the details panel is open over the map and settled
-        await this.toggleAppbarTab(test, 'details', true);
+        await this.toggleAppbarTabDetails(test, true);
         await DomHelper.waitForReactIdle();
 
         // Compute the padding like the Details zoom button does
@@ -296,10 +589,10 @@ export class DetailsTester extends GVAbstractTester {
         // Zoom to the feature with the computed padding
         test.addStep('Zooming to feature extent with the panel-aware padding...');
         await this.getControllersRegistry().layerController.zoomToExtentRestrictedAndHighlight(
-          layerPath,
+          gvLayer.getLayerPath(),
           feature,
           feature.extent,
-          GVAbstractTester.USE_ZOOM_ANIMATION,
+          TestConstants.USE_ZOOM_ANIMATION,
           { padding }
         );
 
@@ -308,32 +601,49 @@ export class DetailsTester extends GVAbstractTester {
 
         // Return the test execution results
         return {
-          basePaddingLeft: DomHelper.Map.getDefaultFitPadding()[3],
-          paddingLeft: padding[3],
-          basePaddingRight: DomHelper.Map.getDefaultFitPadding()[1],
-          paddingRight: padding[1],
-          mapWidth: mapSize?.[0],
-          hasNavBar: !!DomHelper.getNavBar(this.getMapId()),
-          centerPixelX: pixel ? pixel[0] : undefined,
+          features,
+          zoom: {
+            basePaddingLeft: DomHelper.Map.getDefaultFitPadding()[3],
+            basePaddingRight: DomHelper.Map.getDefaultFitPadding()[1],
+            paddingLeft: padding[3],
+            paddingRight: padding[1],
+            mapWidth: mapSize?.[0],
+            hasNavBar: !!DomHelper.getNavBar(this.getMapId()),
+            centerPixelX: pixel ? pixel[0] : undefined,
+          },
         };
       },
       (test, result) => {
+        test.addStep('Verifying feature has extent for zoom...');
+        Test.assertIsDefined('features', result.features);
+        Test.assertIsArrayLengthMinimal(result.features, 1);
+        Test.assertIsDefined('feature.extent', result.features[0].extent);
+        Test.assertIsDefined('zoom', result.zoom);
+
         // Verify the open panel was detected as overlapping the map
         test.addStep('Verifying the left padding includes the panel overlap...');
-        Test.assertIsEqual(result.paddingLeft > result.basePaddingLeft, true);
+        Test.assertIsEqual(result.zoom.paddingLeft > result.zoom.basePaddingLeft, true);
 
         // Verify the navigation bar was detected as overlapping the map
-        if (result.hasNavBar) {
+        if (result.zoom.hasNavBar) {
           test.addStep('Verifying the right padding includes the navigation bar overlap...');
-          Test.assertIsEqual(result.paddingRight > result.basePaddingRight, true);
+          Test.assertIsEqual(result.zoom.paddingRight > result.zoom.basePaddingRight, true);
         }
 
         // Verify the feature center is outside the area covered by the panel and the map controls
         test.addStep('Verifying the feature center is in the part of the map not covered by the panel or the map controls...');
-        Test.assertIsDefined('centerPixelX', result.centerPixelX);
-        Test.assertIsDefined('mapWidth', result.mapWidth);
-        Test.assertIsEqual(result.centerPixelX >= result.paddingLeft, true);
-        Test.assertIsEqual(result.centerPixelX <= result.mapWidth - result.paddingRight, true);
+        Test.assertIsDefined('centerPixelX', result.zoom.centerPixelX);
+        Test.assertIsDefined('mapWidth', result.zoom.mapWidth);
+        Test.assertIsEqual(result.zoom.centerPixelX >= result.zoom.paddingLeft, true);
+        Test.assertIsEqual(result.zoom.centerPixelX <= result.zoom.mapWidth - result.zoom.paddingRight, true);
+      },
+      async (test) => {
+        // Restore zoom extent
+        test.addStep('Restoring the pre-test map extent...');
+        await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
+
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -344,26 +654,30 @@ export class DetailsTester extends GVAbstractTester {
    * Covers spatially distinct points, coincident points, tiny extents, polygons with lines,
    * missing/invalid extents and stale group requests.
    *
-   * @param layerPath - The layer path of the layer
-   * @param lonlat - The coordinate on the map to query
    * @returns A promise resolving when the test completes
    */
-  testZoomToResultsGroupExtent(layerPath: string, lonlat: Coordinate): Promise<Test<TestZoomToResultsGroupExtent>> {
+  testZoomToResultsGroupExtent(): Promise<Test<TestZoomToResultsGroupExtent>> {
+    const initialExtent = this.getMapViewer().getView().calculateExtent();
+    let rootLayerPath: string | undefined;
     let cleanupLookup: (() => void) | undefined;
     return this.test(
-      `Test Zoom to all results for layer ${layerPath}...`,
+      'Test Zoom to all results for a polygon fixture layer...',
       async (test) => {
+        const layer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+        const layerPath = layer.getLayerPath();
+
         const { layerController, mapController } = this.getControllersRegistry();
         const view = this.getMapViewer().getView();
-        const fitOptions = GVAbstractTester.USE_ZOOM_ANIMATION ? {} : { duration: 0 };
+        const fitOptions = TestConstants.USE_ZOOM_ANIMATION ? {} : { duration: 0 };
 
         // Get a real result to build the group results from
-        const layer = layerController.getGeoviewLayerRegular(layerPath);
-        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
-        Test.assertIsDefined('features', features);
-        Test.assertIsArrayLengthMinimal(features, 1);
-        const polygon = features[0];
-        Test.assertIsDefined('polygon.extent', polygon.extent);
+        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, TestConstants.ONTARIO_CENTER_LONLAT);
+        const polygon = features?.[0];
+        if (!polygon?.extent) return { features };
         const [cx, cy] = getCenter(polygon.extent);
 
         // Creates a result clone with the given extent and no oid field (no extent lookup)
@@ -503,64 +817,84 @@ export class DetailsTester extends GVAbstractTester {
           [createResult([cx + 900000, cy, cx + 950000, cy + 50000], 0)],
           { ...fitOptions, duration: 60000 }
         );
-        await whenThisThen(() => view.getAnimating(), GVAbstractTester.UI_STATE_TIMEOUT_MS, 10);
+        await whenThisThen(() => view.getAnimating(), TestConstants.UI_STATE_TIMEOUT_MS, 10);
         view.cancelAnimations();
         const cancelledZoomed = await interruptedZoom;
 
         return {
-          distinctPointsInView,
-          coincidentResolution,
-          tinyResolution,
-          groupMinResolution: mapController.getResolutionFromScale(OL_ZOOM_FEATURE_MAX_SCALE),
-          polygonAndLineInView,
-          invalidIgnoredInView,
-          allInvalidThrowsNoExtent: allInvalidError instanceof NoExtentError,
-          noGeometryGroupExtent,
-          staleZoomed,
-          staleCenterUnchanged,
-          missingExtentsAvailable,
-          lookedUpZoomed,
-          lookedUpExtentInView,
-          cancelledZoomed,
+          features,
+          zoom: {
+            distinctPointsInView,
+            coincidentResolution,
+            tinyResolution,
+            groupMinResolution: mapController.getResolutionFromScale(OL_ZOOM_FEATURE_MAX_SCALE),
+            polygonAndLineInView,
+            invalidIgnoredInView,
+            allInvalidThrowsNoExtent: allInvalidError instanceof NoExtentError,
+            noGeometryGroupExtent,
+            staleZoomed,
+            staleCenterUnchanged,
+            missingExtentsAvailable,
+            lookedUpZoomed,
+            lookedUpExtentInView,
+            cancelledZoomed,
+          },
         };
       },
       (test, result) => {
+        test.addStep('Verifying the queried feature and group zoom observations...');
+        Test.assertIsDefined('features', result.features);
+        Test.assertIsArrayLengthMinimal(result.features, 1);
+        Test.assertIsDefined('polygon.extent', result.features[0].extent);
+        Test.assertIsDefined('zoom', result.zoom);
+        const { zoom } = result;
+
         test.addStep('Verifying the five distinct points are all in view...');
-        Test.assertIsEqual(result.distinctPointsInView, true);
+        Test.assertIsEqual(zoom.distinctPointsInView, true);
 
         test.addStep('Verifying coincident points do not zoom closer than the group bound...');
-        Test.assertIsDefined('groupMinResolution', result.groupMinResolution);
-        Test.assertIsDefined('coincidentResolution', result.coincidentResolution);
-        Test.assertIsEqual(result.coincidentResolution >= result.groupMinResolution * 0.999, true);
+        Test.assertIsDefined('groupMinResolution', zoom.groupMinResolution);
+        Test.assertIsDefined('coincidentResolution', zoom.coincidentResolution);
+        Test.assertIsEqual(zoom.coincidentResolution >= zoom.groupMinResolution * 0.999, true);
 
         test.addStep('Verifying a tiny extent does not zoom closer than the group bound...');
-        Test.assertIsDefined('tinyResolution', result.tinyResolution);
-        Test.assertIsEqual(result.tinyResolution >= result.groupMinResolution * 0.999, true);
+        Test.assertIsDefined('tinyResolution', zoom.tinyResolution);
+        Test.assertIsEqual(zoom.tinyResolution >= zoom.groupMinResolution * 0.999, true);
 
         test.addStep('Verifying the polygon and line are both in view...');
-        Test.assertIsEqual(result.polygonAndLineInView, true);
+        Test.assertIsEqual(zoom.polygonAndLineInView, true);
 
         test.addStep('Verifying missing/invalid extents are ignored...');
-        Test.assertIsEqual(result.invalidIgnoredInView, true);
+        Test.assertIsEqual(zoom.invalidIgnoredInView, true);
 
         test.addStep('Verifying a group without valid extent throws NoExtentError...');
-        Test.assertIsEqual(result.allInvalidThrowsNoExtent, true);
+        Test.assertIsEqual(zoom.allInvalidThrowsNoExtent, true);
 
         test.addStep('Verifying results without geometry have no group extent...');
-        Test.assertIsUndefined('noGeometryGroupExtent', result.noGeometryGroupExtent);
+        Test.assertIsUndefined('noGeometryGroupExtent', zoom.noGeometryGroupExtent);
 
         test.addStep('Verifying a stale group does not move the map...');
-        Test.assertIsEqual(result.staleZoomed, false);
-        Test.assertIsEqual(result.staleCenterUnchanged, true);
+        Test.assertIsEqual(zoom.staleZoomed, false);
+        Test.assertIsEqual(zoom.staleCenterUnchanged, true);
 
         test.addStep('Verifying lookup-only results can zoom and interrupted fits do not report completion...');
-        Test.assertIsEqual(result.missingExtentsAvailable, true);
-        Test.assertIsEqual(result.lookedUpZoomed, true);
-        Test.assertIsEqual(result.lookedUpExtentInView, true);
-        Test.assertIsEqual(result.cancelledZoomed, false);
+        Test.assertIsEqual(zoom.missingExtentsAvailable, true);
+        Test.assertIsEqual(zoom.lookedUpZoomed, true);
+        Test.assertIsEqual(zoom.lookedUpExtentInView, true);
+        Test.assertIsEqual(zoom.cancelledZoomed, false);
       },
-      () => {
-        cleanupLookup?.();
+      async (test) => {
+        try {
+          try {
+            cleanupLookup?.();
+          } finally {
+            // Clear the layer from the map and assert it was removed
+            if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
+          }
+        } finally {
+          test.addStep('Restoring the pre-test map extent...');
+          await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
+        }
       }
     );
   }
@@ -570,25 +904,30 @@ export class DetailsTester extends GVAbstractTester {
    * feature into view (Details previous/next after a zoom to feature) only pans for a small feature, zooms out for
    * a feature larger than the view, and never zooms back in.
    *
-   * @param layerPath - The layer path of the layer
-   * @param lonlat - The coordinate on the map to query
    * @returns A promise resolving when the test completes
    */
-  testZoomToFeatureBoundAndPan(layerPath: string, lonlat: Coordinate): Promise<Test<TestZoomToFeatureBoundAndPan>> {
+  testZoomToFeatureBoundAndPan(): Promise<Test<TestZoomToFeatureBoundAndPan>> {
+    const initialExtent = this.getMapViewer().getView().calculateExtent();
+    let rootLayerPath: string | undefined;
     return this.test(
-      `Test Zoom to point feature bound and pan to next feature on layer ${layerPath}...`,
+      'Test Zoom to point feature bound and pan to next feature on a polygon fixture layer...',
       async (test) => {
+        const layer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+        const layerPath = layer.getLayerPath();
+
         const { layerController, mapController } = this.getControllersRegistry();
         const view = this.getMapViewer().getView();
-        const fitOptions = GVAbstractTester.USE_ZOOM_ANIMATION ? {} : { duration: 0 };
+        const fitOptions = TestConstants.USE_ZOOM_ANIMATION ? {} : { duration: 0 };
 
         // Get a real result to build a point feature from
-        const layer = layerController.getGeoviewLayerRegular(layerPath);
-        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
-        Test.assertIsDefined('features', features);
-        Test.assertIsArrayLengthMinimal(features, 1);
-        Test.assertIsDefined('features[0].extent', features[0].extent);
-        const [cx, cy] = getCenter(features[0].extent);
+        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, TestConstants.ONTARIO_CENTER_LONLAT);
+        const feature = features?.[0];
+        if (!feature?.extent) return { features };
+        const [cx, cy] = getCenter(feature.extent);
         const pointExtent: Extent = [cx, cy, cx, cy];
 
         // Zoom far out, then zoom to a point feature
@@ -596,9 +935,9 @@ export class DetailsTester extends GVAbstractTester {
         await mapController.zoomToExtent([cx - 3000000, cy - 3000000, cx + 3000000, cy + 3000000], false, fitOptions);
         await layerController.zoomToExtentRestrictedAndHighlight(
           layerPath,
-          { ...features[0], extent: pointExtent },
+          { ...feature, extent: pointExtent },
           pointExtent,
-          GVAbstractTester.USE_ZOOM_ANIMATION,
+          TestConstants.USE_ZOOM_ANIMATION,
           fitOptions
         );
         const pointZoomResolution = view.getResolution();
@@ -610,7 +949,7 @@ export class DetailsTester extends GVAbstractTester {
         const panIsFeatureZoomView = await layerController.panToExtentRestrictedAndOutline(
           layerPath,
           nextExtent,
-          GVAbstractTester.USE_ZOOM_ANIMATION,
+          TestConstants.USE_ZOOM_ANIMATION,
           fitOptions
         );
         const panResolution = view.getResolution();
@@ -622,7 +961,7 @@ export class DetailsTester extends GVAbstractTester {
         const largeIsFeatureZoomView = await layerController.panToExtentRestrictedAndOutline(
           layerPath,
           largeExtent,
-          GVAbstractTester.USE_ZOOM_ANIMATION,
+          TestConstants.USE_ZOOM_ANIMATION,
           fitOptions
         );
         const largeResolution = view.getResolution();
@@ -633,51 +972,69 @@ export class DetailsTester extends GVAbstractTester {
         const backToSmallIsFeatureZoomView = await layerController.panToExtentRestrictedAndOutline(
           layerPath,
           nextExtent,
-          GVAbstractTester.USE_ZOOM_ANIMATION,
+          TestConstants.USE_ZOOM_ANIMATION,
           fitOptions
         );
 
         return {
-          featureMinResolution: mapController.getResolutionFromScale(OL_ZOOM_FEATURE_MAX_SCALE),
-          pointZoomResolution,
-          clickMarkerAfterZoom,
-          panResolution,
-          nextFeatureInView,
-          largeResolution,
-          largeFeatureInView,
-          backToSmallResolution: view.getResolution(),
-          panIsFeatureZoomView,
-          largeIsFeatureZoomView,
-          backToSmallIsFeatureZoomView,
+          features,
+          zoom: {
+            featureMinResolution: mapController.getResolutionFromScale(OL_ZOOM_FEATURE_MAX_SCALE),
+            pointZoomResolution,
+            clickMarkerAfterZoom,
+            panResolution,
+            nextFeatureInView,
+            largeResolution,
+            largeFeatureInView,
+            backToSmallResolution: view.getResolution(),
+            panIsFeatureZoomView,
+            largeIsFeatureZoomView,
+            backToSmallIsFeatureZoomView,
+          },
         };
       },
       (test, result) => {
+        test.addStep('Verifying the queried feature and feature zoom observations...');
+        Test.assertIsDefined('features', result.features);
+        Test.assertIsArrayLengthMinimal(result.features, 1);
+        Test.assertIsDefined('feature.extent', result.features[0].extent);
+        Test.assertIsDefined('zoom', result.zoom);
+        const { zoom } = result;
+
         test.addStep('Verifying the point zoom stops at the feature bound...');
-        Test.assertIsDefined('featureMinResolution', result.featureMinResolution);
-        Test.assertIsDefined('pointZoomResolution', result.pointZoomResolution);
-        Test.assertIsEqual(result.pointZoomResolution >= result.featureMinResolution * 0.999, true);
+        Test.assertIsDefined('featureMinResolution', zoom.featureMinResolution);
+        Test.assertIsDefined('pointZoomResolution', zoom.pointZoomResolution);
+        Test.assertIsEqual(zoom.pointZoomResolution >= zoom.featureMinResolution * 0.999, true);
 
         test.addStep('Verifying the zoom to feature hides the click marker...');
-        Test.assertIsUndefined('clickMarkerAfterZoom', result.clickMarkerAfterZoom);
+        Test.assertIsUndefined('clickMarkerAfterZoom', zoom.clickMarkerAfterZoom);
 
         test.addStep('Verifying a small feature only pans (keeps the resolution) and is in view...');
-        Test.assertIsDefined('panResolution', result.panResolution);
-        Test.assertIsEqual(Math.abs(result.panResolution - result.pointZoomResolution) <= result.pointZoomResolution * 0.001, true);
-        Test.assertIsEqual(result.nextFeatureInView, true);
+        Test.assertIsDefined('panResolution', zoom.panResolution);
+        Test.assertIsEqual(Math.abs(zoom.panResolution - zoom.pointZoomResolution) <= zoom.pointZoomResolution * 0.001, true);
+        Test.assertIsEqual(zoom.nextFeatureInView, true);
 
         test.addStep('Verifying a large feature zooms out and is fully in view...');
-        Test.assertIsDefined('largeResolution', result.largeResolution);
-        Test.assertIsEqual(result.largeResolution > result.panResolution, true);
-        Test.assertIsEqual(result.largeFeatureInView, true);
+        Test.assertIsDefined('largeResolution', zoom.largeResolution);
+        Test.assertIsEqual(zoom.largeResolution > zoom.panResolution, true);
+        Test.assertIsEqual(zoom.largeFeatureInView, true);
 
         test.addStep('Verifying going back to a small feature does not zoom in...');
-        Test.assertIsDefined('backToSmallResolution', result.backToSmallResolution);
-        Test.assertIsEqual(Math.abs(result.backToSmallResolution - result.largeResolution) <= result.largeResolution * 0.001, true);
+        Test.assertIsDefined('backToSmallResolution', zoom.backToSmallResolution);
+        Test.assertIsEqual(Math.abs(zoom.backToSmallResolution - zoom.largeResolution) <= zoom.largeResolution * 0.001, true);
 
         test.addStep('Verifying when a pan already shows the zoom to feature view (zoom button would have no effect)...');
-        Test.assertIsEqual(result.panIsFeatureZoomView, true);
-        Test.assertIsEqual(result.largeIsFeatureZoomView, true);
-        Test.assertIsEqual(result.backToSmallIsFeatureZoomView, false);
+        Test.assertIsEqual(zoom.panIsFeatureZoomView, true);
+        Test.assertIsEqual(zoom.largeIsFeatureZoomView, true);
+        Test.assertIsEqual(zoom.backToSmallIsFeatureZoomView, false);
+      },
+      async (test) => {
+        // Restore zoom extent
+        test.addStep('Restoring the pre-test map extent...');
+        await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
+
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -686,26 +1043,32 @@ export class DetailsTester extends GVAbstractTester {
    * Tests that the Details zoom to all results button becomes unavailable (aria-disabled) after its zoom, and
    * available again once the map view changes.
    *
-   * @param layerPath - The layer path of a layer returning several results at the coordinate
-   * @param lonlat - The coordinate on the map to click
    * @returns A promise resolving when the test completes
    */
-  testZoomToResultsButtonUnavailableUntilViewChanges(layerPath: string, lonlat: Coordinate): Promise<Test<TestZoomButtonState>> {
+  testZoomToResultsButtonUnavailableUntilViewChanges(): Promise<Test<TestZoomButtonState>> {
     const BUTTON_SELECTOR = 'button[aria-label="Zoom to all results for this layer"]';
+    const initialExtent = this.getMapViewer().getView().calculateExtent();
+    let rootLayerPath: string | undefined;
 
     return this.test(
-      `Test Zoom to all results button is unavailable until the map view changes on layer ${layerPath}...`,
+      'Test Zoom to all results button is unavailable until the map view changes on a polygon fixture layer...',
       async (test) => {
+        const fixtureLayer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+        const layerPath = fixtureLayer.getLayerPath();
         const root = DomHelper.getGVRootElement(this.getMapId());
 
         // Vector queries use a pixel hit tolerance, so the result count depends on the view: go back to the initial view
         // (previous tests zoomed in) where the click returns several results for the layer
         test.addStep('Zooming to the initial extent...');
-        await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomToInitialExtent(TestConstants.USE_ZOOM_ANIMATION);
 
         // Click the map and select the layer, so the Details panel shows its results
         await this.getControllersRegistry().layerController.waitForLayersLoaded();
-        await this.simulateMapClickWaitForBatchedQuery(test, lonlat);
+        await this.simulateMapClickWaitForBatchedQuery(test, TestConstants.ONTARIO_CENTER_LONLAT);
         await DomHelper.waitForAppbarTabSelected(this.getMapId(), 'details');
         this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
 
@@ -717,7 +1080,7 @@ export class DetailsTester extends GVAbstractTester {
         // Get the button
         test.addStep('Waiting for the zoom to all results button...');
         const waitForElement = async (selector: string): Promise<Element> => {
-          const element = await whenThisThen(() => root.querySelector(selector), GVAbstractTester.UI_STATE_TIMEOUT_MS, 50);
+          const element = await whenThisThen(() => root.querySelector(selector), TestConstants.UI_STATE_TIMEOUT_MS, 50);
           if (!element) throw new Error(`Element not found: ${selector}`);
           return element;
         };
@@ -735,7 +1098,7 @@ export class DetailsTester extends GVAbstractTester {
         const center = this.getMapViewer().getView().getCenter()!;
         await this.getControllersRegistry().mapController.zoomToExtent(
           [center[0] + 1000, center[1] + 1000, center[0] + 2000, center[1] + 2000],
-          GVAbstractTester.USE_ZOOM_ANIMATION
+          TestConstants.USE_ZOOM_ANIMATION
         );
         const disabledAfterViewChange =
           (await waitForElement(`${BUTTON_SELECTOR}[aria-disabled="false"]`)).getAttribute('aria-disabled') ?? undefined;
@@ -775,6 +1138,14 @@ export class DetailsTester extends GVAbstractTester {
 
         test.addStep('Verifying returning to a layer does not restore feature-follow...');
         Test.assertIsEqual(result.followsAfterLayerSwitch, false);
+      },
+      async (test) => {
+        // Restore zoom extent
+        test.addStep('Restoring the pre-test map extent...');
+        await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
+
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -782,188 +1153,157 @@ export class DetailsTester extends GVAbstractTester {
   /**
    * Tests that nameField configuration controls the feature display label.
    *
-   * @returns A promise resolving when the test completes
+   * @returns The original and persisted layer paths and the persisted layer's feature count
    */
-  testNameFieldAsLabel(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
-    const mapId = this.getMapId();
-    const LAYER_PATH = 'geojsonLYR5/polygons.json';
-    const NAME_FIELD = 'creationDate';
-
+  testLayerSelectionPersistence(): Promise<Test<DetailsLayerSelectionResult>> {
+    // Retain each fixture independently so cleanup can run even if adding the second layer fails.
+    let polygons: AbstractGVLayer | undefined;
+    let projects: AbstractBaseGVLayer | undefined;
+    let polygonRootLayerPath: string | undefined;
+    let projectRootLayerPath: string | undefined;
     return this.test(
-      'Test nameField as label in query results...',
+      'Test details layer selection persistence across map clicks',
       async (test) => {
-        // Create map with custom featureInfo nameField config using a date field
-        test.addStep('Creating map with nameField configuration (date field)...');
-        await this.#helperCreateMapWithFeatureInfoConfig(test, mapId, {
-          queryable: true,
-          nameField: NAME_FIELD,
-        });
-
-        // Get the layer
-        test.addStep('Getting the layer...');
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
-
-        // Query at Ontario coordinates
-        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
-      },
-      (test, result) => {
-        // Verify we got results
-        test.addStep('Verifying query returned features...');
-        Test.assertIsDefined('features', result);
-        Test.assertIsArrayLengthMinimal(result, 1);
-
-        // Verify the nameField is set correctly on the result
-        test.addStep('Verifying nameField is set on result...');
-        Test.assertIsEqual(result[0].nameField, NAME_FIELD);
-      }
-    );
-  }
-
-  /**
-   * Tests that fields with summary: false are excluded from query results.
-   *
-   * @returns A promise resolving when the test completes
-   */
-  testSummaryFalseHidesField(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
-    const mapId = this.getMapId();
-    const LAYER_PATH = 'geojsonLYR5/polygons.json';
-    const NAME_FIELD = 'Province';
-    const HIDDEN_FIELD = 'creationDate';
-
-    return this.test(
-      'Test summary false hides field from query results...',
-      async (test) => {
-        // Create map with outfields config where creationDate has summary: false
-        test.addStep('Creating map with outfields summary:false configuration...');
-        await this.#helperCreateMapWithFeatureInfoConfig(test, mapId, {
-          queryable: true,
-          nameField: NAME_FIELD,
-          outfields: [
-            { name: NAME_FIELD, type: 'string' },
-            { name: HIDDEN_FIELD, type: 'date', summary: false },
-          ],
-        });
-
-        // Get the layer
-        test.addStep('Getting the layer...');
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
-
-        // Query at Ontario coordinates
-        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
-      },
-      (test, result) => {
-        // Verify we got results
-        test.addStep('Verifying query returned features...');
-        Test.assertIsDefined('features', result);
-        Test.assertIsArrayLengthMinimal(result, 1);
-
-        // Verify the hidden field is NOT in fieldInfo
-        test.addStep(`Verifying field '${HIDDEN_FIELD}' is excluded from fieldInfo...`);
-        Test.assertIsUndefined(`fieldInfo.${HIDDEN_FIELD}`, result[0].fieldInfo[HIDDEN_FIELD]);
-
-        // Verify that Province field IS present
-        test.addStep('Verifying Province field IS present in fieldInfo...');
-        Test.assertIsDefined('fieldInfo.Province', result[0].fieldInfo.Province);
-      }
-    );
-  }
-
-  /**
-   * Tests that field alias configuration is applied in query results.
-   *
-   * @returns A promise resolving when the test completes
-   */
-  testFieldAliasRenamesField(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
-    const mapId = this.getMapId();
-    const LAYER_PATH = 'geojsonLYR5/polygons.json';
-    const ALIAS_VALUE = 'Custom Province Name';
-
-    return this.test(
-      'Test field alias renames field in query results...',
-      async (test) => {
-        // Create map with outfields config where Province has a custom alias
-        test.addStep('Creating map with outfields alias configuration...');
-        await this.#helperCreateMapWithFeatureInfoConfig(test, mapId, {
-          queryable: true,
-          nameField: 'Province',
-          outfields: [{ name: 'Province', alias: ALIAS_VALUE, type: 'string' }],
-        });
-
-        // Get the layer
-        test.addStep('Getting the layer...');
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
-
-        // Query at Ontario coordinates
-        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
-      },
-      (test, result) => {
-        // Verify we got results
-        test.addStep('Verifying query returned features...');
-        Test.assertIsDefined('features', result);
-        Test.assertIsArrayLengthMinimal(result, 1);
-
-        // Verify the alias is applied
-        test.addStep(`Verifying Province field alias is '${ALIAS_VALUE}'...`);
-        Test.assertIsDefined('fieldInfo.Province', result[0].fieldInfo.Province);
-        Test.assertIsEqual(result[0].fieldInfo.Province.alias, ALIAS_VALUE);
-      }
-    );
-  }
-
-  // #region PRIVATE HELPERS
-
-  /**
-   * Creates a map with a GeoJSON polygons layer configured with custom featureInfo settings.
-   *
-   * @param test - The test instance used to log steps
-   * @param mapId - The map identifier
-   * @param featureInfoConfig - The featureInfo configuration to apply to the layer
-   * @returns A promise that resolves when the map is created and layers are loaded
-   */
-  #helperCreateMapWithFeatureInfoConfig<T>(test: Test<T>, mapId: string, featureInfoConfig: Record<string, unknown>): Promise<MapViewer> {
-    const baseConfig = {
-      map: {
-        interaction: 'dynamic',
-        viewSettings: { projection: 3978, initialView: { zoomAndCenter: [4.5, [-90, 60]] } },
-        basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
-        listOfGeoviewLayerConfig: [
-          {
-            geoviewLayerId: 'geojsonLYR5',
-            geoviewLayerName: 'GeoJSON Sample',
-            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
-            geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
-            serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
-            listOfLayerEntryConfig: [
-              {
-                layerId: 'polygons.json',
-                layerName: 'Polygons',
-                source: {
-                  featureInfo: featureInfoConfig,
-                },
-              },
-            ],
+        // Create the candidates here rather than relying on layers configured by the host page.
+        polygons = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            polygonRootLayerPath = rootPath;
           },
-        ],
-      },
-      components: [],
-      corePackages: ['test-suite'],
-      corePackagesConfig: [{ 'test-suite': { suites: ['suite-details'] } }],
-      theme: 'geo.ca',
-      footerBar: {
-        tabs: {
-          core: ['legend', 'layers'],
-        },
-      },
-    };
+        });
 
-    // Replace the map!
-    return this.replaceMap(test, mapId, baseConfig);
+        projects = await this.addLayerEsriFeatureTopProjects(test, {
+          onLayerPath: (rootPath): void => {
+            projectRootLayerPath = rootPath;
+          },
+        });
+
+        // Fixture IDs are generated, so selection and cleanup must use the returned runtime paths.
+        const layerPath1 = polygons.getLayerPath();
+        const layerPath2 = projects.getLayerPath();
+
+        // Let the first completed map query establish the automatic Details selection.
+        await this.simulateMapClickWaitForBatchedQuery(test, [-87.4, 52.9]);
+        test.addStep('Checking selected layer after first click...');
+        const originalLayerPath = getStoreDetailsSelectedLayerPath(this.getMapId());
+        test.addStep(`First selected layer: ${originalLayerPath}`);
+        // Select a different candidate regardless of which fixture was automatically selected first.
+        const expectedLayerPath = originalLayerPath === layerPath1 ? layerPath2 : layerPath1;
+
+        // A subsequent query must respect this explicit selection instead of auto-selecting another result.
+        test.addStep(`Manually selecting the other layer '${expectedLayerPath}'...`);
+        this.getControllersRegistry().detailsController.setSelectedLayerPath(expectedLayerPath);
+        // Wait for the second batch to settle before observing selection persistence and refreshed features.
+        await this.simulateMapClickWaitForBatchedQuery(test, [-73.9, 46.5]);
+
+        test.addStep('Checking selected layer after second click...');
+        const alternateLayerPath = getStoreDetailsSelectedLayerPath(this.getMapId());
+        test.addStep(`Second selected layer: ${alternateLayerPath}`);
+
+        // Read features for the actual selected layer, not merely the layer we intended to select.
+        const secondFeatureCount = getStoreDetailsFeatures(this.getMapId(), alternateLayerPath)?.length ?? 0;
+        test.addStep(`Second layer feature count: ${secondFeatureCount}`);
+        return { originalLayerPath, expectedLayerPath, alternateLayerPath, secondFeatureCount };
+      },
+      (test, result) => {
+        // A different layer alone is insufficient: it must be exactly the manually selected candidate.
+        test.addStep('Verifying the manually selected layer persisted...');
+        Test.assertIsEqual(result.alternateLayerPath, result.expectedLayerPath);
+        test.addStep('Verifying first and second layers were different...');
+        Test.assertIsNotEqual(result.originalLayerPath, result.alternateLayerPath);
+
+        // Persistence must retain useful query results, not just a selected path with no features.
+        test.addStep('Verifying second layer has exactly 1 feature...');
+        Test.assertIsEqual(result.secondFeatureCount, 1);
+      },
+      (test) => {
+        // Clear the layer from the map and assert it was removed
+        if (projectRootLayerPath) this.removeLayerConfigAndAssert(test, projectRootLayerPath);
+        if (polygonRootLayerPath) this.removeLayerConfigAndAssert(test, polygonRootLayerPath);
+      }
+    );
   }
-
-  // #endregion
+  /**
+   * Waits for fresh coordinate data and captures the corresponding rendered content.
+   *
+   * @param coordinate - The longitude/latitude expected from the most recent map click
+   * @param toggle - The coordinate information toggle whose state is observed
+   * @returns The settled store values and rendered coordinate information
+   */
+  async #readCoordinateInfo(coordinate: number[], toggle: HTMLInputElement): Promise<CoordinateInfoObservation> {
+    const mapId = this.getMapId();
+    await whenThisThen(
+      () => {
+        const feature = getStoreDetailsLayerDataArrayFeature(mapId);
+        return (
+          getStoreDetailsQueryStatus(mapId, LAYER_PATH_COORDINATE_INFO) === 'processed' &&
+          feature?.fieldInfo.latitude?.value === coordinate[1].toFixed(6) &&
+          feature?.fieldInfo.longitude?.value === coordinate[0].toFixed(6)
+        );
+      },
+      TestConstants.UI_STATE_TIMEOUT_MS,
+      50
+    );
+    this.getControllersRegistry().detailsController.setSelectedLayerPath(LAYER_PATH_COORDINATE_INFO);
+    await DomHelper.waitForReactIdle();
+    const content = await whenThisThen(() => DomHelper.Details.getCoordinateInfoContent(mapId), TestConstants.UI_STATE_TIMEOUT_MS, 50);
+    if (!content) throw new Error('Coordinate information content was not rendered');
+    return {
+      checked: toggle.checked,
+      ariaChecked: toggle.getAttribute('aria-checked') ?? undefined,
+      enabled: getStoreDetailsCoordinateInfoEnabled(mapId),
+      feature: getStoreDetailsLayerDataArrayFeature(mapId),
+      text: content.textContent ?? '',
+    };
+  }
 }
 
 // #region TYPES AND INTERFACES
+
+/** Coordinate information captured after a settled lookup and React render. */
+type CoordinateInfoObservation = {
+  checked: boolean;
+  ariaChecked: string | undefined;
+  enabled: boolean;
+  feature: TypeFeatureInfoEntry | undefined;
+  text: string;
+};
+
+/** Observations for coordinate information toggle and map-click updates. */
+type CoordinateInfoToggleResult = {
+  disabledBeforeClick: boolean;
+  enabledAfterClick: boolean;
+  hiddenBeforeEnable: boolean;
+  first: CoordinateInfoObservation;
+  second: CoordinateInfoObservation;
+  uncheckedAfterDisable: boolean;
+  hiddenAfterDisable: boolean;
+  featureRemoved: boolean;
+  hiddenAfterDisabledClick: boolean;
+  featureAbsentAfterDisabledClick: boolean;
+  reenabled: CoordinateInfoObservation;
+};
+
+/** Captured Details feature and its rendered field rows. */
+type DetailsFeatureTableResult = {
+  layerPath: string;
+  selectedLayerPath: string;
+  features: TypeFeatureInfoEntry[] | undefined;
+  feature: TypeFeatureInfoEntry | undefined;
+  dateValue: unknown;
+  imageValue: unknown;
+  expectedDate: string | undefined;
+  layerDateFormat: TypeDisplayDateFormat | undefined;
+  rows: { label: string | undefined; value: string | undefined; images: (string | undefined)[] }[];
+};
+
+/** Captured WMS feature and its rendered field rows. */
+type WmsFeatureTableResult = {
+  layerPath: string;
+  selectedLayerPath: string;
+  features: TypeFeatureInfoEntry[] | undefined;
+  feature: TypeFeatureInfoEntry | undefined;
+  rows: { label: string | undefined; value: string | undefined }[];
+};
 
 /** Result of the button state test; button observations are absent when fewer than two results are returned. */
 export type TestZoomButtonState = {
@@ -981,78 +1321,101 @@ export type TestZoomButtonState = {
 
 /** Result type for the testZoomToFeatureBoundAndPan test execution. */
 export type TestZoomToFeatureBoundAndPan = {
-  /** The resolution matching the closest scale a feature zoom can reach. */
-  featureMinResolution: number | undefined;
-  /** The view resolution after zooming to a point feature. */
-  pointZoomResolution: number | undefined;
-  /** The click marker after the zoom to feature, expected hidden (undefined). */
-  clickMarkerAfterZoom: unknown;
-  /** The view resolution after bringing a small feature into view. */
-  panResolution: number | undefined;
-  /** Whether the small feature was in view after the pan. */
-  nextFeatureInView: boolean;
-  /** The view resolution after bringing a feature larger than the view into view. */
-  largeResolution: number | undefined;
-  /** Whether the large feature was fully in view after the zoom out. */
-  largeFeatureInView: boolean;
-  /** The view resolution after bringing the small feature back into view. */
-  backToSmallResolution: number | undefined;
-  /** Whether the small feature pan landed on its zoom to feature view (map at the feature zoom bound). */
-  panIsFeatureZoomView: boolean;
-  /** Whether the large feature pan landed on its zoom to feature view (pan zoomed out to fit it). */
-  largeIsFeatureZoomView: boolean;
-  /** Whether the pan back to the small feature landed on its zoom to feature view (expected not: a zoom would zoom in). */
-  backToSmallIsFeatureZoomView: boolean;
+  /** Queried features, retained when zoom prerequisites are missing. */
+  features: TypeFeatureInfoEntry[] | undefined;
+  /** Zoom observations, available only when the queried feature has an extent. */
+  zoom?: {
+    /** The resolution matching the closest scale a feature zoom can reach. */
+    featureMinResolution: number | undefined;
+    /** The view resolution after zooming to a point feature. */
+    pointZoomResolution: number | undefined;
+    /** The click marker after the zoom to feature, expected hidden (undefined). */
+    clickMarkerAfterZoom: unknown;
+    /** The view resolution after bringing a small feature into view. */
+    panResolution: number | undefined;
+    /** Whether the small feature was in view after the pan. */
+    nextFeatureInView: boolean;
+    /** The view resolution after bringing a feature larger than the view into view. */
+    largeResolution: number | undefined;
+    /** Whether the large feature was fully in view after the zoom out. */
+    largeFeatureInView: boolean;
+    /** The view resolution after bringing the small feature back into view. */
+    backToSmallResolution: number | undefined;
+    /** Whether the small feature pan landed on its zoom to feature view (map at the feature zoom bound). */
+    panIsFeatureZoomView: boolean;
+    /** Whether the large feature pan landed on its zoom to feature view (pan zoomed out to fit it). */
+    largeIsFeatureZoomView: boolean;
+    /** Whether the pan back to the small feature landed on its zoom to feature view (expected not: a zoom would zoom in). */
+    backToSmallIsFeatureZoomView: boolean;
+  };
 };
 
 /** Result type for the testZoomToResultsGroupExtent test execution. */
 export type TestZoomToResultsGroupExtent = {
-  /** Whether results with only lookup-capable IDs enable group zoom. */
-  missingExtentsAvailable: boolean;
-  /** Whether a group with no embedded extents zoomed after object-ID lookup. */
-  lookedUpZoomed: boolean;
-  /** Whether the looked-up geometry extent was fitted. */
-  lookedUpExtentInView: boolean;
-  /** Whether an interrupted animation incorrectly reported success. */
-  cancelledZoomed: boolean;
-  /** Whether the five distinct points were all in view after the group zoom. */
-  distinctPointsInView: boolean;
-  /** The view resolution after zooming to coincident points. */
-  coincidentResolution: number | undefined;
-  /** The view resolution after zooming to a tiny combined extent. */
-  tinyResolution: number | undefined;
-  /** The resolution matching the closest scale a group zoom can reach. */
-  groupMinResolution: number | undefined;
-  /** Whether the polygon and the line were both in view after the group zoom. */
-  polygonAndLineInView: boolean;
-  /** Whether the valid extent was in view when mixed with missing/invalid extents. */
-  invalidIgnoredInView: boolean;
-  /** Whether a group without any valid extent threw a NoExtentError. */
-  allInvalidThrowsNoExtent: boolean;
-  /** The group extent of results without geometry (pure WMS click point extents), expected undefined. */
-  noGeometryGroupExtent: Extent | undefined;
-  /** Whether the stale group zoom reported a zoom. */
-  staleZoomed: boolean;
-  /** Whether the map center was unchanged by the stale group zoom. */
-  staleCenterUnchanged: boolean;
+  /** Queried features, retained when zoom prerequisites are missing. */
+  features: TypeFeatureInfoEntry[] | undefined;
+  /** Zoom observations, available only when the queried feature has an extent. */
+  zoom?: {
+    /** Whether results with only lookup-capable IDs enable group zoom. */
+    missingExtentsAvailable: boolean;
+    /** Whether a group with no embedded extents zoomed after object-ID lookup. */
+    lookedUpZoomed: boolean;
+    /** Whether the looked-up geometry extent was fitted. */
+    lookedUpExtentInView: boolean;
+    /** Whether an interrupted animation incorrectly reported success. */
+    cancelledZoomed: boolean;
+    /** Whether the five distinct points were all in view after the group zoom. */
+    distinctPointsInView: boolean;
+    /** The view resolution after zooming to coincident points. */
+    coincidentResolution: number | undefined;
+    /** The view resolution after zooming to a tiny combined extent. */
+    tinyResolution: number | undefined;
+    /** The resolution matching the closest scale a group zoom can reach. */
+    groupMinResolution: number | undefined;
+    /** Whether the polygon and the line were both in view after the group zoom. */
+    polygonAndLineInView: boolean;
+    /** Whether the valid extent was in view when mixed with missing/invalid extents. */
+    invalidIgnoredInView: boolean;
+    /** Whether a group without any valid extent threw a NoExtentError. */
+    allInvalidThrowsNoExtent: boolean;
+    /** The group extent of results without geometry (pure WMS click point extents), expected undefined. */
+    noGeometryGroupExtent: Extent | undefined;
+    /** Whether the stale group zoom reported a zoom. */
+    staleZoomed: boolean;
+    /** Whether the map center was unchanged by the stale group zoom. */
+    staleCenterUnchanged: boolean;
+  };
 };
 
 /** Result type for the testZoomToFeatureWithPanelOffset test execution. */
 export type TestZoomWithPanelOffset = {
-  /** The default left padding, in map pixels, without any panel offset. */
-  basePaddingLeft: number;
-  /** The left padding, in map pixels, including the open panel overlap. */
-  paddingLeft: number;
-  /** The default right padding, in map pixels, without any map controls offset. */
-  basePaddingRight: number;
-  /** The right padding, in map pixels, including the map controls (navigation bar, overview map) overlap. */
-  paddingRight: number;
-  /** The map width in map pixels. */
-  mapWidth: number | undefined;
-  /** Whether the navigation bar is shown on the map. */
-  hasNavBar: boolean;
-  /** The x map pixel of the feature center after the zoom. */
-  centerPixelX: number | undefined;
+  /** Features returned by the fixture query, including missing results for assertion diagnostics. */
+  features: TypeFeatureInfoEntry[] | undefined;
+  /** Zoom observations, available only when the queried feature has an extent. */
+  zoom?: {
+    /** The default left padding, in map pixels, without any panel offset. */
+    basePaddingLeft: number;
+    /** The left padding, in map pixels, including the open panel overlap. */
+    paddingLeft: number;
+    /** The default right padding, in map pixels, without any map controls offset. */
+    basePaddingRight: number;
+    /** The right padding, in map pixels, including the map controls (navigation bar, overview map) overlap. */
+    paddingRight: number;
+    /** The map width in map pixels. */
+    mapWidth: number | undefined;
+    /** Whether the navigation bar is shown on the map. */
+    hasNavBar: boolean;
+    /** The x map pixel of the feature center after the zoom. */
+    centerPixelX: number | undefined;
+  };
+};
+
+/** Details layer selection before and after a second map click. */
+type DetailsLayerSelectionResult = {
+  originalLayerPath: string;
+  expectedLayerPath: string;
+  alternateLayerPath: string;
+  secondFeatureCount: number;
 };
 
 /** Result type for the testClearAllHighlights test execution. */

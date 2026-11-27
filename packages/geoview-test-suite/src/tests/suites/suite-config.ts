@@ -41,10 +41,10 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests layer configuration creation and validation across all supported layer types:<br/>
-      <b>ESRI</b> — Dynamic, Feature, Image (happy path + bad URL)<br/>
-      <b>OGC</b> — WMS, WFS, OGC Feature (happy path + bad URL + no capabilities)<br/>
-      <b>File-based</b> — GeoJSON, CSV, WKB, KML, GeoTIFF (happy path + bad URL skip/error)<br/>
+    return `Tests layer configuration initialization, metadata processing, and validation:<br/>
+      <b>ESRI</b> — Dynamic, Feature, and Image initialization and bad URLs; Dynamic and Feature metadata processing<br/>
+      <b>OGC</b> — WMS, WFS, OGC Feature (happy path + bad URL), WMS sublayer configurations and WFS without capabilities<br/>
+      <b>File-based</b> — GeoJSON metadata and GeometryCollection configs; CSV, WKB, KML, GeoTIFF; bad URL skip/error expectations<br/>
       <b>GeoCore</b> — Standalone UUID resolution; Add Layer initialization preserves the selected FeatureServer layer<br/>
       <b>Settings</b> — initialSettings cascade to sublayers`;
   }
@@ -119,11 +119,11 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     // Test EsriImage Elevation config
     const pProcessEsriImage = this.#configTester.testInitEsriImageWithElevation();
 
-    // Test WMS OWSMundialis config
-    const pWMSMundialis = this.#configTester.testInitWMSLayerWithOWSMundialis();
+    // Test WMS OWSTerrestris config
+    const pWMSTerrestris = this.#configTester.testInitWMSLayerWithOWSTerrestris();
 
-    // Test WMS OWSMundialis config no full sub layers
-    const pWMSMundialisNoFullSubLayers = this.#configTester.testInitWMSLayerWithOWSMundialisNoFullSubLayers();
+    // Test WMS OWSTerrestris config no full sub layers
+    const pWMSTerrestrisNoFullSubLayers = this.#configTester.testInitWMSLayerWithOWSTerrestrisNoFullSubLayers();
 
     // Test WMS DatacubeMSI config
     const pWMSDatacubeMSI = this.#configTester.testInitWMSLayerWithDatacubeMSI();
@@ -150,7 +150,7 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     const pWFSGeomet = this.#configTester.testProcessWFSGeomet();
 
     // Test OGC Feature config
-    const pOGcFeature = this.#configTester.testOGCFeatureWithPygeoapi();
+    const pOGcFeature = this.#configTester.testOGCFeatureLakes();
 
     // Test a true negative
     const pOgcFeatureBadUrl = this.#configTester.testOGCFeatureBadUrl();
@@ -215,8 +215,8 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
       pInitEsriImage,
       pInitEsriImageBadUrl,
       pProcessEsriImage,
-      pWMSMundialis,
-      pWMSMundialisNoFullSubLayers,
+      pWMSTerrestris,
+      pWMSTerrestrisNoFullSubLayers,
       pWMSDatacubeMSI,
       pWMSDatacubeMSINoFullSubLayers,
       pWMSBadUrl,

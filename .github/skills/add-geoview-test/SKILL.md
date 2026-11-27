@@ -8,5 +8,5 @@ description: "Use when adding a test to geoview-test-suite (layer, config, map, 
 1. Read `.github/ai/test-suite.md` for the matching algorithm (layer, utility, query, config, map, map-config, new suite).
 2. Add constants to `GVAbstractTester`; write the test in the right tester with three separated callbacks (execute and return result / assert only / cleanup).
 3. Register the call in the suite's `onLaunchTestSuite()` (parallel unless it changes zoom/projection/center, then sequential at the end).
-4. Update `getTestsTotalFinal()` and the test's entry in `docs/app/testing/test-catalog.md`. Update `00-automated-suite.md` only when adding a suite or execution variant; it tracks pass status, not test counts.
+4. Review and update `getDescriptionAsHtml()` for coverage in `onLaunchTestSuite()` source call order, grouping only adjacent related tests; update `getTestsTotalFinal()` and the test's entry in `docs/app/testing/test-catalog.md`. Update `00-automated-suite.md` only when adding a suite or execution variant; it tracks pass status, not test counts.
 5. Run the `/sync-test-counts` skill to re-audit all suites.

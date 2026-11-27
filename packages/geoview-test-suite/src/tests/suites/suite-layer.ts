@@ -3,7 +3,6 @@ import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
 import { LayerTester } from '../testers/layer-tester';
-import { GVAbstractTester } from '../testers/abstract-gv-tester';
 
 /**
  * The GeoView Test Suite.
@@ -42,14 +41,17 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests adding layers to the map, verifying load status and legend icons:<br/>
-      <b>ESRI</b> — Dynamic, Feature, Image (+ bad URL, invalid geometry, domain fields); case-sensitive export bbox/size and returned image dimensions<br/>
-      <b>OGC</b> — WMS (multiple services + CORS proxy), WFS, WMTS (+ bad URLs)<br/>
-      <b>File-based</b> — GeoJSON, CSV, OGC Feature, WKB, KML, GeoTIFF (+ bad URLs)<br/>
+    return `Tests layer addition with rendered Legend and Layers panel entries, expected loading failures, legend icons, and configuration overrides:<br/>
+      <b>ESRI</b> — Dynamic, Feature, Image (+ bad URL, invalid geometry); case-sensitive export bbox/size and returned image dimensions<br/>
+      <b>WMS/WFS</b> — WMS services, VPN-aware group dimensions, metadata/configured names and CORS proxy; WFS; bad URLs and WFS without capabilities<br/>
+      <b>GeoJSON/CSV</b> — File-based layer addition and bad URLs<br/>
+      <b>OGC Feature</b> — Layer addition and bad URL<br/>
+      <b>WKB/KML/GeoTIFF</b> — File-based layer addition and bad URLs<br/>
+      <b>WMTS</b> — World timezones and bad URL<br/>
       <b>Tiles</b> — XYZ (OSM), Vector Tiles (CBMT) (+ bad URLs)<br/>
-      <b>GeoCore</b> — Inline override, simplified name override, group visibility<br/>
       <b>Settings</b> — initialSettings cascade on added layers<br/>
-      <b>Queries</b> — Domain field value translation (sequential)`;
+      <b>GeoCore</b> — Inline layer entry, simplified name, land-cover, CESI and IAAC group initial-state overrides<br/>
+      <b>ESRI domains</b> — Dynamic and Feature domain fields`;
   }
 
   /**
@@ -58,7 +60,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 50;
+    return 47;
   }
 
   /**
@@ -69,7 +71,20 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns A promise that resolves when the debug tests are completed
    */
   protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    await this.#layerTester.testAddEsriDynamicCaseSensitiveExport();
+    // Test geocore custom inline override scenarios
+    await this.#layerTester.testAddGeocoreWithInlineListOfLayerEntryConfigOverride();
+
+    // Test geocore simplified inline layer name override
+    // await this.#layerTester.testAddGeocoreWithSimplifiedInlineLayerNameOverride();
+
+    // Test the land-cover entry's custom name and collapsed/hidden initial states.
+    // await this.#layerTester.testAddGeocoreWithInlineLandCoverEntryOverride();
+
+    // Test the CESI group hierarchy and nested visibility/collapse overrides.
+    // await this.#layerTester.testAddGeocoreWithInlineCesiGroupOverrides();
+
+    // Test the IAAC group and each child's visibility/collapse overrides.
+    // await this.#layerTester.testAddGeocoreWithInlineIAACGroupOverride();
 
     // Resolve
     return;
@@ -106,11 +121,14 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test adding layer
     const pLayerEsriImageElevation = this.#layerTester.testAddEsriImageWithElevation();
 
+    // Test adding layer
+    const pLayerEsriImageUSA = this.#layerTester.testAddEsriImageWithUSA();
+
     // Test true negative
     const pLayerEsriImageBadUrl = this.#layerTester.testAddEsriImageBadUrl();
 
-    // Test adding layer OWS Mundialis
-    const pLayerWMSOWSMundialis = this.#layerTester.testAddWMSLayerWithOWSMundialis();
+    // Test adding layer OWS Terrestris
+    const pLayerWMSOWSTerrestris = this.#layerTester.testAddWMSLayerWithOWSTerrestris();
 
     // Test adding layer
     const pLayerWMSDatacubeOWSMSI = this.#layerTester.testAddWMSLayerWithDatacubeMSI();
@@ -163,7 +181,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     const pLayerCSVBadUrl = this.#layerTester.testAddCSVWithBadUrl();
 
     // Test adding layer
-    const pLayerOGCFeatureWithPygeoapi = this.#layerTester.testAddOGCFeatureWithPygeoapi();
+    const pLayerOGCFeatureLakes = this.#layerTester.testAddOGCFeatureLakes();
 
     // Test true negative
     const pLayerOGCFeatureBadUrl = this.#layerTester.testAddOGCFeatureWithBadUrl();
@@ -210,7 +228,17 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test geocore custom inline override scenarios
     const pGeocoreInlineListOverride = this.#layerTester.testAddGeocoreWithInlineListOfLayerEntryConfigOverride();
 
+    // Test geocore simplified inline layer name override
     const pGeocoreSimplifiedNameOverride = this.#layerTester.testAddGeocoreWithSimplifiedInlineLayerNameOverride();
+
+    // Test the land-cover entry's custom name and collapsed/hidden initial states.
+    const pGeocoreLandCoverOverride = this.#layerTester.testAddGeocoreWithInlineLandCoverEntryOverride();
+
+    // Test the CESI group hierarchy and nested visibility/collapse overrides.
+    const pGeocoreCesiOverride = this.#layerTester.testAddGeocoreWithInlineCesiGroupOverrides();
+
+    // Test the IAAC group and each child's visibility/collapse overrides.
+    const pGeocoreIaacOverride = this.#layerTester.testAddGeocoreWithInlineIAACGroupOverride();
 
     // Test domain fields
     const pEsriDynamicDomainField = this.#layerTester.testAddEsriDynamicWithDomainField();
@@ -227,8 +255,9 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerEsriFeatureBadUrl,
       playerEsriFeatureInvalidGeometry,
       pLayerEsriImageElevation,
+      pLayerEsriImageUSA,
       pLayerEsriImageBadUrl,
-      pLayerWMSOWSMundialis,
+      pLayerWMSOWSTerrestris,
       pLayerWMSDatacubeOWSMSI,
       pLayerWMSDatacubeRingFireHalifax,
       pLayerWMSLandcoverGroupDimension,
@@ -245,7 +274,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerGeoJSonBadUrl,
       pLayerCSVStationList,
       pLayerCSVBadUrl,
-      pLayerOGCFeatureWithPygeoapi,
+      pLayerOGCFeatureLakes,
       pLayerOGCFeatureBadUrl,
       pLayerWKBWithSouthAfrica,
       pLayerWKBBadUrl,
@@ -262,29 +291,12 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pInitialSettingsCascade,
       pGeocoreInlineListOverride,
       pGeocoreSimplifiedNameOverride,
+      pGeocoreLandCoverOverride,
+      pGeocoreCesiOverride,
+      pGeocoreIaacOverride,
       pEsriDynamicDomainField,
       pEsriFeatureDomainField,
     ]);
-
-    // Test domain field query value translation — run sequentially at the end
-    // because they change the zoom level to 17.4 which would affect other tests
-    await this.#layerTester.testEsriDynamicDomainFieldQueryValue();
-    await this.#layerTester.testEsriFeatureDomainFieldQueryValue();
-
-    // Make sure the map is reset in its initial extent after the zooms
-    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
-
-    // Run the GeometryCollection layer test last to avoid perturbing icon color ordering used by earlier strict icon assertions.
-    await this.#layerTester.testAddGeoJSONWithGeometryCollection();
-
-    // Test geocore group with defaultVisibility=false
-    await this.#layerTester.testAddGeocoreWithGroupDefaultVisibilityFalse(this.getIsRunningHeavyTests());
-
-    // Test hidden-by-parent child + setLayerVisibleIncludingParents parent crawl (drives the panels' hidden/available lists)
-    await this.#layerTester.testSetLayerVisibleIncludingParents();
-
-    // Test ESRI Dynamic junction geometry pairs to its own OBJECTID (#3636) — changes zoom, resets to initial extent in finalize
-    await this.#layerTester.testEsriDynamicJunctionGeometryPairing();
 
     // Done
     return;

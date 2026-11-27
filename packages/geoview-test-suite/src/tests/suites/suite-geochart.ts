@@ -2,7 +2,6 @@ import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { TestSuiteCannotExecuteError } from '../core/exceptions';
-import { GVAbstractTester } from '../testers/abstract-gv-tester';
 import { GeochartTester } from '../testers/geochart-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
 
@@ -43,9 +42,9 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests the Geochart plugin integration:<br/>
-      <b>Interaction</b> — Open geochart panel via simulated map click on layer<br/>
-      <b>GeoCore</b> — Add layer by UUID and verify geochart config loading`;
+    return `Tests Geochart configuration and selection through the footer panel:<br/>
+      <b>Polygon chart</b> — Register a chart, query a polygon layer at a coordinate, and verify the selected footer tab and chart layer<br/>
+      <b>GeoCore chart</b> — Add the Airborne layer by UUID, verify its chart configuration, and query and select its chart`;
   }
 
   /**
@@ -81,8 +80,11 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when the debug tests are completed
    */
-  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    return Promise.resolve();
+  protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
+    await this.#geochartTester.testGeochartPolygonsClick();
+
+    // Resolve
+    return;
   }
 
   /**
@@ -92,18 +94,12 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // Test Geochart
-    const pGeochartPolygons = this.#geochartTester.testGeochartOpenForLayerMapClick(
-      'geojsonLYR5/polygons.json',
-      GVAbstractTester.ONTARIO_CENTER_LONLAT
-    );
-
-    // Wait for the test with polygons to complete
-    await pGeochartPolygons;
+    await this.#geochartTester.testGeochartPolygonsClick();
 
     // Test Geochart
-    const pGeochartAirborne = this.#geochartTester.testAddGeocoreLayerUUIDForGeochartAirborne();
+    await this.#geochartTester.testAddGeocoreLayerUUIDForGeochartAirborne();
 
-    // Resolve when all
-    return Promise.all([pGeochartPolygons, pGeochartAirborne]);
+    // Resolve
+    return;
   }
 }

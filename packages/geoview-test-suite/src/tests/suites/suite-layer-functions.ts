@@ -2,7 +2,6 @@ import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
-import { GVAbstractTester } from '../testers/abstract-gv-tester';
 import { LayerTester } from '../testers/layer-tester';
 
 /**
@@ -42,14 +41,26 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests layer controller functions and feature-query behavior:<br/>
-      <b>Layer path resolution</b> — Nested WMS groups with duplicate names are loaded without ambiguous paths or recursion loops; the first layer under a root id (e.g. a GeoCore UUID) is resolved by <code>getGeoviewLayerByRootId</code><br/>
-      <b>Layer visibility</b> — Explicit visibility updates and implicit toggles through the public LayerApi<br/>
+    return `Tests runtime LayerApi/controller operations, legend-store synchronization, and feature queries:<br/>
+      <b>WMS group paths</b> — Nested groups with duplicate names are loaded without ambiguous paths or recursion loops<br/>
       <b>Zoom to extent</b> — Single-feature layers, empty layers, and configured fallback extents<br/>
       <b>Feature geometry</b> — Details queries still retrieve geometry when configured outfields omit geometry fields<br/>
-      <b>WMS feature queries</b> — WMS layers retrieve feature results through their associated WFS services<br/>
+      <b>WMS feature queries</b> — Cities and Airborne layers retrieve features through associated WFS services, with VPN-aware Airborne execution<br/>
+      <b>Root layer resolution</b> — Resolve the first layer under a root id (e.g. a GeoCore UUID) with <code>getGeoviewLayerByRootId</code><br/>
       <b>Layer reload</b> — Reloading a layer rebuilds it from scratch and keeps it at the same position in the layer order<br/>
-      <b>GeoJSON injection</b> — Public object/string replacement, feature-info refresh, and reprojection after injection<br/>`;
+      <b>GeoJSON source</b> — Object/string replacement, feature-info refresh, and reprojection after injection<br/>
+      <b>ESRI domain queries</b> — Dynamic and Feature domain value translation<br/>
+      <b>Combined extent</b> — Union GeoJSON, Esri Feature, Esri Dynamic GNWT Boundaries and Halifax WMS bounds using layer paths or root IDs<br/>
+      <b>GeometryCollection</b> — GeoJSON GeometryCollection layer loading<br/>
+      <b>GeoCore visibility</b> — Group defaultVisibility=false (only when heavy tests are enabled)<br/>
+      <b>Layer naming</b> — Repeated renaming through the public LayerApi updates runtime, legend store, and the rendered Layers panel label<br/>
+      <b>Layer visibility</b> — Explicit updates and toggles through the public LayerApi; making a child and its parents visible<br/>
+      <b>Layer opacity</b> — Parent-to-child propagation, independent child updates, runtime parent caps versus requested store opacity, and restoration from transparency<br/>
+      <b>Details queryability</b> — Public LayerApi updates synchronize the legend store; disabling excludes features and re-enabling restores them<br/>
+      <b>Hoverability</b> — Public LayerApi updates synchronize the legend store; disabling excludes hover results and re-enabling restores them<br/>
+      <b>Text visibility</b> — Layer controller updates synchronize the vector layer's independent text flag and legend store<br/>
+      <b>WMS styles</b> — Named and repeated selections synchronize runtime, source STYLES, and legend store; empty selections preserve the active style<br/>
+      <b>ESRI geometry pairing</b> — Dynamic feature geometry and OBJECTID pairing`;
   }
 
   /**
@@ -58,7 +69,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 12;
+    return 25;
   }
 
   /**
@@ -70,11 +81,29 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    */
   protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Test DEBUG
-    await this.#layerTester.testSetGeojsonSourceReplacesFeatures();
-    await this.#layerTester.testSetGeojsonSourceReprojectsFeatures();
+    // Test the layer renaming
+    await this.#layerTester.testSetLayerName();
 
-    // Resolve when all
-    return Promise.resolve();
+    // Test the public LayerApi explicit visibility and toggle behavior
+    await this.#layerTester.testSetOrToggleLayerVisibility();
+
+    // Test hidden-by-parent child + setLayerVisibleIncludingParents parent crawl (drives the panels' hidden/available lists)
+    await this.#layerTester.testSetLayerVisibleIncludingParents();
+
+    // Test public LayerApi opacity updates after the visibility tests.
+    await this.#layerTester.testSetLayerOpacity();
+
+    // Test non-queryable layer not in details
+    await this.#layerTester.testNonQueryableLayerNotInDetails();
+
+    // Test layer hoverable state
+    await this.#layerTester.testLayerHoverableState();
+
+    // Test the controller's independent text-visibility flag and store synchronization.
+    await this.#layerTester.testSetLayerTextVisibility();
+
+    // Resolve
+    return;
   }
 
   /**
@@ -84,7 +113,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // Test WMS duplicate nested group names (issue #3521)
-    const pLayerWMSDuplicateGroupNames = this.#layerTester.testAddWMSDuplicateGroupNames();
+    await this.#layerTester.testAddWMSDuplicateGroupNames();
 
     // Test zoom to extent of a layer with only 1 point feature
     await this.#layerTester.testZoomExtentWithOneFeature();
@@ -96,7 +125,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
     await this.#layerTester.testZoomExtentWithoutFeaturesWithConfiguredExtent();
 
     // Make sure the map is reset in its initial extent after the zooms
-    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+    await this.zoomToInitialExtent();
 
     // Test feature query behavior when no geometry field in outfields
     await this.#layerTester.testFeatureHasGeometryWhenOutfieldsHasNoGeometryField();
@@ -110,16 +139,57 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
     // Test resolving the first layer under a root id (e.g. a GeoCore UUID) — issue #3633
     await this.#layerTester.testGetGeoviewLayerByRootId();
 
-    // Test the public LayerApi explicit visibility and toggle behavior
-    await this.#layerTester.testSetOrToggleLayerVisibility();
-
     // Test that reloading a layer preserves its position in the layer order — issue #3666
     await this.#layerTester.testReloadLayerPreservesPosition();
 
     // Projection mutations must not overlap the outstanding parallel layer test.
-    await pLayerWMSDuplicateGroupNames;
     await this.#layerTester.testSetGeojsonSourceReplacesFeatures();
     await this.#layerTester.testSetGeojsonSourceReprojectsFeatures();
-    return Promise.resolve();
+
+    // Test domain field query value translation — run sequentially at the end
+    // because they change the zoom level to 17.4 which would affect other tests
+    await this.#layerTester.testEsriDynamicDomainFieldQueryValue();
+    await this.#layerTester.testEsriFeatureDomainFieldQueryValue();
+
+    // Make sure the map is reset in its initial extent after the zooms
+    await this.zoomToInitialExtent();
+
+    // Test combined bounds across four different layer types
+    await this.#layerTester.testGetExtentOfMultipleLayers();
+
+    // Run the GeometryCollection layer test last to avoid perturbing icon color ordering used by earlier strict icon assertions.
+    await this.#layerTester.testAddGeoJSONWithGeometryCollection();
+
+    // Test geocore group with defaultVisibility=false
+    await this.#layerTester.testAddGeocoreWithGroupDefaultVisibilityFalse(this.getIsRunningHeavyTests());
+
+    // Test the layer renaming
+    await this.#layerTester.testSetLayerName();
+
+    // Test the public LayerApi explicit visibility and toggle behavior
+    await this.#layerTester.testSetOrToggleLayerVisibility();
+
+    // Test hidden-by-parent child + setLayerVisibleIncludingParents parent crawl (drives the panels' hidden/available lists)
+    await this.#layerTester.testSetLayerVisibleIncludingParents();
+
+    // Test public LayerApi opacity updates after the visibility tests.
+    await this.#layerTester.testSetLayerOpacity();
+
+    // Test non-queryable layer not in details
+    await this.#layerTester.testNonQueryableLayerNotInDetails();
+
+    // Test layer hoverable state
+    await this.#layerTester.testLayerHoverableState();
+
+    // Test the controller's independent text-visibility flag and store synchronization.
+    await this.#layerTester.testSetLayerTextVisibility();
+
+    // Test WMS style synchronization independently of the query fixtures.
+    await this.#layerTester.testSetLayerWmsStyle();
+
+    // Test ESRI Dynamic junction geometry pairs to its own OBJECTID (#3636) — changes zoom, resets to initial extent in finalize
+    await this.#layerTester.testEsriDynamicJunctionGeometryPairing();
+
+    return;
   }
 }

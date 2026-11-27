@@ -57,15 +57,18 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests cgpv.api.utilities — pure function unit tests:<br/>
-      <b>Core</b> — range, camelCase, deepEqual, deepClone, deepMerge, shallowEquals, isNumeric,<br/>
-      &nbsp;&nbsp;generateId/isValidUUID, setAlphaColor, isJsonString, escapeRegExp, stringify,<br/>
-      &nbsp;&nbsp;sanitizeHtmlContent, enhanceLinksAccessibility, getLocalizedMessage<br/>
+    return `Tests core, date, geo, and projection utilities, including DOM/format readers and projection registration:<br/>
+      <b>Service URLs</b> — Upgrade HTTP metadata URLs only on secure pages<br/>
+      <b>Core</b> — range, camelCase, equality, cloning, merging, numeric and empty-object checks,<br/>
+      &nbsp;&nbsp;IDs/UUIDs, color alpha, JSON parsing, regex escaping, image detection, stringification, object merging,<br/>
+      &nbsp;&nbsp;property paths, measurements, Datacube paths, HTML sanitization, accessible links, localized messages and Markdown IDs<br/>
       <b>Date</b> — formatDate, ISO short, toMilliseconds, tryParseDate, hasTimeComponents,<br/>
-      &nbsp;&nbsp;isValidTimezone, createRangeOGC, epoch timestamps, US standard, special formats<br/>
-      <b>Geo</b> — getBaseUrl, getMapServerUrl, DMS format, isPointInExtent, extent union/intersection,<br/>
-      &nbsp;&nbsp;bufferExtent, isGeoJSONObject, geometryType conversions, ensureServiceRequestUrl, GeoJSON/EsriJSON projection readers<br/>
-      <b>Projection</b> — projection names, readEPSGNumber, getLonLat, transformPoints, transformExtent, object/identifier/metadata dispatch`;
+      &nbsp;&nbsp;isValidTimezone, createRangeOGC, date constants, Dayjs parsing, epoch timestamps, US standard, special formats<br/>
+      <b>Geo</b> — getBaseUrl, getMapServerUrl, DMS format, isPointInExtent, extent union,<br/>
+      &nbsp;&nbsp;longitude/latitude extent checks, bufferExtent, isGeoJSONObject, geometryType conversions, ensureServiceRequestUrl and extent intersection<br/>
+      <b>Projection</b> — Projection names, readEPSGNumber, getLonLat, transformPoints, transformExtent and string lookup<br/>
+      <b>Feature readers</b> — GeoJSON projection objects, embedded CRS precedence and EsriJSON projection objects<br/>
+      <b>Projection registration</b> — Input dispatch; already-available projection inputs avoid unnecessary definition-server requests`;
   }
 
   /**

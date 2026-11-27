@@ -385,7 +385,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
     const result: GeoViewLayerAddedResult = this.#addGeoviewLayerStep2(geoviewLayerConfig, abortSignal);
 
     // If any errors happened during the processing, we want to show them in the notifications
-    result.promiseLayer.catch((error: unknown) => {
+    result.promiseLayerOnMap.catch((error: unknown) => {
       // GV This is the major catcher of many possible layer processing issues
 
       // Show the error(s).
@@ -502,12 +502,12 @@ export class LayerCreatorController extends AbstractMapViewerController {
       }
 
       // Registration can move the row before asynchronous metadata loading completes.
-      const { layer, promiseLayer } = this.addGeoviewLayer(structuredClone(configSnapshot));
+      const { layer, promiseLayerOnMap } = this.addGeoviewLayer(structuredClone(configSnapshot));
       this.#restoreOrderedLayerPaths(rootLayerId, originalOrderedPaths, originalRootPaths);
 
       let reloadSucceeded = false;
       try {
-        await promiseLayer;
+        await promiseLayerOnMap;
         reloadSucceeded = layer.getLayerLoadErrors().length === 0;
       } catch (error: unknown) {
         // addGeoviewLayer already reports load failures through its promise handler.
@@ -871,7 +871,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
     layerBeingAdded.onLayerGVCreated(this.#handleLayerGVCreated.bind(this));
 
     // Create a promise that the layer will be added on the map
-    const promiseLayer = new Promise<void>((resolve, reject) => {
+    const promiseLayerOnMap = new Promise<void>((resolve, reject) => {
       // Continue the addition process
       layerBeingAdded
         .createGeoViewLayers(this.#uiDomain.getDisplayDateMode(), this.getMapViewer().getProjection(), abortSignal)
@@ -899,7 +899,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
     });
 
     // Return the layer with the promise it'll be on the map
-    return { layer: layerBeingAdded, promiseLayer };
+    return { layer: layerBeingAdded, promiseLayerOnMap };
   }
 
   /**
@@ -1550,7 +1550,7 @@ export type GeoViewLayerAddedResult = {
   /** The created GeoView layer instance. */
   layer: AbstractGeoViewLayer;
   /** A promise that resolves when the layer is fully loaded. */
-  promiseLayer: Promise<void>;
+  promiseLayerOnMap: Promise<void>;
 };
 
 /** Defines the event payload for the layer loaded delegate. */

@@ -530,7 +530,7 @@ function testSuiteCreateTable(plugin) {
         <col>
       </colgroup>
       <thead>
-        <tr><td>TEST</td><td>RESULT</td><td>DURATION</td><td>DETAILS</td></tr>
+        <tr><td>SUITE / TEST</td><td>RESULT</td><td>DURATION</td><td>DETAILS</td></tr>
       </thead>
       <tbody id="tableBody-${mapId}"></tbody>
     </table>
@@ -540,6 +540,7 @@ function testSuiteCreateTable(plugin) {
 }
 
 const testSuiteDurationTimers = {};
+const MIN_STARVATION_TO_CARE = 1000;
 
 function getTestSuiteDurationTimerKey(plugin, idPrefix = '') {
   return `${idPrefix || 'default'}-${plugin.mapViewer.mapId}`;
@@ -722,6 +723,68 @@ function testSuiteUpdateGrandTotalDurations(plugins) {
   allSuitesTotalDurationSpan.innerText = cgpv.api.utilities.core.formatDuration(maxDuration);
 }
 
+function testSuiteAddOrUpdateSuiteRow(plugin, testSuite, idPrefix = '') {
+  const prefix = idPrefix ? idPrefix + '-' : '';
+  const mapId = plugin.mapViewer.mapId;
+  const table = document.getElementById(prefix + 'tableResults-' + mapId);
+  const suiteIndex = plugin.testSuites.indexOf(testSuite);
+  if (!table || suiteIndex < 0) return undefined;
+
+  const suiteId = `${prefix}suite-${mapId}-${suiteIndex}`;
+  let suiteBody = document.getElementById(suiteId);
+  if (!suiteBody) {
+    suiteBody = document.createElement('tbody');
+    suiteBody.id = suiteId;
+    suiteBody.dataset.suiteIndex = String(suiteIndex);
+    const header = document.createElement('tr');
+    header.className = 'suite-row';
+    for (let i = 0; i < 4; i++) header.appendChild(document.createElement('td'));
+    suiteBody.appendChild(header);
+    const nextBody = Array.from(table.tBodies).find(
+      (body) => body.dataset.suiteIndex !== undefined && Number(body.dataset.suiteIndex) > suiteIndex
+    );
+    table.insertBefore(suiteBody, nextBody || null);
+  }
+
+  const header = suiteBody.rows[0];
+  const title = header.cells[0];
+  title.replaceChildren();
+  const suiteName = document.createElement('strong');
+  suiteName.textContent = testSuite.getName();
+  title.appendChild(suiteName);
+  const steps = testSuite.getSteps();
+  const renderedSteps = Number(suiteBody.dataset.stepCount || 0);
+  for (let i = renderedSteps; i < steps.length; i++) {
+    const step = steps[i];
+    const row = document.createElement('tr');
+    row.className = 'suite-step-row';
+    const cell = document.createElement('td');
+    cell.textContent = step.message;
+    cell.style.color = step.color;
+    if (step.level === 'major') cell.style.fontWeight = 'bold';
+    row.appendChild(cell);
+    for (let j = 0; j < 3; j++) row.appendChild(document.createElement('td'));
+    suiteBody.appendChild(row);
+  }
+  suiteBody.dataset.stepCount = String(steps.length);
+  const status = testSuite.getSuiteStatus();
+  const failed = status === 'failed' || (status === 'success' && testSuite.getTestsDoneFailed() > 0);
+  header.cells[1].textContent = failed ? '✘' : status === 'success' ? '✔' : status === 'running' ? '⏳' : '';
+  header.cells[1].style.color = failed ? 'red' : status === 'success' ? 'green' : 'black';
+  header.cells[1].style.textAlign = 'center';
+  header.cells[2].textContent = testSuite.getDurationFormatted();
+  if (testSuite.getDurationStarvationMs() > MIN_STARVATION_TO_CARE) {
+    const starvation = document.createElement('span');
+    starvation.style.color = 'orange';
+    starvation.title = 'Maximum estimated test starvation duration';
+    starvation.textContent = ` (${testSuite.getDurationStarvationFormatted()})`;
+    header.cells[2].appendChild(starvation);
+  }
+  header.cells[2].style.textAlign = 'center';
+  header.cells[2].style.fontWeight = 'bold';
+  return suiteBody;
+}
+
 function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, idPrefix = '') {
   // If the test is not success, return
   // if (test.getStatus() !== 'success') return;
@@ -729,7 +792,7 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
   const prefix = idPrefix ? idPrefix + '-' : '';
 
   // Find the table for the map id
-  const tableBody = document.getElementById(prefix + 'tableBody-' + plugin.mapViewer.mapId);
+  const tableBody = testSuiteAddOrUpdateSuiteRow(plugin, testSuite, idPrefix);
   if (!tableBody) {
     return;
   }
@@ -770,7 +833,6 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
 
   // Collapsible content
   testMessage += '<div class="collapsible-content" style="margin-top: 5px;">';
-  testMessage += '<font style="font-size: x-small;">' + '<i>[' + testSuite.getName() + ' | ' + testTester.getName() + ']' + '</i></font>';
   testMessage += test.getStepsAsHtml();
   testMessage += '</div>';
   testCell.innerHTML = testMessage;
@@ -814,7 +876,7 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
 
   // If the test was starved for over 1 second, put it red
   let durationStarvationIndicator = '';
-  if (durationStarvation > 1000) {
+  if (durationStarvation > MIN_STARVATION_TO_CARE) {
     durationStarvationIndicator = ` <span style='color:orange' title='Estimated starvation duration'>(${durationStarvationFormatted})</span>`;
   }
 
@@ -828,6 +890,10 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
 
 function testSuiteEmptyTestResults(plugin, idPrefix = '') {
   const prefix = idPrefix ? idPrefix + '-' : '';
+  const table = document.getElementById(prefix + 'tableResults-' + plugin.mapViewer.mapId);
+  if (table) {
+    Array.from(table.tBodies).filter((body) => body.dataset.suiteIndex !== undefined).forEach((body) => body.remove());
+  }
   // Empty the table
   const tableBody = document.getElementById(prefix + 'tableBody-' + plugin.mapViewer.mapId);
   if (tableBody) {

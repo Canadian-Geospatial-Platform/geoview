@@ -1,11 +1,12 @@
-import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
-import type { SourceFeaturesInfo } from 'geoview-core/geo/utils/utilities';
-import { Projection } from 'geoview-core/geo/utils/projection';
 import Point from 'ol/geom/Point';
 import type { Extent } from 'ol/extent';
 
+import { TestConstants } from './constants';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
+import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
+import type { SourceFeaturesInfo } from 'geoview-core/geo/utils/utilities';
+import { Projection } from 'geoview-core/geo/utils/projection';
 
 /**
  * Geo utilities testing class for cgpv.api.utilities.geo (GeoUtilities) functions.
@@ -21,11 +22,7 @@ export class UtilitiesGeoTester extends GVAbstractTester {
       'Test GeoJSON reader transforms features using an OpenLayers source projection...',
       (test) => {
         test.addStep('Reading a longitude/latitude point into Web Mercator...');
-        return GeoUtilities.readFeaturesFromGeoJSON(
-          GVAbstractTester.PROJECTION_POINT_GEOJSON,
-          Projection.getProjectionLonLat(),
-          'EPSG:3857'
-        );
+        return GeoUtilities.readFeaturesFromGeoJSON(TestConstants.PROJECTION_POINT_GEOJSON, Projection.getProjectionLonLat(), 'EPSG:3857');
       },
       (test, result) => {
         test.addStep('Verifying projection, feature properties and transformed coordinates...');
@@ -46,7 +43,7 @@ export class UtilitiesGeoTester extends GVAbstractTester {
       (test) => {
         test.addStep('Reading embedded EPSG:4326 with a conflicting EPSG:3857 argument...');
         return GeoUtilities.readFeaturesFromGeoJSON(
-          { ...GVAbstractTester.PROJECTION_POINT_GEOJSON, crs: { type: 'name', properties: { name: 'urn:ogc:def:crs:EPSG::4326' } } },
+          { ...TestConstants.PROJECTION_POINT_GEOJSON, crs: { type: 'name', properties: { name: 'urn:ogc:def:crs:EPSG::4326' } } },
           Projection.getProjectionFromStringOrNumber(3857),
           'EPSG:3857'
         );
@@ -95,7 +92,7 @@ export class UtilitiesGeoTester extends GVAbstractTester {
     const geometry = result.features[0].getGeometry();
     Test.assertIsInstance(geometry, Point);
     const coordinates = geometry.getCoordinates();
-    Test.assertIsEqualWithinTolerance(coordinates[0], GVAbstractTester.PROJECTION_POINT_MERCATOR_X, 0.01);
+    Test.assertIsEqualWithinTolerance(coordinates[0], TestConstants.PROJECTION_POINT_MERCATOR_X, 0.01);
     Test.assertIsEqualWithinTolerance(coordinates[1], 0, 0.01);
   }
 

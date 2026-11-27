@@ -1,10 +1,9 @@
+import { GVAbstractTestSuite } from './abstract-gv-test-suite';
+import { MapConfigTester } from '../testers/map-config-tester';
+import { TestConstants } from '../testers/constants';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
-import { GVAbstractTestSuite } from './abstract-gv-test-suite';
-import { MapConfigTester } from '../testers/map-config-tester';
-import { MapTester } from '../testers/map-tester';
-import { GVAbstractTester } from '../testers/abstract-gv-tester';
 
 /**
  * The GeoView Test Suite for Map Configuration.
@@ -12,9 +11,6 @@ import { GVAbstractTester } from '../testers/abstract-gv-tester';
 export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
   /** The Map Config Tester used in this Test Suite */
   #mapConfigTester: MapConfigTester;
-
-  /** Viewport API tester using the same replace-map lifecycle as the config tests. */
-  #mapTester: MapTester;
 
   /**
    * Constructs the Test Suite.
@@ -29,8 +25,6 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     // Create the Map Config tester
     this.#mapConfigTester = new MapConfigTester(api, mapViewer, controllerRegistry);
     this.addTester(this.#mapConfigTester);
-    this.#mapTester = new MapTester(api, mapViewer, controllerRegistry);
-    this.addTester(this.#mapTester);
   }
 
   /**
@@ -48,16 +42,21 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests map configuration overrides by creating fresh map instances:<br/>
-      <b>Footer/App bar</b> — Tab selection, default/empty configs<br/>
+    return `Tests isolated map configuration overrides, viewport calculations, and feature-info presentation:<br/>
+      <b>Fixed-height layout</b> — Maps without a footer bar and with a collapsed footer bar<br/>
+      <b>Details queries</b> — Ontario/Alberta queries, visibility and feature zoom<br/>
+      <b>Footer/App bar</b> — Tab selection, GeoCore selected-layer resolution, default/empty configs and duplicate panels<br/>
       <b>Nav bar</b> — Default controls, empty array fallback<br/>
-      <b>View settings</b> — Zoom constraints, initialView vs homeView, home button navigation<br/>
-      <b>Viewport</b> — Boundary samples, midpoint fitting, rotation, padding, resize, and invalid inputs<br/>
-      <b>Components</b> — Overview map (present/absent/hideOnZoom/reprojection), North arrow<br/>
+      <b>Initial extent</b> — Initial view fits configured layer IDs<br/>
       <b>Overlays</b> — Point markers from config<br/>
-      <b>initialSettings</b> — Controls (all false, remove cascading), states (visible, opacity, queryable, hoverable),<br/>
-      &nbsp;&nbsp;legend collapsed, filters (GeoJSON, OGC Feature, WFS, ESRI Dynamic, ESRI Feature),<br/>
-      &nbsp;&nbsp;opacity parent-child capping, runtime parent opacity change`;
+      <b>View settings</b> — Zoom constraints, initialView vs homeView and home button navigation<br/>
+      <b>Components</b> — Overview map (present/absent/hideOnZoom/reprojection), North arrow<br/>
+      <b>initialSettings</b> — All-false controls; visible, opacity, queryable and hoverable states; query/hover control combinations; removal and visibility cascade;<br/>
+      &nbsp;&nbsp;opacity parent-child capping and runtime parent changes; legend collapsed; control cascade and group overrides;<br/>
+      &nbsp;&nbsp;filters (GeoJSON, OGC Feature, WFS, ESRI Dynamic, ESRI Feature)<br/>
+      <b>Feature presentation</b> — nameField labels, summary:false field hiding and aliases<br/>
+      <b>Viewport fitting</b> — Midpoint fitting, rotation, padding, projection changes, antimeridian and error cases<br/>
+      <b>Viewport boundaries</b> — Boundary samples, padding, resize and unavailable-map errors`;
   }
 
   /**
@@ -66,7 +65,7 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 57;
+    return 61;
   }
 
   /**
@@ -76,12 +75,13 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when the debug tests are completed
    */
-  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
+  protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Test DEBUG
-    const pDevTest0 = this.#mapConfigTester.testFixedHeightWithCollapsedFooterBar();
+    await this.#mapConfigTester.testNoFooterBarAppBarConfigHasDefaults();
+    await this.#mapConfigTester.testViewSettingsInitialViewVsHomeView();
 
     // Resolve when all
-    return Promise.all([pDevTest0]);
+    return;
   }
 
   /**
@@ -90,222 +90,156 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
-    // Viewport tests replace this suite's map, never the map-functions suite's configured layers.
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'none', false, undefined, false);
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3857, 0, 'dynamic', 'none', true, undefined, false);
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4);
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'resize');
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'projection');
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3857, 0, 'dynamic', 'none', true, GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT);
-    await this.#mapTester.testInvalidViewportMidpoints();
-    await this.#mapTester.testErrorFitViewportMidpointsCancelled();
-    await this.#mapTester.testErrorFitViewportUnavailable();
-    await this.#mapTester.testViewportBoundaryLonLat(3978);
-    await this.#mapTester.testViewportBoundaryLonLat(3978, Math.PI / 4);
-    await this.#mapTester.testViewportBoundaryLonLat(3857);
-    await this.#mapTester.testViewportBoundaryLonLat(3978, 0, 'static');
-    await this.#mapTester.testViewportBoundaryLonLat(3857, 0, 'dynamic', GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT);
-    await this.#mapTester.testViewportBoundaryPaddingAndResize();
-    await this.#mapTester.testViewportBoundaryUnavailable();
-
     // Test fixed-height map layout without footer bar
-    const pFixedHeightWithoutFooterBar = this.#mapConfigTester.testFixedHeightWithoutFooterBar();
-    await pFixedHeightWithoutFooterBar;
+    await this.#mapConfigTester.testFixedHeightWithoutFooterBar();
 
     // Test fixed-height map layout with collapsed footer bar
-    const pFixedHeightWithCollapsedFooterBar = this.#mapConfigTester.testFixedHeightWithCollapsedFooterBar();
-    await pFixedHeightWithCollapsedFooterBar;
+    await this.#mapConfigTester.testFixedHeightWithCollapsedFooterBar();
+
+    // Test Details queries and feature-info overrides with the default config fixture.
+    await this.#mapConfigTester.testDetailsForGeoJSONOntarioAlberta();
 
     // Test data table pre-loaded in footer bar
-    const pDataTableInFooterBar = this.#mapConfigTester.testDataTableSelectedTabFooterBar();
-    await pDataTableInFooterBar;
+    await this.#mapConfigTester.testDataTableSelectedTabFooterBar();
 
     // Test data table pre-loaded in app bar
-    const pDataTableInAppBar = this.#mapConfigTester.testDataTableSelectedTabAppBar();
-    await pDataTableInAppBar;
+    await this.#mapConfigTester.testDataTableSelectedTabAppBar();
 
     // Test selectedLayersLayerPath referencing a GeoCore layer by UUID resolves to its first layer path (#3633)
-    const pSelectedLayersLayerPathGeoCore = this.#mapConfigTester.testSelectedLayersLayerPathGeoCoreResolution();
-    await pSelectedLayersLayerPathGeoCore;
+    await this.#mapConfigTester.testSelectedLayersLayerPathGeoCoreResolution();
 
     // Test no footerBar/appBar config has defaults
-    const pNoFooterBarAppBarDefaults = this.#mapConfigTester.testNoFooterBarAppBarConfigHasDefaults();
-    await pNoFooterBarAppBarDefaults;
+    await this.#mapConfigTester.testNoFooterBarAppBarConfigHasDefaults();
 
     // Test empty footerBar/appBar tabs has no footer or app bar
-    const pEmptyFooterBarAppBar = this.#mapConfigTester.testEmptyFooterBarAppBarTabsHasNoFooter();
-    await pEmptyFooterBarAppBar;
+    await this.#mapConfigTester.testEmptyFooterBarAppBarTabsHasNoFooter();
 
     // Test panels declared in both appBar and footerBar are removed from the footer bar
-    const pDuplicatedPanelsRemovedFromFooter = this.#mapConfigTester.testDuplicatedPanelsRemovedFromFooter();
-    await pDuplicatedPanelsRemovedFromFooter;
+    await this.#mapConfigTester.testDuplicatedPanelsRemovedFromFooter();
 
     // Test navBar with null has defaults
-    const pNoNavBarDefaults = this.#mapConfigTester.testNoNavBarHasDefaults();
-    await pNoNavBarDefaults;
+    await this.#mapConfigTester.testNoNavBarHasDefaults();
 
     // Test navBar with empty components has zoom and rotate
-    const pEmptyNavBarZoomRotate = this.#mapConfigTester.testEmptyNavBarHasZoomRotate();
-    await pEmptyNavBarZoomRotate;
+    await this.#mapConfigTester.testEmptyNavBarHasZoomRotate();
 
     // Test initial view with layerIds sets extent
-    const pInitialViewLayerIds = this.#mapConfigTester.testInitialViewLayerIdsSetExtent();
-    await pInitialViewLayerIds;
+    await this.#mapConfigTester.testInitialViewLayerIdsSetExtent();
 
     // Test overlay objects with point markers
-    const pOverlayObjectsPointMarkers = this.#mapConfigTester.testOverlayObjectsPointMarkers();
-    await pOverlayObjectsPointMarkers;
+    await this.#mapConfigTester.testOverlayObjectsPointMarkers();
 
     // Test view settings zoom constraints
-    const pViewSettingsZoomConstraints = this.#mapConfigTester.testViewSettingsZoomConstraints();
-    await pViewSettingsZoomConstraints;
+    await this.#mapConfigTester.testViewSettingsZoomConstraints();
 
     // Test initial view vs home view (zoom difference)
-    const pInitialViewVsHomeView = this.#mapConfigTester.testViewSettingsInitialViewVsHomeView();
-    await pInitialViewVsHomeView;
+    await this.#mapConfigTester.testViewSettingsInitialViewVsHomeView();
 
     // Test home button navigates to homeView center coordinates
-    const pHomeButtonNavigatesToHomeView = this.#mapConfigTester.testViewSettingsHomeButtonNavigatesToHomeView();
-    await pHomeButtonNavigatesToHomeView;
+    await this.#mapConfigTester.testViewSettingsHomeButtonNavigatesToHomeView();
 
     // Test overview map is present when configured
-    const pOverviewMapPresent = this.#mapConfigTester.testOverviewMapPresent();
-    await pOverviewMapPresent;
+    await this.#mapConfigTester.testOverviewMapPresent();
 
     // Test overview map is absent when not configured
-    const pOverviewMapAbsent = this.#mapConfigTester.testOverviewMapAbsent();
-    await pOverviewMapAbsent;
+    await this.#mapConfigTester.testOverviewMapAbsent();
 
     // Test overview map hideOnZoom behavior
-    const pOverviewMapHideOnZoom = this.#mapConfigTester.testOverviewMapHideOnZoom();
-    await pOverviewMapHideOnZoom;
+    await this.#mapConfigTester.testOverviewMapHideOnZoom();
 
     // Test overview map hideOnZoom with reprojection
-    const pOverviewMapHideOnZoomReproject = this.#mapConfigTester.testOverviewMapHideOnZoomWithReprojection();
-    await pOverviewMapHideOnZoomReproject;
+    await this.#mapConfigTester.testOverviewMapHideOnZoomWithReprojection();
 
     // Test north arrow is present when configured
-    const pNorthArrowPresent = this.#mapConfigTester.testNorthArrowPresent();
-    await pNorthArrowPresent;
+    await this.#mapConfigTester.testNorthArrowPresent();
 
     // Test north arrow is absent when not configured
-    const pNorthArrowAbsent = this.#mapConfigTester.testNorthArrowAbsent();
-    await pNorthArrowAbsent;
+    await this.#mapConfigTester.testNorthArrowAbsent();
 
     // Test initialSettings all controls set to false
-    const pControlsAllFalse = this.#mapConfigTester.testInitialSettingsControlsAllFalse();
-    await pControlsAllFalse;
+    await this.#mapConfigTester.testInitialSettingsControlsAllFalse();
 
     // Test initialSettings states
-    const pStateVisible = this.#mapConfigTester.testInitialSettingsStateVisibleFalse();
-    await pStateVisible;
+    await this.#mapConfigTester.testInitialSettingsStateVisibleFalse();
 
-    const pStateOpacity = this.#mapConfigTester.testInitialSettingsStateOpacity();
-    await pStateOpacity;
+    await this.#mapConfigTester.testInitialSettingsStateOpacity();
 
-    const pStateQueryable = this.#mapConfigTester.testInitialSettingsStateQueryableFalse();
-    await pStateQueryable;
+    await this.#mapConfigTester.testInitialSettingsStateQueryableFalse();
 
-    const pStateHoverable = this.#mapConfigTester.testInitialSettingsStateHoverableFalse();
-    await pStateHoverable;
+    await this.#mapConfigTester.testInitialSettingsStateHoverableFalse();
 
     // Test initialSettings controls + states combo
-    const pComboQueryControlTrueStateQueryableFalse = this.#mapConfigTester.testInitialSettingsComboQueryControlTrueStateQueryableFalse();
-    await pComboQueryControlTrueStateQueryableFalse;
+    await this.#mapConfigTester.testInitialSettingsComboQueryControlTrueStateQueryableFalse();
 
-    const pComboHoverControlTrueStateHoverableFalse = this.#mapConfigTester.testInitialSettingsComboHoverControlTrueStateHoverableFalse();
-    await pComboHoverControlTrueStateHoverableFalse;
+    await this.#mapConfigTester.testInitialSettingsComboHoverControlTrueStateHoverableFalse();
 
     // Test controls.remove cascading through group hierarchy
-    const pRemoveCascading = this.#mapConfigTester.testInitialSettingsControlRemoveCascadingToDescendants();
-    await pRemoveCascading;
+    await this.#mapConfigTester.testInitialSettingsControlRemoveCascadingToDescendants();
 
     // Test states.visible cascading through group hierarchy
-    const pVisibleCascading = this.#mapConfigTester.testInitialSettingsStateVisibleCascadingToDescendants();
-    await pVisibleCascading;
+    await this.#mapConfigTester.testInitialSettingsStateVisibleCascadingToDescendants();
 
     // Test opacity cascading with parent/child layers
-    const pOpacityCappedByParent = this.#mapConfigTester.testInitialSettingsOpacityCascadingChildCappedByParent();
-    await pOpacityCappedByParent;
+    await this.#mapConfigTester.testInitialSettingsOpacityCascadingChildCappedByParent();
 
-    const pOpacityBelowParent = this.#mapConfigTester.testInitialSettingsOpacityCascadingChildBelowParent();
-    await pOpacityBelowParent;
+    await this.#mapConfigTester.testInitialSettingsOpacityCascadingChildBelowParent();
 
-    const pOpacityRuntimeCascade = this.#mapConfigTester.testInitialSettingsOpacityCascadingRuntimeParentChange();
-    await pOpacityRuntimeCascade;
+    await this.#mapConfigTester.testInitialSettingsOpacityCascadingRuntimeParentChange();
 
     // Test legend collapsed initial state
-    const pLegendCollapsed = this.#mapConfigTester.testInitialSettingsLegendCollapsed();
-    await pLegendCollapsed;
+    await this.#mapConfigTester.testInitialSettingsLegendCollapsed();
 
     // Test parent controls cascade to children (all controls)
-    const pControlsCascade = this.#mapConfigTester.testInitialSettingsControlsCascadeToChildren();
-    await pControlsCascade;
+    await this.#mapConfigTester.testInitialSettingsControlsCascadeToChildren();
 
     // Test group-level control override
-    const pControlsGroupOverride = this.#mapConfigTester.testInitialSettingsControlsGroupOverride();
-    await pControlsGroupOverride;
+    await this.#mapConfigTester.testInitialSettingsControlsGroupOverride();
 
     // Test initial filter on GeoJSON layer
-    const pInitialFilters = this.#mapConfigTester.testInitialSettingsFilters();
-    await pInitialFilters;
+    await this.#mapConfigTester.testInitialSettingsFilters();
 
     // Test initial filter on OGC Feature layer
-    const pInitialFiltersOgcFeature = this.#mapConfigTester.testInitialSettingsFiltersOgcFeature();
-    await pInitialFiltersOgcFeature;
+    await this.#mapConfigTester.testInitialSettingsFiltersOgcFeature();
 
     // Test initial filter on WFS layer
-    const pInitialFiltersWfs = this.#mapConfigTester.testInitialSettingsFiltersWfs();
-    await pInitialFiltersWfs;
+    await this.#mapConfigTester.testInitialSettingsFiltersWfs();
 
     // Test initial filter on Esri Dynamic layer
-    const pInitialFiltersEsriDynamic = this.#mapConfigTester.testInitialSettingsFiltersEsriDynamic();
-    await pInitialFiltersEsriDynamic;
+    await this.#mapConfigTester.testInitialSettingsFiltersEsriDynamic();
 
     // Test initial filter on Esri Feature layer
-    const pInitialFiltersEsriFeature = this.#mapConfigTester.testInitialSettingsFiltersEsriFeature();
-    await pInitialFiltersEsriFeature;
+    await this.#mapConfigTester.testInitialSettingsFiltersEsriFeature();
 
-    // Resolve when all
-    return Promise.all([
-      pDataTableInFooterBar,
-      pDataTableInAppBar,
-      pNoFooterBarAppBarDefaults,
-      pEmptyFooterBarAppBar,
-      pDuplicatedPanelsRemovedFromFooter,
-      pNoNavBarDefaults,
-      pEmptyNavBarZoomRotate,
-      pInitialViewLayerIds,
-      pOverlayObjectsPointMarkers,
-      pViewSettingsZoomConstraints,
-      pInitialViewVsHomeView,
-      pHomeButtonNavigatesToHomeView,
-      pOverviewMapPresent,
-      pOverviewMapAbsent,
-      pNorthArrowPresent,
-      pNorthArrowAbsent,
-      pOverviewMapHideOnZoom,
-      pOverviewMapHideOnZoomReproject,
-      pControlsAllFalse,
-      pStateVisible,
-      pStateOpacity,
-      pStateQueryable,
-      pStateHoverable,
-      pComboQueryControlTrueStateQueryableFalse,
-      pComboHoverControlTrueStateHoverableFalse,
-      pRemoveCascading,
-      pVisibleCascading,
-      pOpacityCappedByParent,
-      pOpacityBelowParent,
-      pOpacityRuntimeCascade,
-      pLegendCollapsed,
-      pControlsCascade,
-      pControlsGroupOverride,
-      pInitialFilters,
-      pInitialFiltersOgcFeature,
-      pInitialFiltersWfs,
-      pInitialFiltersEsriDynamic,
-      pInitialFiltersEsriFeature,
-    ]);
+    // Tests that recreate the map with custom featureInfo config (sequential)
+    await this.#mapConfigTester.testNameFieldAsLabel();
+    await this.#mapConfigTester.testSummaryFalseHidesField();
+    await this.#mapConfigTester.testFieldAliasRenamesField();
+
+    // Viewport tests replace this suite's map, never the map-functions suite's configured layers.
+    await this.#mapConfigTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'none', false, undefined, false);
+    await this.#mapConfigTester.testFitViewportToMidpointsLonLat(3857, 0, 'dynamic', 'none', true, undefined, false);
+    await this.#mapConfigTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4);
+    await this.#mapConfigTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'resize');
+    await this.#mapConfigTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'projection');
+    await this.#mapConfigTester.testFitViewportToMidpointsLonLat(
+      3857,
+      0,
+      'dynamic',
+      'none',
+      true,
+      TestConstants.VIEWPORT_ANTIMERIDIAN_LONLAT
+    );
+    await this.#mapConfigTester.testInvalidViewportMidpoints();
+    await this.#mapConfigTester.testErrorFitViewportMidpointsCancelled();
+    await this.#mapConfigTester.testErrorFitViewportUnavailable();
+    await this.#mapConfigTester.testViewportBoundaryLonLat(3978);
+    await this.#mapConfigTester.testViewportBoundaryLonLat(3978, Math.PI / 4);
+    await this.#mapConfigTester.testViewportBoundaryLonLat(3857);
+    await this.#mapConfigTester.testViewportBoundaryLonLat(3978, 0, 'static');
+    await this.#mapConfigTester.testViewportBoundaryLonLat(3857, 0, 'dynamic', TestConstants.VIEWPORT_ANTIMERIDIAN_LONLAT);
+    await this.#mapConfigTester.testViewportBoundaryPaddingAndResize();
+    await this.#mapConfigTester.testViewportBoundaryUnavailable();
+
+    return;
   }
 }

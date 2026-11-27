@@ -1,3 +1,4 @@
+import { TestConstants } from './constants';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { TestSkippedError } from '../core/exceptions';
@@ -11,8 +12,7 @@ import {
 } from 'geoview-core/core/stores/states/time-slider-state';
 import { getStoreLayerTimeDimension } from 'geoview-core/core/stores/states/layer-state';
 import type { TimeDimension } from 'geoview-core/core/utils/date-mgt';
-import { generateId } from 'geoview-core/core/utils/utilities';
-import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
+import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
 
 /** Main Time Slider testing class. */
 export class TimeSliderTester extends GVAbstractTester {
@@ -53,25 +53,41 @@ export class TimeSliderTester extends GVAbstractTester {
    */
   testResetValues(): Promise<Test<TimeSliderResetResult>> {
     let originalValues: number[] | undefined;
+    let gvLayer: AbstractBaseGVLayer | undefined;
+    let rootLayerPath: string | undefined;
 
     return this.test(
       'Test Time Slider reset restores registered default values...',
       async (test) => {
-        test.addStep('Waiting for the temporal layer and time-slider values to be registered...');
-        await this.getControllersRegistry().layerController.waitForLayerRegistered(TimeSliderTester.TIME_SLIDER_LAYER_PATH);
-        const registeredValues = await waitForStoreTimeSliderLayer(this.getMapId(), TimeSliderTester.TIME_SLIDER_LAYER_PATH);
+        // Add the layer
+        test.addStep('Adding the Historical Flood layer...');
+        gvLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
+        // Get the registered time-slider values for the added layer
+        const registeredValues = await waitForStoreTimeSliderLayer(this.getMapId(), gvLayer.getLayerPath());
+
+        // Select the time-slider tab
+        this.getControllersRegistry().uiController.setActiveFooterBarTab('time-slider');
+
+        // Select the layer in the time-slider
+        this.getControllersRegistry().timeSliderController!.setSelectedLayerPathTimeSlider(gvLayer.getLayerPath());
+
+        // Read the values
         originalValues = [...registeredValues.values];
         const defaultValuesBeforeReset = [...registeredValues.defaultValues];
         const changedValues = defaultValuesBeforeReset.map((value) => value + 1);
 
         test.addStep('Replacing the current store values while preserving the registered defaults...');
-        setStoreTimeSliderValues(this.getMapId(), TimeSliderTester.TIME_SLIDER_LAYER_PATH, changedValues);
+        setStoreTimeSliderValues(this.getMapId(), gvLayer.getLayerPath(), changedValues);
 
         test.addStep('Resetting values through the time-slider controller...');
-        this.getControllersRegistry().timeSliderController!.resetValues(TimeSliderTester.TIME_SLIDER_LAYER_PATH);
+        this.getControllersRegistry().timeSliderController!.resetValues(gvLayer.getLayerPath());
 
-        const resetValues = getStoreTimeSliderLayer(this.getMapId(), TimeSliderTester.TIME_SLIDER_LAYER_PATH);
+        const resetValues = getStoreTimeSliderLayer(this.getMapId(), gvLayer.getLayerPath());
         Test.assertIsDefined('resetValues', resetValues);
         return {
           changedValues,
@@ -87,13 +103,14 @@ export class TimeSliderTester extends GVAbstractTester {
         Test.assertIsArrayEqual(result.defaultValuesAfterReset, result.defaultValuesBeforeReset);
       },
       (test) => {
-        if (originalValues) {
+        // If we had original values, restore them before removing the layer
+        if (gvLayer && originalValues) {
           test.addStep('Restoring the original time-slider values...');
-          this.getControllersRegistry().timeSliderController!.updateTimeSliderValues(
-            TimeSliderTester.TIME_SLIDER_LAYER_PATH,
-            originalValues
-          );
+          this.getControllersRegistry().timeSliderController!.updateTimeSliderValues(gvLayer.getLayerPath(), originalValues);
         }
+
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -176,12 +193,7 @@ export class TimeSliderTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testWMSLayerLandcoverGroupDimensionFlags(isRunningOnVPN: boolean): Promise<Test<LandcoverGroupDimensionResult>> {
-    const gvLayerId = generateId();
-    const groupPath = `${gvLayerId}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_GROUP_ID}`;
-    const year2010Path = `${groupPath}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2010}`;
-    const year2015Path = `${groupPath}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2015}`;
-    const year2020Path = `${groupPath}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2020}`;
-    const gvLayerName = 'Landcover 2010-2020 (XML)';
+    let rootLayerPath: string | undefined;
 
     return this.test(
       'Test WMS Landcover group dimension flags are set in the store on the group and its sub-layers...',
@@ -191,22 +203,21 @@ export class TimeSliderTester extends GVAbstractTester {
           throw new TestSkippedError('Not running on VPN');
         }
 
-        test.addStep('Creating the GeoView Layer Configuration...');
-        // isTimeAware must be true so the layers get registered by TimeSliderController.tryRegisterLayer()
-        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, GVAbstractTester.LANDCOVER_CDTK_URL, undefined, true, [
-          { id: GVAbstractTester.LANDCOVER_CDTK_LAYER_GROUP_ID },
-        ]);
+        // Add the Landcover group dimensions layer
+        const groupLayer = await this.addLayerWMSLandcoverGroupDimensions(
+          test,
+          {
+            onLayerPath: (rootPath): void => {
+              rootLayerPath = rootPath;
+            },
+          },
+          true
+        );
 
-        // Add the layer on the map
-        test.addStep('Adding the layer on the map...');
-        this.getControllersRegistry().layerCreatorController.addGeoviewLayer(gvConfig);
-
-        // Wait for the group and its sub-layers to be registered and loaded
-        test.addStep('Waiting for the group and its sub-layers to be registered and loaded...');
-        const groupLayer = await this.getControllersRegistry().layerController.waitForLayerRegistered(groupPath);
-
-        // Wait for each layer to be loaded at least once
-        await groupLayer.waitForLoadedOnce();
+        const groupPath = groupLayer.getLayerPath();
+        const year2010Path = `${groupPath}/${TestConstants.LANDCOVER_CDTK_LAYER_ID_2010}`;
+        const year2015Path = `${groupPath}/${TestConstants.LANDCOVER_CDTK_LAYER_ID_2015}`;
+        const year2020Path = `${groupPath}/${TestConstants.LANDCOVER_CDTK_LAYER_ID_2020}`;
 
         // Wait for the legend to be queried for each sub-layer
         test.addStep('Waiting for the legend to be queried for each sub-layer...');
@@ -254,7 +265,8 @@ export class TimeSliderTester extends GVAbstractTester {
       (test) => {
         // If the test was running
         if (isRunningOnVPN) {
-          this.removeLayerConfigAndAssert(test, groupPath);
+          // Clear the layer from the map and assert it was removed
+          if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
         }
       }
     );

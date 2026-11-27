@@ -73,6 +73,10 @@ Each test follows this lifecycle:
 
 ## Execution Flow
 
+The base suite's `launchTestSuite()` rejects launches while the suite is running before invoking
+`onInitializeLaunchTestSuite()`. This hook initializes context before `onCanExecuteTestSuite()` checks
+eligibility. GeoView suites use it to bind the current map and controllers to the suite and its testers.
+
 ```
 1. Plugin reads config: "suites": ["suite-layer", "suite-config"]
 2. Plugin creates suite instances via if/else-if chain in onAdd()
@@ -531,6 +535,13 @@ async launchTestSuite() {
 ### 2. Observer Pattern
 
 Event system for state changes:
+
+`AbstractTestSuite<TTester>` preserves its tester type in all five suite event families:
+started, updated, success, failure, and skipped. Their event payloads expose `tester: TTester`,
+and delegates receive `AbstractTestSuite<TTester>` as the sender. The type parameter defaults
+to `AbstractTester`; `GVAbstractTestSuite` specializes it to `GVAbstractTester`.
+Tester event callbacks likewise receive the concrete tester instance as their sender,
+so a suite can subscribe with a bound handler without narrowing the tester event contract.
 
 ```typescript
 test.onStatusChanged((event) => {

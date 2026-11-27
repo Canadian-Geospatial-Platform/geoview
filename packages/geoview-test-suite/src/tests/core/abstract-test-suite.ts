@@ -1,31 +1,40 @@
 import type { EventDelegateBase } from 'geoview-core/api/events/event-helper';
 import EventHelper from 'geoview-core/api/events/event-helper';
 import { formatDuration, whenThisThen } from 'geoview-core/core/utils/utilities';
-import { logger } from 'geoview-core/core/utils/logger';
 import type { AbstractTester, FailureEvent, SkippedEvent, SuccessEvent, TestEvent, TestUpdatedEvent } from './abstract-tester';
 import { TestSuiteCannotExecuteError, TestSuiteRunningError } from './exceptions';
+import { TestStep } from './test-step';
 
 /**
  * Abstract base class for creating suite of tests.
  */
-export abstract class AbstractTestSuite {
+export abstract class AbstractTestSuite<TTester extends AbstractTester = AbstractTester> {
   /** The Testers in the Test Suite */
-  #testers: AbstractTester[] = [];
+  #testers: TTester[] = [];
 
   /** Callback delegates for the test started event */
-  #onTestersTestStartedHandlers: TesterTestDelegate[] = [];
+  #onTestersTestStartedHandlers: TesterTestDelegate<TTester>[] = [];
 
   /** Callback delegates for the test updated event */
-  #onTestersTestUpdatedHandlers: TesterTestUpdatedDelegate[] = [];
+  #onTestersTestUpdatedHandlers: TesterTestUpdatedDelegate<TTester>[] = [];
 
   /** Callback delegates for the test success event */
-  #onTestersTestSuccessHandlers: TesterSuccessDelegate[] = [];
+  #onTestersTestSuccessHandlers: TesterSuccessDelegate<TTester>[] = [];
 
   /** Callback delegates for the test failure event */
-  #onTestersTestFailureHandlers: TesterFailureDelegate[] = [];
+  #onTestersTestFailureHandlers: TesterFailureDelegate<TTester>[] = [];
 
   /** Callback delegates for the test skipped event */
-  #onTestersTestSkippedHandlers: TesterSkippedDelegate[] = [];
+  #onTestersTestSkippedHandlers: TesterSkippedDelegate<TTester>[] = [];
+
+  /** Steps recorded by this suite during its current launch. */
+  #steps: TestStep[] = [];
+
+  /** Status of the current suite launch. */
+  #suiteStatus: SuiteStatus = 'new';
+
+  /** Callback delegates for suite progress updates. */
+  #onSuiteUpdatedHandlers: SuiteUpdatedDelegate<TTester>[] = [];
 
   /** Indicates whether the plugin is running on a VPN */
   #isRunningOnVPN = false;
@@ -45,9 +54,6 @@ export abstract class AbstractTestSuite {
   /** Number of test suite launches currently in progress across every map on the page. */
   static #activeLaunchesOnPage = 0;
 
-  /** Default maximum wait for other test suites on the page to finish before running page-level tests. */
-  static readonly PAGE_EXCLUSIVE_WAIT_TIMEOUT_MS = 10 * 60 * 1000;
-
   // #region OVERRIDES
 
   /**
@@ -64,6 +70,15 @@ export abstract class AbstractTestSuite {
    * Mustoverride function to provide the exact number of tester test calls in the full onLaunchTestSuite implementation; debug-only calls are excluded.
    */
   abstract getTestsTotalFinal(): number;
+
+  /**
+   * Initializes suite context after the running guard and before eligibility checks.
+   */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected onInitializeLaunchTestSuite(): void {
+    // No initialization is required by default.
+  }
 
   /**
    * Overridable function called when the test suite is about to launch, to validate if it can be executed on the given map.
@@ -114,6 +129,21 @@ export abstract class AbstractTestSuite {
    * @returns A promise that resolves when the tests are over
    */
   protected abstract onLaunchTestSuite(): Promise<unknown>;
+
+  /**
+   * Provides an overridable hook for cleanup after a test suite launch.
+   *
+   * Called after the suite status and end time are recorded, whether preparation or test execution succeeds or fails.
+   * It is not called if the running guard, initialization, or eligibility check fails.
+   * The default implementation does nothing.
+   *
+   * @returns A promise that resolves when finalization is complete
+   */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected onFinalizeLaunchTestSuite(): Promise<void> {
+    return Promise.resolve();
+  }
 
   // #endregion OVERRIDES
 
@@ -278,11 +308,41 @@ export abstract class AbstractTestSuite {
   }
 
   /**
+   * Gets the largest estimated starvation duration among all tests in this suite.
+   *
+   * Taking the maximum avoids adding overlapping delays from concurrent tests.
+   * This is the maximum per-test estimate, not a measurement of suite wall-clock starvation.
+   *
+   * @returns The maximum test starvation duration in milliseconds, or zero when no tests are registered
+   */
+  getDurationStarvationMs(): number {
+    return this.#testers.reduce((maximum, tester) => Math.max(maximum, tester.getDurationStarvationMs()), 0);
+  }
+
+  /**
+   * Gets the maximum test starvation duration as a compact human-readable string.
+   *
+   * @returns The formatted maximum test starvation duration
+   */
+  getDurationStarvationFormatted(): string {
+    return formatDuration(this.getDurationStarvationMs());
+  }
+
+  /**
+   * Gets the testers registered with this suite.
+   *
+   * @returns The registered testers as a read-only collection
+   */
+  protected getTesters(): readonly TTester[] {
+    return this.#testers;
+  }
+
+  /**
    * Initializes a tester as part of the Test Suite.
    *
    * @param tester - The tester to initialize
    */
-  addTester(tester: AbstractTester): void {
+  addTester(tester: TTester): void {
     // Add it
     this.#testers.push(tester);
 
@@ -292,6 +352,35 @@ export abstract class AbstractTestSuite {
     tester.onSuccess(this.#handleTesterSuccess.bind(this));
     tester.onFailure(this.#handleTesterFailure.bind(this));
     tester.onSkipped(this.#handleTesterSkipped.bind(this));
+  }
+
+  /**
+   * Gets the steps recorded by the current suite launch.
+   *
+   * @returns The suite's recorded steps
+   */
+  getSteps(): readonly TestStep[] {
+    return this.#steps;
+  }
+
+  /**
+   * Gets the current suite launch status.
+   *
+   * @returns The suite status
+   */
+  getSuiteStatus(): SuiteStatus {
+    return this.#suiteStatus;
+  }
+
+  /**
+   * Adds a suite-level step and notifies listeners.
+   *
+   * @param message - The step message
+   */
+  addStep(message: string): void {
+    const step = new TestStep(message, 'major', undefined);
+    this.#steps.push(step);
+    this.#emitSuiteUpdated({ step });
   }
 
   /**
@@ -306,7 +395,11 @@ export abstract class AbstractTestSuite {
    */
   async launchTestSuite(): Promise<unknown> {
     // Validates the Test Suite isn't already running tests
-    if (this.getTestsRunning() > 0) throw new TestSuiteRunningError('The Test Suite is already running, please wait to prevent errors.');
+    if (this.#suiteStatus === 'running' || this.getTestsRunning() > 0)
+      throw new TestSuiteRunningError('The Test Suite is already running, please wait to prevent errors.');
+
+    // Call overridable method to initialize the launch of the test suite
+    this.onInitializeLaunchTestSuite();
 
     // Validates the Test Suite can execute
     if (!(await this.onCanExecuteTestSuite())) throw new TestSuiteCannotExecuteError();
@@ -315,8 +408,12 @@ export abstract class AbstractTestSuite {
     this.#launchStartedAt = new Date();
     this.#launchEndedAt = undefined;
     AbstractTestSuite.#activeLaunchesOnPage++;
+    this.#suiteStatus = 'running';
 
     try {
+      // Emit that the suite has updated/started in fact
+      this.#emitSuiteUpdated({});
+
       // Prepare to launch the test suite
       await this.onPrepareLaunchTestSuite();
 
@@ -328,11 +425,36 @@ export abstract class AbstractTestSuite {
 
       // Launching full test suite
       return await this.onLaunchTestSuite();
+    } catch (error: unknown) {
+      // Flag the suite status to failed
+      this.#suiteStatus = 'failed';
+      throw error;
     } finally {
       // Record the end time whether launch succeeded or failed.
       this.#launchEndedAt = new Date();
       AbstractTestSuite.#activeLaunchesOnPage--;
+      if (this.#suiteStatus === 'running') this.#suiteStatus = 'success';
+
+      // Emit that the suite has udpdated/terminated in fact
+      this.#emitSuiteUpdated({});
+
+      // Finalize the test suite execution
+      await this.onFinalizeLaunchTestSuite();
     }
+  }
+
+  /**
+   * Resets all the testers in the suite.
+   */
+  resetTestSuite(): void {
+    // Validates the Test Suite isn't already running tests
+    if (this.#suiteStatus === 'running' || this.getTestsRunning() > 0)
+      throw new TestSuiteRunningError('The Test Suite is running, please wait to prevent errors.');
+
+    // Resets tests in all testers
+    this.#testers.forEach((tester) => tester.resetTests());
+    this.#steps = [];
+    this.#suiteStatus = 'new';
   }
 
   /**
@@ -344,26 +466,9 @@ export abstract class AbstractTestSuite {
    * @param timeoutMs - Optional maximum wait in milliseconds (defaults to PAGE_EXCLUSIVE_WAIT_TIMEOUT_MS)
    * @returns A promise resolving to true when the page became exclusive, or false when the timeout elapsed first
    */
-  protected async waitForPageExclusivity(timeoutMs = AbstractTestSuite.PAGE_EXCLUSIVE_WAIT_TIMEOUT_MS): Promise<boolean> {
-    try {
-      await whenThisThen((): boolean => AbstractTestSuite.#activeLaunchesOnPage <= 1, timeoutMs, 500);
-      return true;
-    } catch (error: unknown) {
-      // Proceed anyway; page-level tests may then be disturbed by the remaining concurrent suites
-      logger.logWarning(`Test suite '${this.getName()}' did not get exclusive page access before the timeout`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Resets all the testers in the suite.
-   */
-  resetTestSuite(): void {
-    // Validates the Test Suite isn't already running tests
-    if (this.getTestsRunning() > 0) throw new TestSuiteRunningError('The Test Suite is running, please wait to prevent errors.');
-
-    // Resets tests in all testers
-    this.#testers.forEach((tester) => tester.resetTests());
+  waitForPageExclusivity(): Promise<boolean> {
+    this.addStep('Waiting for exclusive page access before continuing tests...');
+    return whenThisThen((): boolean => AbstractTestSuite.#activeLaunchesOnPage <= 1, undefined, 500);
   }
 
   // #endregion PUBLIC METHODS
@@ -380,7 +485,7 @@ export abstract class AbstractTestSuite {
    * @param sender - The tester instance that started the test
    * @param event - The event containing the test that has started
    */
-  #handleTesterTestStarted(sender: AbstractTester, event: TestEvent): void {
+  #handleTesterTestStarted(sender: TTester, event: TestEvent): void {
     // Re-emit
     this.#emitTestStarted({ ...event, tester: sender });
   }
@@ -392,7 +497,7 @@ export abstract class AbstractTestSuite {
    * @param sender - The tester instance that updated the test
    * @param event - The event containing the updated test and its internal event
    */
-  #handleTesterTestStepUpdated(sender: AbstractTester, event: TestUpdatedEvent): void {
+  #handleTesterTestStepUpdated(sender: TTester, event: TestUpdatedEvent): void {
     // Re-emit
     this.#emitTestUpdated({ ...event, tester: sender });
   }
@@ -404,7 +509,7 @@ export abstract class AbstractTestSuite {
    * @param sender - The tester instance that completed the test successfully
    * @param event - The event containing the test and its resulting data
    */
-  #handleTesterSuccess(sender: AbstractTester, event: SuccessEvent): void {
+  #handleTesterSuccess(sender: TTester, event: SuccessEvent): void {
     // Re-emit
     this.#emitSuccess({ ...event, tester: sender });
   }
@@ -416,7 +521,7 @@ export abstract class AbstractTestSuite {
    * @param sender - The tester instance that encountered the failure
    * @param event - The event containing the test and the associated error
    */
-  #handleTesterFailure(sender: AbstractTester, event: FailureEvent): void {
+  #handleTesterFailure(sender: TTester, event: FailureEvent): void {
     // Re-emit
     this.#emitFailure({ ...event, tester: sender });
   }
@@ -428,7 +533,7 @@ export abstract class AbstractTestSuite {
    * @param sender - The tester instance that encountered the skip
    * @param event - The event containing the test and the associated error
    */
-  #handleTesterSkipped(sender: AbstractTester, event: SkippedEvent): void {
+  #handleTesterSkipped(sender: TTester, event: SkippedEvent): void {
     // Re-emit
     this.#emitSkipped({ ...event, tester: sender });
   }
@@ -438,11 +543,38 @@ export abstract class AbstractTestSuite {
   // #region EVENTS
 
   /**
+   * Emits a suite status or step update.
+   *
+   * @param event - The suite update
+   */
+  #emitSuiteUpdated(event: SuiteUpdatedEvent): void {
+    EventHelper.emitEvent(this, this.#onSuiteUpdatedHandlers, event);
+  }
+
+  /**
+   * Registers a suite progress handler.
+   *
+   * @param callback - The handler to register
+   */
+  onSuiteUpdated(callback: SuiteUpdatedDelegate<TTester>): void {
+    EventHelper.onEvent(this.#onSuiteUpdatedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a suite progress handler.
+   *
+   * @param callback - The handler to remove
+   */
+  offSuiteUpdated(callback: SuiteUpdatedDelegate<TTester>): void {
+    EventHelper.offEvent(this.#onSuiteUpdatedHandlers, callback);
+  }
+
+  /**
    * Emits an event to all handlers.
    *
    * @param event - The event to emit
    */
-  #emitTestStarted(event: TesterTestEvent): void {
+  #emitTestStarted(event: TesterTestEvent<TTester>): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onTestersTestStartedHandlers, event);
   }
@@ -452,7 +584,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onTestStarted(callback: TesterTestDelegate): void {
+  onTestStarted(callback: TesterTestDelegate<TTester>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onTestersTestStartedHandlers, callback);
   }
@@ -462,7 +594,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offTestStarted(callback: TesterTestDelegate): void {
+  offTestStarted(callback: TesterTestDelegate<TTester>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onTestersTestStartedHandlers, callback);
   }
@@ -472,7 +604,7 @@ export abstract class AbstractTestSuite {
    *
    * @param event - The event to emit
    */
-  #emitTestUpdated(event: TesterTestUpdatedEvent): void {
+  #emitTestUpdated(event: TesterTestUpdatedEvent<TTester>): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onTestersTestUpdatedHandlers, event);
   }
@@ -482,7 +614,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onTestUpdated(callback: TesterTestUpdatedDelegate): void {
+  onTestUpdated(callback: TesterTestUpdatedDelegate<TTester>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onTestersTestUpdatedHandlers, callback);
   }
@@ -492,7 +624,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offTestUpdated(callback: TesterTestUpdatedDelegate): void {
+  offTestUpdated(callback: TesterTestUpdatedDelegate<TTester>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onTestersTestUpdatedHandlers, callback);
   }
@@ -502,7 +634,7 @@ export abstract class AbstractTestSuite {
    *
    * @param event - The event to emit
    */
-  #emitSuccess(event: TesterSuccessEvent): void {
+  #emitSuccess(event: TesterSuccessEvent<TTester>): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onTestersTestSuccessHandlers, event);
   }
@@ -512,7 +644,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onSuccess(callback: TesterSuccessDelegate): void {
+  onSuccess(callback: TesterSuccessDelegate<TTester>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onTestersTestSuccessHandlers, callback);
   }
@@ -522,7 +654,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offSuccess(callback: TesterSuccessDelegate): void {
+  offSuccess(callback: TesterSuccessDelegate<TTester>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onTestersTestSuccessHandlers, callback);
   }
@@ -532,7 +664,7 @@ export abstract class AbstractTestSuite {
    *
    * @param event - The event to emit
    */
-  #emitFailure(event: TesterFailureEvent): void {
+  #emitFailure(event: TesterFailureEvent<TTester>): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onTestersTestFailureHandlers, event);
   }
@@ -542,7 +674,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onFailure(callback: TesterFailureDelegate): void {
+  onFailure(callback: TesterFailureDelegate<TTester>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onTestersTestFailureHandlers, callback);
   }
@@ -552,7 +684,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offFailure(callback: TesterFailureDelegate): void {
+  offFailure(callback: TesterFailureDelegate<TTester>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onTestersTestFailureHandlers, callback);
   }
@@ -562,7 +694,7 @@ export abstract class AbstractTestSuite {
    *
    * @param event - The event to emit
    */
-  #emitSkipped(event: TesterSkippedEvent): void {
+  #emitSkipped(event: TesterSkippedEvent<TTester>): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onTestersTestSkippedHandlers, event);
   }
@@ -572,7 +704,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onSkipped(callback: TesterSkippedDelegate): void {
+  onSkipped(callback: TesterSkippedDelegate<TTester>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onTestersTestSkippedHandlers, callback);
   }
@@ -582,7 +714,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offSkipped(callback: TesterSkippedDelegate): void {
+  offSkipped(callback: TesterSkippedDelegate<TTester>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onTestersTestSkippedHandlers, callback);
   }
@@ -590,42 +722,77 @@ export abstract class AbstractTestSuite {
   // #endregion EVENTS
 }
 
+/** Status of a suite launch. */
+export type SuiteStatus = 'new' | 'running' | 'success' | 'failed';
+
+/** A suite progress update, optionally containing a newly added step. */
+export interface SuiteUpdatedEvent {
+  step?: TestStep;
+}
+
+/** A handler for suite progress updates. */
+export type SuiteUpdatedDelegate<TTester extends AbstractTester = AbstractTester> = EventDelegateBase<
+  AbstractTestSuite<TTester>,
+  SuiteUpdatedEvent,
+  void
+>;
+
 /** Define an event for the delegate. */
-export interface TesterTestEvent extends TestEvent {
-  tester: AbstractTester;
+export interface TesterTestEvent<TTester extends AbstractTester = AbstractTester> extends TestEvent {
+  tester: TTester;
 }
 
 /** Define a delegate for the event handler function signature. */
-export type TesterTestDelegate = EventDelegateBase<AbstractTestSuite, TesterTestEvent, void>;
+export type TesterTestDelegate<TTester extends AbstractTester = AbstractTester> = EventDelegateBase<
+  AbstractTestSuite<TTester>,
+  TesterTestEvent<TTester>,
+  void
+>;
 
 /** Define an event for the delegate. */
-export interface TesterTestUpdatedEvent extends TestUpdatedEvent {
-  tester: AbstractTester;
+export interface TesterTestUpdatedEvent<TTester extends AbstractTester = AbstractTester> extends TestUpdatedEvent {
+  tester: TTester;
 }
 
 /** Define a delegate for the event handler function signature. */
-export type TesterTestUpdatedDelegate = EventDelegateBase<AbstractTestSuite, TesterTestUpdatedEvent, void>;
+export type TesterTestUpdatedDelegate<TTester extends AbstractTester = AbstractTester> = EventDelegateBase<
+  AbstractTestSuite<TTester>,
+  TesterTestUpdatedEvent<TTester>,
+  void
+>;
 
 /** Define an event for the delegate. */
-export interface TesterSuccessEvent extends SuccessEvent {
-  tester: AbstractTester;
+export interface TesterSuccessEvent<TTester extends AbstractTester = AbstractTester> extends SuccessEvent {
+  tester: TTester;
 }
 
 /** Define a delegate for the event handler function signature. */
-export type TesterSuccessDelegate = EventDelegateBase<AbstractTestSuite, TesterSuccessEvent, void>;
+export type TesterSuccessDelegate<TTester extends AbstractTester = AbstractTester> = EventDelegateBase<
+  AbstractTestSuite<TTester>,
+  TesterSuccessEvent<TTester>,
+  void
+>;
 
 /** Define an event for the delegate. */
-export interface TesterFailureEvent extends FailureEvent {
-  tester: AbstractTester;
+export interface TesterFailureEvent<TTester extends AbstractTester = AbstractTester> extends FailureEvent {
+  tester: TTester;
 }
 
 /** Define a delegate for the event handler function signature. */
-export type TesterFailureDelegate = EventDelegateBase<AbstractTestSuite, TesterFailureEvent, void>;
+export type TesterFailureDelegate<TTester extends AbstractTester = AbstractTester> = EventDelegateBase<
+  AbstractTestSuite<TTester>,
+  TesterFailureEvent<TTester>,
+  void
+>;
 
 /** Define an event for the delegate. */
-export interface TesterSkippedEvent extends SkippedEvent {
-  tester: AbstractTester;
+export interface TesterSkippedEvent<TTester extends AbstractTester = AbstractTester> extends SkippedEvent {
+  tester: TTester;
 }
 
 /** Define a delegate for the event handler function signature. */
-export type TesterSkippedDelegate = EventDelegateBase<AbstractTestSuite, TesterSkippedEvent, void>;
+export type TesterSkippedDelegate<TTester extends AbstractTester = AbstractTester> = EventDelegateBase<
+  AbstractTestSuite<TTester>,
+  TesterSkippedEvent<TTester>,
+  void
+>;

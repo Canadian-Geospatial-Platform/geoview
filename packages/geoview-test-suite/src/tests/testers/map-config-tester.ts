@@ -1,7 +1,20 @@
-import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
-import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
+import type { Coordinate } from 'ol/coordinate';
+
+import { TestConstants } from './constants';
 import { Test } from '../core/test';
+import { TestError } from '../core/exceptions';
 import { GVAbstractTester } from './abstract-gv-tester';
+import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
+import type { TypeViewportBoundaryLonLat } from 'geoview-core/api/types/map-schema-types';
+import {
+  MAP_CENTER,
+  MAP_ZOOM_LEVEL,
+  type TypeFeatureInfoEntry,
+  type TypeInteraction,
+  type TypeValidMapProjectionCodes,
+} from 'geoview-core/api/types/map-schema-types';
+import { InvalidViewportMidpointsError, MapViewportUnavailableError } from 'geoview-core/core/exceptions/geoview-exceptions';
+import { CancelledError } from 'geoview-core/core/exceptions/core-exceptions';
 import {
   getStoreUIActiveAppBarTab,
   getStoreUIActiveFooterBarTab,
@@ -18,8 +31,10 @@ import {
   getStoreLayerControls,
   getStoreLayerLegendLayerByPath,
   getStoreLayerSelectedLayerPath,
+  getStoreLayerItemVisibility,
 } from 'geoview-core/core/stores/states/layer-state';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
+import { deepMerge } from 'geoview-core/core/utils/utilities';
 import {
   getStoreMapPointMarkers,
   getStoreMapConfigOverviewMap,
@@ -27,6 +42,8 @@ import {
   getStoreMapStateJson,
   getStoreMapNorthArrow,
 } from 'geoview-core/core/stores/states/map-state';
+import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { Projection } from 'geoview-core/geo/utils/projection';
 
 /** Fixed map height used by map config layout tests. */
@@ -46,6 +63,181 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   /**
+   * Tests Ontario/Alberta Details queries, visibility, feature zoom, nameField configuration, summary:false fields, and aliases.
+   *
+   * @returns A promise resolving with query results and zoom levels before and after zooming to a feature
+   */
+  testDetailsForGeoJSONOntarioAlberta(): Promise<Test<DetailsOntarioAlbertaResult>> {
+    const layerPathFromMapConfig = 'geojsonLYR5/polygons.json';
+    const nameField = 'creationDate';
+    const aliasValue = 'Custom Province Name';
+
+    // Both the Ontario fit and the row-zoom action change the view used by subsequent tests.
+    const initialExtent = this.getMapViewer().getView().calculateExtent();
+
+    // Test
+    let gvLayer: AbstractGVLayer | undefined;
+    let rootLayerPath: string | undefined;
+    return this.test(
+      `Test Details on Polygons layer...`,
+      async (test) => {
+        // Add the Polygons layer
+        gvLayer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+
+        const visibilityAndZoomResults = await this.#executeVisibilityAndZoomScenarios(test, gvLayer);
+        const featureInfoResults = await this.#executeFeatureInfoConfigurationScenarios(
+          test,
+          layerPathFromMapConfig,
+          nameField,
+          aliasValue
+        );
+
+        return { ...visibilityAndZoomResults, ...featureInfoResults };
+      },
+      (test, results) => {
+        MapConfigTester.#assertVisibilityAndZoomResults(test, results);
+        MapConfigTester.#assertFeatureInfoConfigurationResults(test, results, nameField, aliasValue);
+      },
+      async (test) => {
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
+        if (this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(layerPathFromMapConfig)) {
+          this.removeLayerConfigAndAssert(test, layerPathFromMapConfig);
+        }
+
+        // Restore the initial extent
+        test.addStep('Restoring the initial map extent...');
+        await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
+      }
+    );
+  }
+
+  /**
+   * Runs the layer visibility and feature zoom scenarios for the Ontario/Alberta Details test.
+   *
+   * @param test - The test being executed
+   * @param gvLayer - The GeoJSON layer used by the scenarios
+   * @returns The query results and zoom levels captured by the scenarios
+   */
+  async #executeVisibilityAndZoomScenarios(
+    test: Test<DetailsOntarioAlbertaResult>,
+    gvLayer: AbstractGVLayer
+  ): Promise<DetailsVisibilityAndZoomResult> {
+    const layerPath = gvLayer.getLayerPath();
+    const resultsOntarioResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, TestConstants.ONTARIO_CENTER_LONLAT);
+
+    test.addStep(`Selecting the details for the added layer...`);
+    this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
+
+    test.addStep(`Make the layer invisible...`);
+    gvLayer.setVisible(false);
+    const resultsOntarioNoResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, TestConstants.ONTARIO_CENTER_LONLAT);
+
+    test.addStep(`Make the layer visible...`);
+    gvLayer.setVisible(true);
+    const resultsAlbertaNoResults1 = await this.queryAtCoordinateRetrieveResultsForLayer(
+      test,
+      gvLayer,
+      TestConstants.ALBERTA_CENTER_LONLAT
+    );
+
+    let item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
+    await this.getControllersRegistry().layerController.toggleItemVisibility(layerPath, item, true);
+    const resultsAlbertaResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, TestConstants.ALBERTA_CENTER_LONLAT);
+
+    item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
+    await this.getControllersRegistry().layerController.toggleItemVisibility(layerPath, item, true);
+    const resultsAlbertaNoResults2 = await this.queryAtCoordinateRetrieveResultsForLayer(
+      test,
+      gvLayer,
+      TestConstants.ALBERTA_CENTER_LONLAT
+    );
+
+    test.addStep('Recording initial zoom level...');
+    const initialZoom = this.getMapViewer().getView().getZoom();
+    const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, TestConstants.ONTARIO_CENTER_LONLAT);
+    test.addStep('Verifying feature has extent for zoom...');
+    Test.assertIsDefined('features', features);
+    Test.assertIsArrayLengthMinimal(features, 1);
+    const feature = features[0];
+    Test.assertIsDefined('feature.extent', feature.extent);
+
+    test.addStep('Zooming to feature extent...');
+    await this.getControllersRegistry().mapController.zoomToExtent(feature.extent, TestConstants.USE_ZOOM_ANIMATION, {
+      maxZoom: 13,
+    });
+    const finalZoom = this.getMapViewer().getView().getZoom();
+
+    return {
+      resultsOntarioResults,
+      resultsOntarioNoResults,
+      resultsAlbertaNoResults1,
+      resultsAlbertaResults,
+      resultsAlbertaNoResults2,
+      initialZoom,
+      finalZoom,
+    };
+  }
+
+  /**
+   * Runs the name-field, summary, and alias configuration scenarios.
+   *
+   * @param test - The test being executed
+   * @param layerPath - The configured layer path to query
+   * @param nameField - The date field used by the name-field and summary scenarios
+   * @param aliasValue - The expected Province field alias
+   * @returns The feature-info results from each map configuration
+   */
+  async #executeFeatureInfoConfigurationScenarios(
+    test: Test<DetailsOntarioAlbertaResult>,
+    layerPath: string,
+    nameField: string,
+    aliasValue: string
+  ): Promise<DetailsFeatureInfoConfigurationResult> {
+    test.addStep('Creating map with nameField configuration (date field)...');
+    await this.#helperCreateMapWithFeatureInfoConfig(test, {
+      queryable: true,
+      nameField,
+    });
+    test.addStep('Getting the layer...');
+    const configuredLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+    const nameFieldResults = await this.queryAtCoordinateRetrieveResultsForLayer(
+      test,
+      configuredLayer,
+      TestConstants.ONTARIO_CENTER_LONLAT
+    );
+
+    test.addStep('Creating map with outfields summary:false configuration...');
+    await this.#helperCreateMapWithFeatureInfoConfig(test, {
+      queryable: true,
+      nameField: 'Province',
+      outfields: [
+        { name: 'Province', type: 'string' },
+        { name: nameField, type: 'date', summary: false },
+      ],
+    });
+    test.addStep('Getting the layer...');
+    const summaryLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+    const summaryResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, summaryLayer, TestConstants.ONTARIO_CENTER_LONLAT);
+
+    test.addStep('Creating map with outfields alias configuration...');
+    await this.#helperCreateMapWithFeatureInfoConfig(test, {
+      queryable: true,
+      nameField: 'Province',
+      outfields: [{ name: 'Province', alias: aliasValue, type: 'string' }],
+    });
+    test.addStep('Getting the layer...');
+    const aliasLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+    const aliasResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, aliasLayer, TestConstants.ONTARIO_CENTER_LONLAT);
+
+    return { nameFieldResults, summaryResults, aliasResults };
+  }
+
+  /**
    * Tests that a fixed-height map without a footer bar keeps the requested viewer height.
    *
    * @returns A promise that resolves when the test completes
@@ -57,7 +249,7 @@ export class MapConfigTester extends GVAbstractTester {
       'Test fixed-height map without footer bar keeps requested viewer height...',
       async (test) => {
         test.addStep('Creating fixed-height map with no footer bar...');
-        await this.#helperCreateMapConfig(test, mapId, ['footerBar', { tabs: { core: [] } }]);
+        await this.#helperCreateMapConfig(test, mapId, { footerBar: { tabs: { core: [] } } });
 
         test.addStep('Waiting for layout effects to settle...');
         await DomHelper.waitForReactIdle();
@@ -126,7 +318,7 @@ export class MapConfigTester extends GVAbstractTester {
         };
 
         // Create the map viewer from config
-        await this.#helperCreateMapConfig(test, mapId, [['footerBar', footerBarConfig]]);
+        await this.#helperCreateMapConfig(test, mapId, { footerBar: footerBarConfig });
 
         // GV The fact that the selectedLayerPath is already set, means a query needs to happen to populate the data table, but we need to wait for it to happen before checking the content of the data table store
         test.addStep('Waiting for the query in the data-table to get processed...');
@@ -175,8 +367,8 @@ export class MapConfigTester extends GVAbstractTester {
    */
   testSelectedLayersLayerPathGeoCoreResolution(): Promise<Test<MapViewer>> {
     const mapId = this.getMapId();
-    const geocoreUuid = GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID;
-    const expectedLayerPath = GVAbstractTester.AIRBORNE_RADIOACTIVITY_GROUP;
+    const geocoreUuid = TestConstants.AIRBORNE_RADIOACTIVITY_UUID;
+    const expectedLayerPath = TestConstants.AIRBORNE_RADIOACTIVITY_GROUP;
 
     // Test
     return this.test(
@@ -191,16 +383,20 @@ export class MapConfigTester extends GVAbstractTester {
         const geocoreLayerConfig = [{ geoviewLayerType: 'geoCore' as TypeGeoviewLayerType, geoviewLayerId: geocoreUuid }];
 
         // Create the map viewer from config (waits for layers loaded)
-        return this.#helperCreateMapConfig(test, mapId, [
-          ['map.listOfGeoviewLayerConfig', geocoreLayerConfig],
-          ['footerBar', footerBarConfig],
-        ]);
+        return this.#helperCreateMapConfig(test, mapId, {
+          map: { listOfGeoviewLayerConfig: geocoreLayerConfig },
+          footerBar: footerBarConfig,
+        });
       },
       (test) => {
         // The bare UUID should have been rewritten to the first resolved layer path in the store selection
         test.addStep('Verifying the layers store selectedLayerPath resolved the UUID to its first layer path...');
         const selectedLayerPath = getStoreLayerSelectedLayerPath(mapId);
         Test.assertIsEqual(selectedLayerPath, expectedLayerPath);
+      },
+      (test) => {
+        // Clear the layer from the map and assert it was removed
+        this.removeLayerConfigAndAssert(test, geocoreUuid);
       }
     );
   }
@@ -228,7 +424,7 @@ export class MapConfigTester extends GVAbstractTester {
         };
 
         // Create the map viewer from config
-        await this.#helperCreateMapConfig(test, mapId, [['appBar', appBarConfig]]);
+        await this.#helperCreateMapConfig(test, mapId, { appBar: appBarConfig });
 
         // GV The fact that the selectedLayerPath is already set, means a query needs to happen to populate the data table, but we need to wait for it to happen before checking the content of the data table store
         test.addStep('Waiting for the query in the data-table to get processed...');
@@ -280,12 +476,9 @@ export class MapConfigTester extends GVAbstractTester {
       'Test no footerBar or app bar config creates default tabs (layers, data-table) and (geolocator, legend, details, export)',
       async (test) => {
         // Create the mapViewer with footerBar and appBar removed
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
-          ['footerBar', null],
-          ['appBar', null],
-        ]);
+        await this.#helperCreateMapConfig(test, mapId, { footerBar: null, appBar: null });
 
-        return mapViewer;
+        return;
       },
       (test) => {
         // Verify that footer bar exists with default tabs
@@ -323,10 +516,7 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Create the mapViewer with empty tabs arrays
         const emptyTabsConfig = { tabs: { core: [] } };
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
-          ['footerBar', emptyTabsConfig],
-          ['appBar', emptyTabsConfig],
-        ]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { footerBar: emptyTabsConfig, appBar: emptyTabsConfig });
 
         return mapViewer;
       },
@@ -357,10 +547,10 @@ export class MapConfigTester extends GVAbstractTester {
       'Test panels declared in both appBar and footerBar are removed from the footer bar',
       async (test) => {
         // Create the mapViewer with 'legend' and 'details' declared in BOTH bars
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
-          ['appBar', { tabs: { core: ['geolocator', 'legend', 'details'] } }],
-          ['footerBar', { tabs: { core: ['legend', 'layers', 'details', 'data-table'] } }],
-        ]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, {
+          appBar: { tabs: { core: ['geolocator', 'legend', 'details'] } },
+          footerBar: { tabs: { core: ['legend', 'layers', 'details', 'data-table'] } },
+        });
 
         return mapViewer;
       },
@@ -395,7 +585,7 @@ export class MapConfigTester extends GVAbstractTester {
       'Test no navBar config value creates default navigation controls',
       async (test) => {
         // Create the mapViewer with navBar removed (null)
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['navBar', null]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { navBar: null });
 
         return mapViewer;
       },
@@ -425,7 +615,7 @@ export class MapConfigTester extends GVAbstractTester {
       'Test navBar with empty array has only zoom and rotate',
       async (test) => {
         // Create the mapViewer with empty navBar array
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['navBar', []]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { navBar: [] });
 
         return mapViewer;
       },
@@ -459,7 +649,7 @@ export class MapConfigTester extends GVAbstractTester {
         const initialViewConfig = { layerIds: [LAYER_PATH] };
 
         // Create a new map viewer from a new config
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings.initialView', initialViewConfig]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { map: { viewSettings: { initialView: initialViewConfig } } });
 
         // Wait for the zoom to happen on the map upon initialization
         await mapViewer.waitForMapReadyZoomed();
@@ -537,7 +727,7 @@ export class MapConfigTester extends GVAbstractTester {
         };
 
         // Create a new map viewer from a new config
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.overlayObjects', overlayObjectsConfig]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { map: { overlayObjects: overlayObjectsConfig } });
         return mapViewer;
       },
       (test) => {
@@ -588,7 +778,7 @@ export class MapConfigTester extends GVAbstractTester {
         };
 
         // Create a new map viewer from a new config
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings', viewSettingsConfig]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { map: { viewSettings: viewSettingsConfig } });
         return mapViewer;
       },
       (test, newMapViewer) => {
@@ -634,7 +824,7 @@ export class MapConfigTester extends GVAbstractTester {
       'Test overview map is present when configured in components',
       async (test) => {
         // Create the mapViewer with overview-map in components
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['components', ['overview-map', 'north-arrow']]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { components: ['overview-map', 'north-arrow'] });
         return mapViewer;
       },
       async (test) => {
@@ -674,7 +864,7 @@ export class MapConfigTester extends GVAbstractTester {
       'Test overview map is absent when not in components',
       async (test) => {
         // Create the mapViewer with only north-arrow (no overview-map)
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['components', ['north-arrow']]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { components: ['north-arrow'] });
         return mapViewer;
       },
       (test) => {
@@ -706,7 +896,7 @@ export class MapConfigTester extends GVAbstractTester {
       'Test north arrow is present when configured in components',
       async (test) => {
         // Create the mapViewer with north-arrow in components
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['components', ['north-arrow']]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { components: ['north-arrow'] });
         return mapViewer;
       },
       (test) => {
@@ -741,7 +931,7 @@ export class MapConfigTester extends GVAbstractTester {
       'Test north arrow is absent when not in components',
       async (test) => {
         // Create the mapViewer with empty components (no north-arrow)
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['components', []]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { components: [] });
         return mapViewer;
       },
       (test) => {
@@ -776,10 +966,10 @@ export class MapConfigTester extends GVAbstractTester {
       'Test overview map hideOnZoom hides at low zoom, shows above threshold',
       async (test) => {
         // Create the mapViewer with overview-map and hideOnZoom=7, initial zoom 4.5
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
-          ['components', ['overview-map', 'north-arrow']],
-          ['overviewMap', { hideOnZoom: 7 }],
-        ]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, {
+          components: ['overview-map', 'north-arrow'],
+          overviewMap: { hideOnZoom: 7 },
+        });
         return mapViewer;
       },
       async (test) => {
@@ -800,7 +990,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Zoom to 8 (above threshold)
         test.addStep('Zooming to level 8 (above threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(8, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(8, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for the React useEffect to update visibility
         await this.getControllersRegistry().mapController.waitForOverviewMapVisibility(true);
@@ -812,7 +1002,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Zoom back to 4 (below threshold)
         test.addStep('Zooming back to level 4 (below threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(4, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(4, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for visibility to turn false
         await this.getControllersRegistry().mapController.waitForOverviewMapVisibility(false);
@@ -837,16 +1027,16 @@ export class MapConfigTester extends GVAbstractTester {
       'Test overview map hideOnZoom with reprojection preserves visibility',
       async (test) => {
         // Create the mapViewer with overview-map, hideOnZoom=7, projection 3978
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
-          ['components', ['overview-map', 'north-arrow']],
-          ['overviewMap', { hideOnZoom: 7 }],
-        ]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, {
+          components: ['overview-map', 'north-arrow'],
+          overviewMap: { hideOnZoom: 7 },
+        });
         return mapViewer;
       },
       async (test) => {
         // Zoom to 8 (above threshold) so overview map is visible
         test.addStep('Zooming to level 8 (above threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(8, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(8, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for overview map to become visible
         await this.getControllersRegistry().mapController.waitForOverviewMapVisibility(true);
@@ -870,7 +1060,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Zoom below threshold in 3857
         test.addStep('Zooming to level 4 in 3857 (below threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(4, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(4, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for visibility to turn false
         await this.getControllersRegistry().mapController.waitForOverviewMapVisibility(false);
@@ -894,7 +1084,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Zoom above threshold in 3978
         test.addStep('Zooming to level 8 in 3978 (above threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(8, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(8, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for visibility to turn true
         await this.getControllersRegistry().mapController.waitForOverviewMapVisibility(true);
@@ -907,7 +1097,7 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #region View Settings Tests
+  // #region VIEW SETTINGS
 
   /**
    * Tests that initialView sets the initial zoom and zoomToInitialExtent navigates to homeView zoom.
@@ -928,7 +1118,7 @@ export class MapConfigTester extends GVAbstractTester {
         };
 
         // Create a new map viewer from a new config
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings', viewSettingsConfig]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { map: { viewSettings: viewSettingsConfig } });
         return mapViewer;
       },
       async (test, newMapViewer) => {
@@ -939,7 +1129,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Call zoomToInitialExtent which uses homeView
         test.addStep('Calling zoomToInitialExtent() which navigates to homeView...');
-        await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomToInitialExtent(TestConstants.USE_ZOOM_ANIMATION);
 
         // Verify zoom changed to 4 (from homeView)
         test.addStep('Verifying zoom changed to 4 from homeView...');
@@ -971,11 +1161,11 @@ export class MapConfigTester extends GVAbstractTester {
         };
 
         // Create a new map viewer from a new config
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings', viewSettingsConfig]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { map: { viewSettings: viewSettingsConfig } });
 
         // Call zoomToInitialExtent which navigates to homeView
         test.addStep('Calling zoomToInitialExtent() to navigate to homeView...');
-        await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomToInitialExtent(TestConstants.USE_ZOOM_ANIMATION);
 
         return mapViewer;
       },
@@ -1010,9 +1200,137 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #endregion
+  // #endregion VIEW SETTINGS
 
-  // #region Initial Settings Controls Tests
+  /**
+   * Tests that nameField configuration controls the feature display label.
+   *
+   * @returns A promise resolving when the test completes
+   */
+  testNameFieldAsLabel(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
+    const NAME_FIELD = 'creationDate';
+
+    return this.test(
+      'Test nameField as label in query results...',
+      async (test) => {
+        // Create map with custom featureInfo nameField config using a date field
+        test.addStep('Creating map with nameField configuration (date field)...');
+        await this.#helperCreateMapWithFeatureInfoConfig(test, {
+          queryable: true,
+          nameField: NAME_FIELD,
+        });
+
+        // Get the layer
+        test.addStep('Getting the layer...');
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+
+        // Query at Ontario coordinates
+        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, TestConstants.ONTARIO_CENTER_LONLAT);
+      },
+      (test, result) => {
+        // Verify we got results
+        test.addStep('Verifying query returned features...');
+        Test.assertIsDefined('features', result);
+        Test.assertIsArrayLengthMinimal(result, 1);
+
+        // Verify the nameField is set correctly on the result
+        test.addStep('Verifying nameField is set on result...');
+        Test.assertIsEqual(result[0].nameField, NAME_FIELD);
+      }
+    );
+  }
+
+  /**
+   * Tests that fields with summary: false are excluded from query results.
+   *
+   * @returns A promise resolving when the test completes
+   */
+  testSummaryFalseHidesField(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
+    const NAME_FIELD = 'Province';
+    const HIDDEN_FIELD = 'creationDate';
+
+    return this.test(
+      'Test summary false hides field from query results...',
+      async (test) => {
+        // Create map with outfields config where creationDate has summary: false
+        test.addStep('Creating map with outfields summary:false configuration...');
+        await this.#helperCreateMapWithFeatureInfoConfig(test, {
+          queryable: true,
+          nameField: NAME_FIELD,
+          outfields: [
+            { name: NAME_FIELD, type: 'string' },
+            { name: HIDDEN_FIELD, type: 'date', summary: false },
+          ],
+        });
+
+        // Get the layer
+        test.addStep('Getting the layer...');
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+
+        // Query at Ontario coordinates
+        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, TestConstants.ONTARIO_CENTER_LONLAT);
+      },
+      (test, result) => {
+        // Verify we got results
+        test.addStep('Verifying query returned features...');
+        Test.assertIsDefined('features', result);
+        Test.assertIsArrayLengthMinimal(result, 1);
+
+        // Verify the hidden field is NOT in fieldInfo
+        test.addStep(`Verifying field '${HIDDEN_FIELD}' is excluded from fieldInfo...`);
+        Test.assertIsUndefined(`fieldInfo.${HIDDEN_FIELD}`, result[0].fieldInfo[HIDDEN_FIELD]);
+
+        // Verify that Province field IS present
+        test.addStep('Verifying Province field IS present in fieldInfo...');
+        Test.assertIsDefined('fieldInfo.Province', result[0].fieldInfo.Province);
+      }
+    );
+  }
+
+  /**
+   * Tests that field alias configuration is applied in query results.
+   *
+   * @returns A promise resolving when the test completes
+   */
+  testFieldAliasRenamesField(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
+    const ALIAS_VALUE = 'Custom Province Name';
+
+    return this.test(
+      'Test field alias renames field in query results...',
+      async (test) => {
+        // Create map with outfields config where Province has a custom alias
+        test.addStep('Creating map with outfields alias configuration...');
+        await this.#helperCreateMapWithFeatureInfoConfig(test, {
+          queryable: true,
+          nameField: 'Province',
+          outfields: [{ name: 'Province', alias: ALIAS_VALUE, type: 'string' }],
+        });
+
+        // Get the layer
+        test.addStep('Getting the layer...');
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+
+        // Query at Ontario coordinates
+        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, TestConstants.ONTARIO_CENTER_LONLAT);
+      },
+      (test, result) => {
+        // Verify we got results
+        test.addStep('Verifying query returned features...');
+        Test.assertIsDefined('features', result);
+        Test.assertIsArrayLengthMinimal(result, 1);
+
+        // Verify the alias is applied
+        test.addStep(`Verifying Province field alias is '${ALIAS_VALUE}'...`);
+        Test.assertIsDefined('fieldInfo.Province', result[0].fieldInfo.Province);
+        Test.assertIsEqual(result[0].fieldInfo.Province.alias, ALIAS_VALUE);
+      }
+    );
+  }
+
+  // #region INITIAL SETTINGS CONTROLS
 
   /**
    * Tests that setting all controls to false is reflected in the store.
@@ -1169,9 +1487,9 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #endregion
+  // #endregion INITIAL SETTINGS CONTROLS
 
-  // #region Initial Settings Opacity Cascading Tests
+  // #region INITIAL SETTINGS OPACITY CASCADING
 
   /**
    * Tests that a child layer's opacity is capped by its parent group's opacity when child opacity exceeds the parent.
@@ -1379,9 +1697,9 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #endregion
+  // #endregion INITIAL SETTINGS OPACITY CASCADING
 
-  // #region Initial Settings Controls + States Combo Tests
+  // #region INITIAL SETTINGS CONTROLS + STATES COMBO
 
   /**
    * Tests that controls.query = true with states.queryable = false shows the query UI toggle but makes the layer not queryable at runtime.
@@ -1482,9 +1800,9 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #endregion
+  // #endregion INITIAL SETTINGS CONTROLS + STATES COMBO
 
-  // #region Initial Settings Legend Collapsed Tests
+  // #region INITIAL SETTINGS LEGEND COLLAPSED
 
   /**
    * Tests that setting states.legendCollapsed to true on a group layer results in the legend being collapsed in the store.
@@ -1512,9 +1830,9 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #endregion
+  // #endregion INITIAL SETTINGS LEGEND COLLAPSED
 
-  // #region Initial Settings Controls Cascading Tests
+  // #region INITIAL SETTINGS CONTROLS CASCADING
 
   /**
    * Tests that controls set on the parent group cascade to all descendants (subgroup and child leaf).
@@ -1618,9 +1936,9 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #endregion
+  // #endregion INITIAL SETTINGS CONTROLS CASCADING
 
-  // #region Initial Filters Tests
+  // #region INITIAL FILTERS
 
   /**
    * Tests that a GeoJSON layer with a layerFilter config property has the filter stored and accessible at runtime.
@@ -1637,14 +1955,13 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Create a new map viewer from a new config
         test.addStep('Creating map with GeoJSON layer having layerFilter...');
-        await this.#helperCreateMapConfig(test, mapId, [
-          [
-            'map.listOfGeoviewLayerConfig',
-            [
+        await this.#helperCreateMapConfig(test, mapId, {
+          map: {
+            listOfGeoviewLayerConfig: [
               {
                 geoviewLayerId: 'geojsonLYR5',
                 geoviewLayerName: 'GeoJSON Sample',
-                metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+                metadataAccessPath: TestConstants.GEOJSON_METADATA_META,
                 geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
                 serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
                 listOfLayerEntryConfig: [
@@ -1656,8 +1973,8 @@ export class MapConfigTester extends GVAbstractTester {
                 ],
               },
             ],
-          ],
-        ]);
+          },
+        });
       },
       (test) => {
         // Verify the filter is accessible on the GV layer via getLayerFilters().getInitialFilter()
@@ -1684,7 +2001,7 @@ export class MapConfigTester extends GVAbstractTester {
   testInitialSettingsFiltersOgcFeature(): Promise<Test> {
     const mapId = this.getMapId();
     const GV_LAYER_ID = 'ogcFeatureLYR';
-    const LAYER_PATH = `${GV_LAYER_ID}/${GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES}`;
+    const LAYER_PATH = `${GV_LAYER_ID}/${TestConstants.PYGEOAPI_B6RYUVAKK5_LAKES}`;
     const FILTER_EXPRESSION = "name = 'Lake Huron'";
 
     return this.test(
@@ -1692,25 +2009,24 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Create a new map viewer from a new config
         test.addStep('Creating map with OGC Feature layer having layerFilter...');
-        await this.#helperCreateMapConfig(test, mapId, [
-          [
-            'map.listOfGeoviewLayerConfig',
-            [
+        await this.#helperCreateMapConfig(test, mapId, {
+          map: {
+            listOfGeoviewLayerConfig: [
               {
                 geoviewLayerId: GV_LAYER_ID,
                 geoviewLayerName: 'OGC Feature Lakes',
-                metadataAccessPath: GVAbstractTester.PYGEOAPI_B6RYUVAKK5,
+                metadataAccessPath: TestConstants.PYGEOAPI_B6RYUVAKK5,
                 geoviewLayerType: 'ogcFeature' as TypeGeoviewLayerType,
                 listOfLayerEntryConfig: [
                   {
-                    layerId: GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES,
+                    layerId: TestConstants.PYGEOAPI_B6RYUVAKK5_LAKES,
                     layerFilter: FILTER_EXPRESSION,
                   },
                 ],
               },
             ],
-          ],
-        ]);
+          },
+        });
       },
       (test) => {
         test.addStep('Verifying layerFilter is stored on GV layer via getInitialFilter()...');
@@ -1735,7 +2051,7 @@ export class MapConfigTester extends GVAbstractTester {
   testInitialSettingsFiltersWfs(): Promise<Test> {
     const mapId = this.getMapId();
     const GV_LAYER_ID = 'wfsLYR';
-    const LAYER_PATH = `${GV_LAYER_ID}/${GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
+    const LAYER_PATH = `${GV_LAYER_ID}/${TestConstants.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
     const FILTER_EXPRESSION = "element_name_e = 'Temperature'";
 
     return this.test(
@@ -1743,25 +2059,24 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Create a new map viewer from a new config
         test.addStep('Creating map with WFS layer having layerFilter...');
-        await this.#helperCreateMapConfig(test, mapId, [
-          [
-            'map.listOfGeoviewLayerConfig',
-            [
+        await this.#helperCreateMapConfig(test, mapId, {
+          map: {
+            listOfGeoviewLayerConfig: [
               {
                 geoviewLayerId: GV_LAYER_ID,
                 geoviewLayerName: 'WFS Current Conditions',
-                metadataAccessPath: GVAbstractTester.GEOMET_URL,
+                metadataAccessPath: TestConstants.GEOMET_URL,
                 geoviewLayerType: 'ogcWfs' as TypeGeoviewLayerType,
                 listOfLayerEntryConfig: [
                   {
-                    layerId: GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID,
+                    layerId: TestConstants.GEOMET_URL_CURRENT_COND_LAYER_ID,
                     layerFilter: FILTER_EXPRESSION,
                   },
                 ],
               },
             ],
-          ],
-        ]);
+          },
+        });
       },
       (test) => {
         test.addStep('Verifying layerFilter is stored on GV layer via getInitialFilter()...');
@@ -1786,7 +2101,7 @@ export class MapConfigTester extends GVAbstractTester {
   testInitialSettingsFiltersEsriDynamic(): Promise<Test> {
     const mapId = this.getMapId();
     const GV_LAYER_ID = 'esriDynamicLYR';
-    const LAYER_PATH = `${GV_LAYER_ID}/${GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID}`;
+    const LAYER_PATH = `${GV_LAYER_ID}/${TestConstants.HISTORICAL_FLOOD_LAYER_ID}`;
     const FILTER_EXPRESSION = "event_type = 'freshet'";
 
     return this.test(
@@ -1794,25 +2109,24 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Create a new map viewer from a new config
         test.addStep('Creating map with Esri Dynamic layer having layerFilter...');
-        await this.#helperCreateMapConfig(test, mapId, [
-          [
-            'map.listOfGeoviewLayerConfig',
-            [
+        await this.#helperCreateMapConfig(test, mapId, {
+          map: {
+            listOfGeoviewLayerConfig: [
               {
                 geoviewLayerId: GV_LAYER_ID,
                 geoviewLayerName: 'Historical Flood Events',
-                metadataAccessPath: GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER,
+                metadataAccessPath: TestConstants.HISTORICAL_FLOOD_URL_MAP_SERVER,
                 geoviewLayerType: 'esriDynamic' as TypeGeoviewLayerType,
                 listOfLayerEntryConfig: [
                   {
-                    layerId: GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID,
+                    layerId: TestConstants.HISTORICAL_FLOOD_LAYER_ID,
                     layerFilter: FILTER_EXPRESSION,
                   },
                 ],
               },
             ],
-          ],
-        ]);
+          },
+        });
       },
       (test) => {
         test.addStep('Verifying layerFilter is stored on GV layer via getInitialFilter()...');
@@ -1837,7 +2151,7 @@ export class MapConfigTester extends GVAbstractTester {
   testInitialSettingsFiltersEsriFeature(): Promise<Test> {
     const mapId = this.getMapId();
     const GV_LAYER_ID = 'esriFeatureLYR';
-    const LAYER_PATH = `${GV_LAYER_ID}/${GVAbstractTester.FOREST_INDUSTRY_LAYER_ID}`;
+    const LAYER_PATH = `${GV_LAYER_ID}/${TestConstants.FOREST_INDUSTRY_LAYER_ID}`;
     const FILTER_EXPRESSION = "Province = 'Ontario'";
 
     return this.test(
@@ -1845,25 +2159,24 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Create a new map viewer from a new config
         test.addStep('Creating map with Esri Feature layer having layerFilter...');
-        await this.#helperCreateMapConfig(test, mapId, [
-          [
-            'map.listOfGeoviewLayerConfig',
-            [
+        await this.#helperCreateMapConfig(test, mapId, {
+          map: {
+            listOfGeoviewLayerConfig: [
               {
                 geoviewLayerId: GV_LAYER_ID,
                 geoviewLayerName: 'Forest Industry',
-                metadataAccessPath: GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER,
+                metadataAccessPath: TestConstants.FOREST_INDUSTRY_MAP_SERVER,
                 geoviewLayerType: 'esriFeature' as TypeGeoviewLayerType,
                 listOfLayerEntryConfig: [
                   {
-                    layerId: GVAbstractTester.FOREST_INDUSTRY_LAYER_ID,
+                    layerId: TestConstants.FOREST_INDUSTRY_LAYER_ID,
                     layerFilter: FILTER_EXPRESSION,
                   },
                 ],
               },
             ],
-          ],
-        ]);
+          },
+        });
       },
       (test) => {
         test.addStep('Verifying layerFilter is stored on GV layer via getInitialFilter()...');
@@ -1880,7 +2193,463 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #endregion
+  // #endregion INITIAL FILTERS
+
+  // #region VIEWPORT BOUNDARY
+
+  /**
+   * Tests fitting midpoint coordinates in the map-config suite's existing container.
+   *
+   * @param projection - Source projection
+   * @param rotation - Optional rotation in radians
+   * @param interaction - Optional interaction mode
+   * @param change - Optional change to viewport aspect ratio or projection before fitting
+   * @param useAnimation - Optional animation flag
+   * @param center - Optional source center in longitude/latitude
+   * @param useRotation - Whether the fit should restore the source rotation or preserve the changed rotation
+   * @returns A promise that resolves with the fit outcome
+   */
+  testFitViewportToMidpointsLonLat(
+    projection: TypeValidMapProjectionCodes,
+    rotation = 0,
+    interaction: TypeInteraction = 'dynamic',
+    change: 'none' | 'resize' | 'projection' = 'none',
+    useAnimation = false,
+    center: Coordinate = MAP_CENTER[projection],
+    useRotation = true
+  ): Promise<Test<TypeViewportMidpointFitResult>> {
+    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
+    const originalWidth = gvRootElement.style.width;
+    return this.test(
+      `Test fitting viewport midpoints EPSG:${projection}, rotation ${rotation}, ${interaction}, ${change}, animated ${useAnimation}, align ${useRotation}`,
+      async (test): Promise<TypeViewportMidpointFitResult> => {
+        const viewer = await this.#createViewportFixture(test, gvRootElement, projection, interaction, center, rotation);
+        viewer.getView().padding = interaction === 'dynamic' ? [15, 25, 60, 35] : [0, 0, 0, 0];
+        viewer.map.renderSync();
+        const before = MapConfigTester.#captureViewportBoundary(viewer);
+        const input = before.boundary.midpointWSENCoords;
+        const original = input.map((coordinate) => [...coordinate]);
+        test.addStep('Changing the view before fitting the captured WSEN coordinates...');
+        if (change === 'resize') {
+          gvRootElement.style.width = '540px';
+          viewer.map.updateSize();
+        }
+        if (change === 'projection') {
+          viewer.setView({ projection: 3857, initialView: { zoomAndCenter: [5, MAP_CENTER[3857]] }, rotation });
+        }
+        const view = viewer.getView();
+        view.setRotation(rotation + 0.7);
+        view.setZoom(view.getZoom()! + 2);
+        const currentCenter = view.getCenter()!;
+        view.setCenter([currentCenter[0] + view.getResolution()! * 100, currentCenter[1]]);
+        viewer.map.renderSync();
+        test.addStep('Fitting the captured coordinates through the public viewer API...');
+        await viewer.fitViewportToMidpointsLonLat(input, useRotation, useAnimation);
+        return {
+          snapshot: MapConfigTester.#captureViewportBoundary(viewer),
+          original,
+          input,
+          pixels: original.map((coordinate) => viewer.map.getPixelFromCoordinate(viewer.convertCoordinateLonLatToMapProj(coordinate))),
+          originalPixels: [before.expectedPixels[7], before.expectedPixels[6], before.expectedPixels[5], before.expectedPixels[4]],
+          rotation,
+        };
+      },
+      (test, result): void => {
+        test.addStep('Verifying containment, rotation, input preservation, and exact compatible-view round trip...');
+        Test.assertIsArrayEqualJsons(result.input, result.original);
+        if (!useRotation) Test.assertIsEqualWithinTolerance(result.snapshot.rotation, result.rotation + 0.7, 1e-9);
+        else if (change !== 'projection') Test.assertIsEqualWithinTolerance(result.snapshot.rotation, result.rotation, 1e-9);
+        else {
+          const [west, south, east, north] = result.pixels;
+          Test.assertIsDefined('west', west);
+          Test.assertIsDefined('south', south);
+          Test.assertIsDefined('east', east);
+          Test.assertIsDefined('north', north);
+          const eastAngle = Math.atan2(-(east[1] - west[1]), east[0] - west[0]);
+          const northAngle = Math.atan2(-(north[1] - south[1]), north[0] - south[0]) - Math.PI / 2;
+          Test.assertIsEqualWithinTolerance(eastAngle + northAngle, 0, 1e-6);
+        }
+        const [left, top] = result.snapshot.expectedPixels[0];
+        const [right, bottom] = result.snapshot.expectedPixels[2];
+        result.pixels.forEach((pixel, index): void => {
+          Test.assertIsDefined('pixel', pixel);
+          Test.assertIsEqual(pixel[0] >= left - 0.5 && pixel[0] <= right + 0.5, true);
+          Test.assertIsEqual(pixel[1] >= top - 0.5 && pixel[1] <= bottom + 0.5, true);
+          if (change === 'none' && useRotation)
+            pixel.forEach((value, axis): void => Test.assertIsEqualWithinTolerance(value, result.originalPixels[index][axis], 0.5));
+        });
+        const pixels = result.pixels.filter((pixel) => pixel !== null);
+        const minX = Math.min(...pixels.map((pixel) => pixel[0]));
+        const maxX = Math.max(...pixels.map((pixel) => pixel[0]));
+        const minY = Math.min(...pixels.map((pixel) => pixel[1]));
+        const maxY = Math.max(...pixels.map((pixel) => pixel[1]));
+        Test.assertIsEqual(
+          (Math.abs(minX - left) < 0.5 && Math.abs(maxX - right) < 0.5) || (Math.abs(minY - top) < 0.5 && Math.abs(maxY - bottom) < 0.5),
+          true
+        );
+      },
+      (): void => {
+        this.#resetViewportFixture(gvRootElement, originalWidth);
+      }
+    );
+  }
+
+  /**
+   * Tests that invalid midpoint input rejects without modifying the view.
+   *
+   * @returns A promise that resolves with errors and unchanged boundaries for each invalid input
+   */
+  testInvalidViewportMidpoints(): Promise<
+    Test<{ error: InvalidViewportMidpointsError | undefined; boundary: TypeViewportBoundaryLonLat }[]>
+  > {
+    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
+    const originalWidth = gvRootElement.style.width;
+    let original: TypeViewportBoundaryLonLat | undefined;
+    return this.test(
+      'Test invalid viewport midpoint inputs without recreating the map',
+      async (test): Promise<{ error: InvalidViewportMidpointsError | undefined; boundary: TypeViewportBoundaryLonLat }[]> => {
+        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
+        original = viewer.getViewportBoundaryLonLat();
+        const results: { error: InvalidViewportMidpointsError | undefined; boundary: TypeViewportBoundaryLonLat }[] = [];
+        for (const condition of ['count', 'nonfinite', 'latitude', 'coincident', 'orientation']) {
+          const input = original.midpointWSENCoords.map((coordinate) => [...coordinate]);
+          test.addStep(`Passing invalid midpoint coordinates (${condition})...`);
+          if (condition === 'count') input.pop();
+          else if (condition === 'nonfinite') input[0][0] = Number.NaN;
+          else if (condition === 'latitude') input[0][1] = 91;
+          else if (condition === 'orientation') [input[1], input[3]] = [input[3], input[1]];
+          else input.fill(input[0]);
+          let error: InvalidViewportMidpointsError | undefined;
+          try {
+            // eslint-disable-next-line no-await-in-loop -- Verify each rejection and unchanged view before reusing the fixture.
+            await viewer.fitViewportToMidpointsLonLat(input, true, false);
+          } catch (caught: unknown) {
+            if (!(caught instanceof InvalidViewportMidpointsError)) throw caught;
+            error = caught;
+          }
+          results.push({ error, boundary: viewer.getViewportBoundaryLonLat() });
+        }
+        return results;
+      },
+      (_test, results): void => {
+        Test.assertIsArrayLengthEqual(results, 5);
+        results.forEach((result): void => {
+          Test.assertIsInstance(result.error, InvalidViewportMidpointsError);
+          Test.assertJsonObject(result.boundary, original);
+        });
+      },
+      (): void => {
+        this.#resetViewportFixture(gvRootElement, originalWidth);
+      }
+    );
+  }
+
+  /**
+   * Tests that an interrupted animation rejects instead of reporting a completed fit.
+   *
+   * @returns A promise that resolves with the expected cancellation error
+   */
+  testErrorFitViewportMidpointsCancelled(): Promise<Test<CancelledError>> {
+    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
+    const originalWidth = gvRootElement.style.width;
+    return this.testError(
+      'Test viewport midpoint fit interrupted by another interaction',
+      CancelledError,
+      async (test): Promise<void> => {
+        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
+        const input = viewer.getViewportBoundaryLonLat().midpointWSENCoords;
+        viewer.getView().setZoom(8);
+        viewer.getView().setRotation(1);
+        viewer.map.renderSync();
+        test.addStep('Starting and immediately cancelling the animated fit...');
+        const fitting = viewer.fitViewportToMidpointsLonLat(input);
+        viewer.getView().cancelAnimations();
+        await fitting;
+      },
+      undefined,
+      (): void => {
+        this.#resetViewportFixture(gvRootElement, originalWidth);
+      }
+    );
+  }
+
+  /**
+   * Tests padded viewport samples in a fresh, network-independent map.
+   *
+   * @param projection - Projection to test
+   * @param rotation - Optional view rotation in radians
+   * @param interaction - Optional interaction mode
+   * @param center - Optional center in longitude/latitude
+   * @returns A promise that resolves with the boundary test
+   */
+  testViewportBoundaryLonLat(
+    projection: TypeValidMapProjectionCodes,
+    rotation = 0,
+    interaction: TypeInteraction = 'dynamic',
+    center: Coordinate = MAP_CENTER[projection]
+  ): Promise<Test<TypeViewportBoundarySnapshot>> {
+    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
+    const originalWidth = gvRootElement.style.width;
+    return this.test(
+      `Test viewport boundary EPSG:${projection}, rotation ${rotation}, ${interaction}, center ${center}`,
+      async (test): Promise<TypeViewportBoundarySnapshot> => {
+        test.addStep('Replacing the suite map and sampling the public viewer API...');
+        const viewer = await this.#createViewportFixture(test, gvRootElement, projection, interaction, center, rotation);
+        return MapConfigTester.#captureViewportBoundary(viewer);
+      },
+      (test, result): void => {
+        test.addStep('Checking eight samples against independent view geometry and CSS pixels...');
+        MapConfigTester.#assertViewportBoundary(result);
+        Test.assertIsEqualWithinTolerance(result.bottomPadding, result.infoHeight, 0.5);
+        Test.assertIsEqualWithinTolerance(result.rotation, rotation, 1e-9);
+        Test.assertIsArrayEqual(result.center, center, 6);
+        if (rotation !== 0) Test.assertIsEqual(Math.abs(result.boundary.midpoints.s[1] - result.extentSouth[1]) > 0.1, true);
+        if (projection === 3978 && rotation === 0 && center === MAP_CENTER[3978]) {
+          Test.assertIsEqual(result.boundary.midpoints.s[1] - result.boundary.corners.sw[1] > 0.1, true);
+          Test.assertIsEqual(result.boundary.midpoints.s[1] - result.boundary.corners.se[1] > 0.1, true);
+        }
+        if (projection === 3857 && rotation === 0) {
+          const { corners, midpoints } = result.boundary;
+          Test.assertIsEqualWithinTolerance(midpoints.w[0], corners.nw[0], 1e-6);
+          Test.assertIsEqualWithinTolerance(midpoints.e[0], corners.se[0], 1e-6);
+          Test.assertIsEqualWithinTolerance(midpoints.n[1], corners.ne[1], 1e-6);
+          Test.assertIsEqualWithinTolerance(midpoints.s[1], corners.sw[1], 1e-6);
+          if (center === TestConstants.VIEWPORT_ANTIMERIDIAN_LONLAT) Test.assertIsEqual(midpoints.e[0] > 180, true);
+        }
+        if (interaction === 'dynamic') Test.assertIsNotEqual(result.boundary.midpoints.s[1], result.canvasSouth[1]);
+        else Test.assertIsArrayEqual(result.boundary.midpoints.s, result.canvasSouth, 6);
+      },
+      (): void => {
+        this.#resetViewportFixture(gvRootElement, originalWidth);
+      }
+    );
+  }
+
+  /**
+   * Tests map-info height changes, asymmetric padding, and viewport resizing.
+   *
+   * @returns A promise that resolves with the boundary snapshots before and after each change
+   */
+  testViewportBoundaryPaddingAndResize(): Promise<Test<TypeViewportBoundarySnapshot[]>> {
+    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
+    const originalWidth = gvRootElement.style.width;
+    return this.test(
+      'Test viewport boundary after map-info height, padding, and size changes',
+      async (test): Promise<TypeViewportBoundarySnapshot[]> => {
+        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
+        const snapshots = [MapConfigTester.#captureViewportBoundary(viewer)];
+        test.addStep('Increasing map-info bar height and updating view padding...');
+        const info = DomHelper.getMapInfo(viewer.mapId);
+        if (!info) throw new TestError('Viewport fixture has no map-info bar');
+        info.style.height = `${info.offsetHeight + 30}px`;
+        viewer.updateViewPadding();
+        viewer.map.renderSync();
+        snapshots.push(MapConfigTester.#captureViewportBoundary(viewer));
+        test.addStep('Applying padding on all four sides...');
+        viewer.getView().padding = [20, 30, 70, 40];
+        viewer.map.renderSync();
+        snapshots.push(MapConfigTester.#captureViewportBoundary(viewer));
+        test.addStep('Resizing the host and resampling...');
+        gvRootElement.style.width = '640px';
+        viewer.map.updateSize();
+        viewer.map.renderSync();
+        snapshots.push(MapConfigTester.#captureViewportBoundary(viewer));
+        return snapshots;
+      },
+      (test, result): void => {
+        test.addStep('Verifying fresh geometry after each layout change...');
+        result.forEach(MapConfigTester.#assertViewportBoundary);
+        Test.assertIsEqualWithinTolerance(result[1].bottomPadding, result[1].infoHeight, 0.5);
+        Test.assertIsEqual(result[1].bottomPadding > result[0].bottomPadding, true);
+        Test.assertIsNotEqual(result[2].expectedPixels[1][0], result[3].expectedPixels[1][0]);
+        Test.assertIsNotEqual(result[2].boundary.midpoints.e[0], result[3].boundary.midpoints.e[0]);
+      },
+      (): void => {
+        this.#resetViewportFixture(gvRootElement, originalWidth);
+      }
+    );
+  }
+
+  /**
+   * Tests unavailable viewport conditions using one fixture, restoring it after every condition.
+   *
+   * @returns A promise that resolves with the captured typed errors
+   */
+  testViewportBoundaryUnavailable(): Promise<Test<(MapViewportUnavailableError | undefined)[]>> {
+    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
+    const originalWidth = gvRootElement.style.width;
+    return this.test(
+      'Test unavailable viewport conditions without recreating the map',
+      async (test): Promise<(MapViewportUnavailableError | undefined)[]> => {
+        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
+        const results: (MapViewportUnavailableError | undefined)[] = [];
+        for (const condition of ['size', 'padding', 'nonfinite', 'negative-padding', 'unrendered']) {
+          viewer.getViewportBoundaryLonLat();
+          test.addStep(`Making viewport unavailable (${condition}) and sampling...`);
+          let error: MapViewportUnavailableError | undefined;
+          try {
+            if (condition === 'size') viewer.map.setSize([0, 0]);
+            else if (condition === 'padding') viewer.getView().padding = [0, 0, viewer.map.getSize()![1], 0];
+            else if (condition === 'nonfinite') viewer.map.setSize([Number.NaN, 600]);
+            else if (condition === 'negative-padding') viewer.getView().padding = [0, 0, -10, 0];
+            else viewer.map.setTarget(undefined);
+            viewer.getViewportBoundaryLonLat();
+          } catch (caught: unknown) {
+            if (!(caught instanceof MapViewportUnavailableError)) throw caught;
+            error = caught;
+          } finally {
+            this.#resetViewportFixture(gvRootElement, '800px');
+          }
+          results.push(error);
+        }
+        return results;
+      },
+      (_test, results): void => {
+        Test.assertIsArrayLengthEqual(results, 5);
+        results.forEach((error): void => Test.assertIsInstance(error, MapViewportUnavailableError));
+      },
+      (): void => {
+        this.#resetViewportFixture(gvRootElement, originalWidth);
+      }
+    );
+  }
+
+  /**
+   * Tests that fitting propagates an unavailable viewport error.
+   *
+   * @returns A promise that resolves with the expected typed error
+   */
+  testErrorFitViewportUnavailable(): Promise<Test<MapViewportUnavailableError>> {
+    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
+    const originalWidth = gvRootElement.style.width;
+    return this.testError(
+      'Test fitting an unavailable viewport',
+      MapViewportUnavailableError,
+      async (test): Promise<void> => {
+        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
+        const input = viewer.getViewportBoundaryLonLat().midpointWSENCoords;
+        test.addStep('Removing the usable viewport size and fitting...');
+        viewer.map.setSize([0, 0]);
+        await viewer.fitViewportToMidpointsLonLat(input, true, false);
+      },
+      undefined,
+      (): void => {
+        this.#resetViewportFixture(gvRootElement, originalWidth);
+      }
+    );
+  }
+
+  // #endregion VIEWPORT BOUNDARY
+
+  // #region PROTECTED METHODS
+
+  /**
+   * Destroys the current map and creates a new one from the given config.
+   *
+   * Deletes the existing map viewer, creates a fresh instance via `createMapFromConfigFast`,
+   * reassigns the tester's internal references, and waits for all layers to finish loading.
+   *
+   * @param test - The test instance used to log each step
+   * @param mapId - The map identifier to destroy and recreate
+   * @param mapConfig - The map configuration object (will be JSON-stringified)
+   * @param divHeight - Optional height for the map container div
+   * @returns A promise that resolves with the newly created MapViewer
+   */
+  protected async replaceMap(test: Test, mapId: string, mapConfig: unknown, divHeight?: number): Promise<MapViewer> {
+    // Delete current map
+    test.addStep('Deleting current map...');
+    await this.getApi().deleteMapViewer(mapId, false);
+
+    // Wait for layer to load and data table to initialize
+    test.addStep('Creating the map from config...');
+    const mapViewer = await this.getApi().createMapFromConfigFast(mapId, JSON.stringify(mapConfig), divHeight);
+
+    // Replace the map viewer and the controller registry in the tester with the new one created from config
+    this.assignMapViewerAndControllers(mapViewer);
+
+    // Waiting for layers to get loaded even when map is in a background tab
+    test.addStep('Waiting for layers to get loaded even when map is in a background tab...');
+    const loadedLayersCount = await this.getControllersRegistry().layerController.waitForLayersLoadedForcingRenders();
+    test.addStep(`Layers loaded (${loadedLayersCount})`);
+
+    // Force a final synchronous render so OL populates frameState_ (required for getPixelFromCoordinate to work in hidden tabs)
+    test.addStep('Waiting for map render...');
+    await mapViewer.waitForRender();
+
+    // Return the map viewer
+    return mapViewer;
+  }
+
+  // #endregion PROTECTED METHODS
+
+  // #region PRIVATE METHODS
+
+  /**
+   * Verifies the query results and zoom change for the visibility scenarios.
+   *
+   * @param test - The test being asserted
+   * @param results - The scenario results
+   */
+  static #assertVisibilityAndZoomResults(test: Test<DetailsOntarioAlbertaResult>, results: DetailsOntarioAlbertaResult): void {
+    test.addStep('Verifying there is 2 feature info result for the Ontario query...');
+    Test.assertIsArrayLengthEqual(results.resultsOntarioResults, 2);
+
+    test.addStep('Verifying there is 0 feature info result for the Ontario query...');
+    Test.assertIsArrayLengthEqual(results.resultsOntarioNoResults, 0);
+
+    test.addStep('Verifying there is 0 feature info result for the Alberta query...');
+    Test.assertIsArrayLengthEqual(results.resultsAlbertaNoResults1, 0);
+
+    test.addStep('Verifying there is 1 feature info result for the Alberta query...');
+    Test.assertIsArrayLengthEqual(results.resultsAlbertaResults, 1);
+
+    test.addStep('Verifying there is 0 feature info result for the Alberta query...');
+    Test.assertIsArrayLengthEqual(results.resultsAlbertaNoResults2, 0);
+
+    test.addStep('Verifying zoom level changed...');
+    Test.assertIsNotEqual(results.initialZoom, results.finalZoom);
+  }
+
+  /**
+   * Verifies the name-field, summary, and alias feature-info results.
+   *
+   * @param test - The test being asserted
+   * @param results - The configuration scenario results
+   * @param nameField - The date field used by the name-field and summary scenarios
+   * @param aliasValue - The expected Province field alias
+   */
+  static #assertFeatureInfoConfigurationResults(
+    test: Test<DetailsOntarioAlbertaResult>,
+    results: DetailsOntarioAlbertaResult,
+    nameField: string,
+    aliasValue: string
+  ): void {
+    const { nameFieldResults, summaryResults, aliasResults } = results;
+    test.addStep('Verifying query returned features...');
+    Test.assertIsDefined('features', nameFieldResults);
+    Test.assertIsArrayLengthMinimal(nameFieldResults, 1);
+
+    test.addStep('Verifying nameField is set on result...');
+    Test.assertIsEqual(nameFieldResults[0].nameField, nameField);
+
+    test.addStep('Verifying query returned features...');
+    Test.assertIsDefined('features', summaryResults);
+    Test.assertIsArrayLengthMinimal(summaryResults, 1);
+
+    test.addStep(`Verifying field '${nameField}' is excluded from fieldInfo...`);
+    Test.assertIsUndefined(`fieldInfo.${nameField}`, summaryResults[0].fieldInfo[nameField]);
+
+    test.addStep('Verifying Province field IS present in fieldInfo...');
+    Test.assertIsDefined('fieldInfo.Province', summaryResults[0].fieldInfo.Province);
+
+    test.addStep('Verifying query returned features...');
+    Test.assertIsDefined('features', aliasResults);
+    Test.assertIsArrayLengthMinimal(aliasResults, 1);
+
+    test.addStep(`Verifying Province field alias is '${aliasValue}'...`);
+    Test.assertIsDefined('fieldInfo.Province', aliasResults[0].fieldInfo.Province);
+    Test.assertIsEqual(aliasResults[0].fieldInfo.Province.alias, aliasValue);
+  }
 
   /**
    * Helper to create a map config with initialSettings on the GeoJSON layer.
@@ -1902,14 +2671,13 @@ export class MapConfigTester extends GVAbstractTester {
     if (states) initialSettings.states = states;
 
     // Create a new map viewer from a new config
-    return this.#helperCreateMapConfig(test, mapId, [
-      [
-        'map.listOfGeoviewLayerConfig',
-        [
+    return this.#helperCreateMapConfig(test, mapId, {
+      map: {
+        listOfGeoviewLayerConfig: [
           {
             geoviewLayerId: 'geojsonLYR5',
             geoviewLayerName: 'GeoJSON Sample',
-            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            metadataAccessPath: TestConstants.GEOJSON_METADATA_META,
             geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
             serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
             listOfLayerEntryConfig: [
@@ -1921,8 +2689,8 @@ export class MapConfigTester extends GVAbstractTester {
             ],
           },
         ],
-      ],
-    ]);
+      },
+    });
   }
 
   /**
@@ -1947,14 +2715,13 @@ export class MapConfigTester extends GVAbstractTester {
     if (childStates) childInitialSettings.states = childStates;
 
     // Create a new map viewer from a new config
-    return this.#helperCreateMapConfig(test, mapId, [
-      [
-        'map.listOfGeoviewLayerConfig',
-        [
+    return this.#helperCreateMapConfig(test, mapId, {
+      map: {
+        listOfGeoviewLayerConfig: [
           {
             geoviewLayerId: 'geojsonLYR5',
             geoviewLayerName: 'GeoJSON Sample',
-            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            metadataAccessPath: TestConstants.GEOJSON_METADATA_META,
             geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
             serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
             listOfLayerEntryConfig: [
@@ -1972,8 +2739,8 @@ export class MapConfigTester extends GVAbstractTester {
             ],
           },
         ],
-      ],
-    ]);
+      },
+    });
   }
 
   /**
@@ -1994,14 +2761,13 @@ export class MapConfigTester extends GVAbstractTester {
     childSettings?: Record<string, unknown>
   ): Promise<MapViewer> {
     // Create a new map viewer from a new config
-    return this.#helperCreateMapConfig(test, mapId, [
-      [
-        'map.listOfGeoviewLayerConfig',
-        [
+    return this.#helperCreateMapConfig(test, mapId, {
+      map: {
+        listOfGeoviewLayerConfig: [
           {
             geoviewLayerId: 'geojsonLYR5',
             geoviewLayerName: 'GeoJSON Sample',
-            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            metadataAccessPath: TestConstants.GEOJSON_METADATA_META,
             geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
             serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
             listOfLayerEntryConfig: [
@@ -2026,23 +2792,18 @@ export class MapConfigTester extends GVAbstractTester {
             ],
           },
         ],
-      ],
-    ]);
+      },
+    });
   }
 
   /**
-   * Helper function to create a basic map configuration with optional overrides.
+   * Creates a map with a GeoJSON polygons layer configured with custom featureInfo settings.
    *
    * @param test - The test instance used to log steps
-   * @param mapId - The map identifier
-   * @param overrides - Optional configuration overrides as path-value pairs
-   *  - Array of [path, value] pairs:
-   *     [['footerBar', { tabs: { core: ['data-table'] }, selectedTab: 'data-table' }]]
-   *   - Single [path, value] pair:
-   *     ['map.viewSettings.initialView', { layerIds: ['geojsonLYR5/polygons.json'] }]
-   * @returns A promise that resolves to the created map viewer
+   * @param featureInfoConfig - The featureInfo configuration to apply to the layer
+   * @returns A promise that resolves when the map is created and layers are loaded
    */
-  #helperCreateMapConfig(test: Test, mapId: string, overrides: [string, unknown][] | [string, unknown] = []): Promise<MapViewer> {
+  #helperCreateMapWithFeatureInfoConfig<T>(test: Test<T>, featureInfoConfig: Record<string, unknown>): Promise<MapViewer> {
     const baseConfig = {
       map: {
         interaction: 'dynamic',
@@ -2052,7 +2813,55 @@ export class MapConfigTester extends GVAbstractTester {
           {
             geoviewLayerId: 'geojsonLYR5',
             geoviewLayerName: 'GeoJSON Sample',
-            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            metadataAccessPath: TestConstants.GEOJSON_METADATA_META,
+            geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
+            serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
+            listOfLayerEntryConfig: [
+              {
+                layerId: 'polygons.json',
+                layerName: 'Polygons',
+                source: {
+                  featureInfo: featureInfoConfig,
+                },
+              },
+            ],
+          },
+        ],
+      },
+      components: [],
+      corePackages: ['test-suite'],
+      corePackagesConfig: [{ 'test-suite': { suites: ['suite-map-config'] } }],
+      theme: 'geo.ca',
+      footerBar: {
+        tabs: {
+          core: ['legend', 'layers', 'data-table', 'time-slider', 'geochart'],
+        },
+      },
+    };
+
+    // Replace the map!
+    return this.replaceMap(test, this.getMapId(), baseConfig);
+  }
+
+  /**
+   * Creates an isolated base map configuration with nested overrides, without inheriting the previous test's configuration.
+   *
+   * @param test - The test instance used to log steps
+   * @param mapId - The map identifier
+   * @param mapConfigOverrides - Optional nested map configuration to merge with the base fixture
+   * @returns A promise that resolves to the created map viewer
+   */
+  #helperCreateMapConfig(test: Test, mapId: string, mapConfigOverrides: unknown = {}): Promise<MapViewer> {
+    const baseConfig = {
+      map: {
+        interaction: 'dynamic',
+        viewSettings: { projection: 3978, initialView: { zoomAndCenter: [4.5, [-90, 60]] } },
+        basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
+        listOfGeoviewLayerConfig: [
+          {
+            geoviewLayerId: 'geojsonLYR5',
+            geoviewLayerName: 'GeoJSON Sample',
+            metadataAccessPath: TestConstants.GEOJSON_METADATA_META,
             geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
             serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
             listOfLayerEntryConfig: [
@@ -2085,53 +2894,154 @@ export class MapConfigTester extends GVAbstractTester {
       },
     };
 
-    // Apply overrides - normalize to array format then apply each path-value pair
-    let overridesArray: [string, unknown][] = [];
-    if (overrides.length > 0) {
-      overridesArray = Array.isArray(overrides[0]) ? (overrides as [string, unknown][]) : [overrides as [string, unknown]];
-    }
-    overridesArray.forEach(([path, value]) => {
-      MapConfigTester.#setValueByPath(baseConfig, path, value);
-    });
-
     // Replace the map!
-    return this.replaceMap(test, mapId, baseConfig);
+    return this.replaceMap(test, mapId, deepMerge(baseConfig, mapConfigOverrides), MAP_CONFIG_TEST_HEIGHT);
   }
 
   /**
-   * Sets a value in an object using a dot-notation path. If value is null or undefined, removes the key.
+   * Replaces the suite map with a fixed-size, layer-free map using the standard config-test lifecycle.
    *
-   * @param obj - The object to modify
-   * @param path - Dot-notation path like 'map.viewSettings.initialView'
-   * @param value - The value to set, or null/undefined to remove
+   * @param test - Test instance used to record lifecycle steps
+   * @param host - The suite's existing map root
+   * @param projection - View projection
+   * @param interaction - Interaction mode
+   * @param center - Initial longitude/latitude center
+   * @param rotation - View rotation in radians
+   * @returns A promise that resolves with the rendered fixture
    */
-  static #setValueByPath(obj: Record<string, unknown>, path: string, value: unknown): void {
-    const keys = path.split('.');
-    let current = obj;
+  async #createViewportFixture(
+    test: Test,
+    host: HTMLElement,
+    projection: TypeValidMapProjectionCodes,
+    interaction: TypeInteraction,
+    center: Coordinate,
+    rotation: number
+  ): Promise<MapViewer> {
+    host.style.setProperty('width', '800px');
+    // Keep the near-pole round-trip fixture below the projection singularity.
+    const zoom = center === TestConstants.VIEWPORT_POLAR_LONLAT ? 8 : MAP_ZOOM_LEVEL[projection];
+    const viewer = await this.replaceMap(test, host.id, {
+      map: {
+        interaction,
+        viewSettings: {
+          projection,
+          initialView: { zoomAndCenter: [zoom, center] },
+        },
+        basemapOptions: { basemapId: 'nogeom', shaded: false, labeled: false },
+        listOfGeoviewLayerConfig: [],
+      },
+      components: [],
+      navBar: [],
+      appBar: { tabs: { core: [] } },
+      footerBar: { tabs: { core: [] } },
+    });
 
-    // Validate against prototype pollution
-    const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
-    if (keys.some((key) => dangerousKeys.includes(key))) {
-      throw new Error(`Invalid path: "${path}" contains dangerous keys that could lead to prototype pollution`);
-    }
+    // Remove extent constraints so edge/polar fixtures test the requested center rather than a clamped Canada view.
+    viewer.setView({
+      projection,
+      initialView: { zoomAndCenter: [zoom, [center[0], center[1]]] },
+      rotation,
+    });
 
-    // Navigate to the parent of the final key
-    for (let i = 0; i < keys.length - 1; i++) {
-      const key = keys[i];
-      if (!Object.prototype.hasOwnProperty.call(current, key) || typeof current[key] !== 'object' || current[key] === null) {
-        current[key] = {};
-      }
-      current = current[key] as Record<string, unknown>;
-    }
+    viewer.map.updateSize();
+    viewer.updateViewPadding();
+    await viewer.waitForRender();
+    return viewer;
+  }
 
-    const finalKey = keys[keys.length - 1];
+  /**
+   * Restores layout and a usable viewport after a test, including detached and invalid-size cases.
+   *
+   * @param host - The suite's existing map root
+   * @param originalWidth - Inline width before the test
+   */
+  #resetViewportFixture(host: HTMLElement, originalWidth: string): void {
+    host.style.setProperty('width', originalWidth);
+    const viewer = this.getMapViewer();
+    viewer.map.setTarget(DomHelper.getMapTargetElement(this.getMapId()));
+    DomHelper.getMapInfo(this.getMapId())?.style.removeProperty('height');
+    viewer.setView({ projection: 3978, initialView: { zoomAndCenter: [MAP_ZOOM_LEVEL[3978], MAP_CENTER[3978]] } });
+    viewer.map.updateSize();
+    viewer.updateViewPadding();
+    viewer.map.renderSync();
+  }
 
-    // If value is null or undefined, remove the key
-    if (value === null || value === undefined) {
-      delete current[finalKey];
-    } else {
-      current[finalKey] = value;
-    }
+  /**
+   * Captures actual samples and an independent affine view-geometry oracle.
+   *
+   * @param viewer - Rendered fixture
+   * @returns Snapshot used exclusively for assertions
+   */
+  static #captureViewportBoundary(viewer: MapViewer): TypeViewportBoundarySnapshot {
+    const boundary = viewer.getViewportBoundaryLonLat();
+    const repeatedBoundary = viewer.getViewportBoundaryLonLat();
+    const view = viewer.getView();
+    const [width, height] = viewer.map.getSize()!;
+    const [top, padRight, padBottom, left] = view.padding ?? [0, 0, 0, 0];
+    const right = width - padRight;
+    const bottom = height - padBottom;
+    const x = (left + right) / 2;
+    const y = (top + bottom) / 2;
+    const expectedPixels = [
+      [left, top],
+      [right, top],
+      [right, bottom],
+      [left, bottom],
+      [x, top],
+      [right, y],
+      [x, bottom],
+      [left, y],
+    ];
+    const center = view.getCenter()!;
+    const resolution = view.getResolution()!;
+    const cos = Math.cos(view.getRotation());
+    const sin = Math.sin(view.getRotation());
+    const expected = expectedPixels.map(([px, py]): Coordinate =>
+      viewer.convertCoordinateMapProjToLonLat([
+        center[0] + resolution * ((px - x) * cos + (py - y) * sin),
+        center[1] + resolution * ((px - x) * sin - (py - y) * cos),
+      ])
+    );
+    const coordinates = [...Object.values(boundary.corners), ...Object.values(boundary.midpoints)];
+    const extent = view.calculateExtent();
+    return {
+      boundary,
+      repeatedBoundary,
+      expected,
+      pixels: coordinates.map((coordinate) => viewer.map.getPixelFromCoordinate(viewer.convertCoordinateLonLatToMapProj(coordinate))),
+      expectedPixels,
+      bottomPadding: padBottom,
+      infoHeight: viewer.mapFeaturesConfig.map.interaction === 'static' ? 0 : DomHelper.getMapInfoOffsetHeight(viewer.mapId),
+      canvasSouth: viewer.convertCoordinateMapProjToLonLat(viewer.map.getCoordinateFromPixel([x, height])),
+      freshObjects: boundary !== repeatedBoundary && boundary.corners.nw !== repeatedBoundary.corners.nw,
+      rotation: view.getRotation(),
+      center: viewer.convertCoordinateMapProjToLonLat(center),
+      extentSouth: viewer.convertCoordinateMapProjToLonLat([(extent[0] + extent[2]) / 2, extent[1]]),
+    };
+  }
+
+  /**
+   * Verifies exact output shape, finite coordinates, and boundary positions.
+   *
+   * @param snapshot - Captured API result and independent expectations
+   */
+  static #assertViewportBoundary(snapshot: TypeViewportBoundarySnapshot): void {
+    Test.assertIsArrayEqual(Object.keys(snapshot.boundary), ['corners', 'midpoints', 'midpointWSENCoords']);
+    Test.assertIsArrayEqual(Object.keys(snapshot.boundary.corners), ['nw', 'ne', 'se', 'sw']);
+    Test.assertIsArrayEqual(Object.keys(snapshot.boundary.midpoints), ['n', 'e', 's', 'w']);
+    Test.assertJsonObject(snapshot.boundary, snapshot.repeatedBoundary);
+    Test.assertIsEqual(snapshot.freshObjects, true);
+    const { w, s, e, n } = snapshot.boundary.midpoints;
+    Test.assertIsArrayEqualJsons(snapshot.boundary.midpointWSENCoords, [w, s, e, n]);
+    const coordinates = [...Object.values(snapshot.boundary.corners), ...Object.values(snapshot.boundary.midpoints)];
+    coordinates.forEach((coordinate, index): void => {
+      Test.assertIsArrayLengthEqual(coordinate, 2);
+      Test.assertIsEqual(coordinate.every(Number.isFinite), true);
+      coordinate.forEach((value, axis): void => Test.assertIsEqualWithinTolerance(value, snapshot.expected[index][axis], 1e-6));
+      const pixel = snapshot.pixels[index];
+      Test.assertIsDefined('pixel', pixel);
+      pixel.forEach((value, axis): void => Test.assertIsEqualWithinTolerance(value, snapshot.expectedPixels[index][axis], 0.5));
+    });
   }
 
   /**
@@ -2151,9 +3061,40 @@ export class MapConfigTester extends GVAbstractTester {
       footerChromeHeight: tabsContainer ? Math.round(tabsContainer.getBoundingClientRect().height) : 0,
     };
   }
+
+  // #endregion PRIVATE METHODS
 }
 
 // #region TYPES AND INTERFACES
+
+/** Query and zoom results from the Ontario/Alberta visibility scenarios. */
+type DetailsVisibilityAndZoomResult = Pick<
+  DetailsOntarioAlbertaResult,
+  | 'resultsOntarioResults'
+  | 'resultsOntarioNoResults'
+  | 'resultsAlbertaNoResults1'
+  | 'resultsAlbertaResults'
+  | 'resultsAlbertaNoResults2'
+  | 'initialZoom'
+  | 'finalZoom'
+>;
+
+/** Feature-info query results from the field configuration scenarios. */
+type DetailsFeatureInfoConfigurationResult = Pick<DetailsOntarioAlbertaResult, 'nameFieldResults' | 'summaryResults' | 'aliasResults'>;
+
+/** Query and zoom observations for the Ontario/Alberta Details test. */
+type DetailsOntarioAlbertaResult = {
+  resultsOntarioResults: TypeFeatureInfoEntry[] | undefined;
+  resultsOntarioNoResults: TypeFeatureInfoEntry[] | undefined;
+  resultsAlbertaNoResults1: TypeFeatureInfoEntry[] | undefined;
+  resultsAlbertaResults: TypeFeatureInfoEntry[] | undefined;
+  resultsAlbertaNoResults2: TypeFeatureInfoEntry[] | undefined;
+  nameFieldResults: TypeFeatureInfoEntry[] | undefined;
+  summaryResults: TypeFeatureInfoEntry[] | undefined;
+  aliasResults: TypeFeatureInfoEntry[] | undefined;
+  initialZoom: number | undefined;
+  finalZoom: number | undefined;
+};
 
 /** Height measurements for fixed-height map layout tests. */
 type TypeMapHeightMeasurements = {
@@ -2162,5 +3103,49 @@ type TypeMapHeightMeasurements = {
   /** Height of the rendered collapsed footer chrome. */
   footerChromeHeight: number;
 };
+
+/** Captured boundary samples and independent pixel/coordinate expectations. */
+interface TypeViewportBoundarySnapshot {
+  /** Public viewer result. */
+  boundary: TypeViewportBoundaryLonLat;
+  /** Second snapshot from the same rendered frame. */
+  repeatedBoundary: TypeViewportBoundaryLonLat;
+  /** Samples calculated from view center, resolution, rotation, and padding. */
+  expected: Coordinate[];
+  /** Returned coordinates projected back to viewport pixels. */
+  pixels: (number[] | null)[];
+  /** Expected screen positions. */
+  expectedPixels: number[][];
+  /** Bottom padding at sampling time. */
+  bottomPadding: number;
+  /** Actual map-info bar overlay height (zero for static maps). */
+  infoHeight: number;
+  /** Southern sample calculated at the full canvas bottom. */
+  canvasSouth: Coordinate;
+  /** Indicates independent objects were returned by consecutive calls. */
+  freshObjects: boolean;
+  /** Rendered view rotation in radians. */
+  rotation: number;
+  /** Rendered logical center in longitude/latitude. */
+  center: Coordinate;
+  /** Southern midpoint derived from the axis-aligned extent rather than the viewport. */
+  extentSouth: Coordinate;
+}
+
+/** Fit outcome captured before assertion so operations stay in the execution phase. */
+interface TypeViewportMidpointFitResult {
+  /** Rendered geometry after fitting. */
+  snapshot: TypeViewportBoundarySnapshot;
+  /** Original coordinates copied before fitting. */
+  original: Coordinate[];
+  /** Caller-owned array after fitting. */
+  input: Coordinate[];
+  /** Original coordinates projected to pixels after fitting. */
+  pixels: (number[] | null)[];
+  /** Original pixel positions before the view was changed. */
+  originalPixels: number[][];
+  /** Source rotation to restore when the projection is unchanged. */
+  rotation: number;
+}
 
 // #endregion TYPES AND INTERFACES

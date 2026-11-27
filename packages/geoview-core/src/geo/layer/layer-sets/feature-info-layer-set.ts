@@ -108,6 +108,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // The result set to be returned
     const querySet: TypeFeatureInfoResultSet = {};
 
+    // Before querying, make sure the map render is synchronized, this can be necessary for vector layers that were just added to the map
+    await this.mapViewer.waitForRender();
+
     // Initialize the resultSet
     this.getRegisteredLayerPaths().forEach((layerPath) => {
       // Init the result set entry for the layer path

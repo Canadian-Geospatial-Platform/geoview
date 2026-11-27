@@ -1359,9 +1359,9 @@ function DataTable({
       const filterStrings = buildFilterList(filters)
         .filter((filterValue) => filterValue.length)
         .join(' and ');
-      dataTableController.applyMapFilters(filterStrings);
+      dataTableController.applyMapFilters(layerPath, filterStrings);
     },
-    [buildFilterList, dataTableController]
+    [buildFilterList, dataTableController, layerPath]
   );
 
   /**

@@ -2,7 +2,6 @@ import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import {
-  getStoreDataTableSelectedLayerPath,
   getStoreDataTableMapFilteredRecord,
   setStoreDataTableColumnFiltersRecord,
   setStoreDataTableColumnVisibilityRecord,
@@ -16,6 +15,7 @@ import {
   setStoreDataTableSelectedLayerPath,
   type TypeColumnFiltersState,
 } from '@/core/stores/states/data-table-state';
+import { logger } from '@/core/utils/logger';
 import type { MapViewer } from '@/geo/map/map-viewer';
 
 // GV Controllers shouldn't import DomHelper
@@ -43,22 +43,26 @@ export class DataTableController extends AbstractMapViewerController {
   // #region PUBLIC METHODS
 
   /**
-   * Applies the current map filter strings to the selected data-table layer.
+   * Applies the current map filter strings to a data-table layer.
    *
    * If the layer already has a filtered record, the provided filter strings are applied;
    * otherwise the filter is cleared.
    *
+   * @param layerPath - The owning table's layer path; defaults to the current selection
    * @param filterStrings - The filter expression to apply
    */
-  applyMapFilters(filterStrings: string): void {
-    // Get the selected layer path
-    const selectedLayerPath = getStoreDataTableSelectedLayerPath(this.getMapId());
+  applyMapFilters(layerPath: string | undefined, filterStrings: string): void {
+    if (!layerPath) return;
+
+    // A pending React effect can run after its table's layer has been removed.
+    const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegularIfExists(layerPath);
+    if (!layer) {
+      logger.logDebug(`Skipping data-table map filters for removed layer '${layerPath}'.`);
+      return;
+    }
 
     // TODO: Move this condition check in the caller?
-    const filter = getStoreDataTableMapFilteredRecord(this.getMapId(), selectedLayerPath) ? filterStrings : '';
-
-    // Get the layer
-    const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(selectedLayerPath);
+    const filter = getStoreDataTableMapFilteredRecord(this.getMapId(), layerPath) ? filterStrings : '';
 
     // Set the filters on the data on the layer
     layer.setLayerFiltersData(filter);

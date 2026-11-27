@@ -1,10 +1,8 @@
 import type { BaseTestChangedEvent } from './test';
 import type { ClassType } from 'geoview-core/core/types/global-types';
-import type { EventDelegateBase } from 'geoview-core/api/events/event-helper';
 import EventHelper from 'geoview-core/api/events/event-helper';
 import { logger } from 'geoview-core/core/utils/logger';
 import { formatError } from 'geoview-core/core/exceptions/core-exceptions';
-import { delay } from 'geoview-core/core/utils/utilities';
 import { Test } from './test';
 import { TestSkippedError } from './exceptions';
 
@@ -117,6 +115,38 @@ export abstract class AbstractTester {
    */
   getTestsDoneAllSuccess(): boolean {
     return this.getTestsDoneAll() && this.#tests.every((test) => test.getStatus() === 'success' || test.getStatus() === 'skipped');
+  }
+
+  /**
+   * Gets the sum of available full test lifecycle durations across all registered tests.
+   *
+   * Tests without start and end timestamps do not contribute. Concurrent test durations can overlap.
+   *
+   * @returns The accumulated recorded test duration in milliseconds, or zero when none are available
+   */
+  getDurationMs(): number {
+    return this.#tests.reduce((total, test) => total + (test.getDurationMs() ?? 0), 0);
+  }
+
+  /**
+   * Gets the sum of available execution callback durations, excluding assertions and finalization.
+   *
+   * Tests without callback start and end timestamps do not contribute, including failed callbacks
+   * without a recorded end time. Concurrent callback durations can overlap.
+   *
+   * @returns The accumulated recorded callback duration in milliseconds, or zero when none are available
+   */
+  getDurationTestMs(): number {
+    return this.#tests.reduce((total, test) => total + (test.getDurationTestMs() ?? 0), 0);
+  }
+
+  /**
+   * Gets the largest estimated starvation duration among all registered tests.
+   *
+   * @returns The maximum test starvation duration in milliseconds, or zero when no tests are registered
+   */
+  getDurationStarvationMs(): number {
+    return this.#tests.reduce((maximum, test) => Math.max(maximum, test.getDurationStarvationMs()), 0);
   }
 
   /**
@@ -562,24 +592,6 @@ export abstract class AbstractTester {
 
   // #endregion PRIVATE
 
-  // #region STATIC METHODS
-
-  /**
-   * Waits for a purely aesthetic delay to allow the test UI to visually catch up.
-   *
-   * This should only be used for display purposes (e.g., giving the human observer time to see
-   * intermediate state changes in the test runner UI). Never use this for functional synchronization.
-   *
-   * @param period - Optional delay in milliseconds (default: 5000)
-   * @returns A promise that resolves after the delay
-   */
-  static waitForFun(period = 5000): Promise<void> {
-    // Wait for the React UI to actually pick up on the store update
-    return delay(period);
-  }
-
-  // #endregion STATIC METHODS
-
   // #region EVENTS
 
   /**
@@ -597,7 +609,7 @@ export abstract class AbstractTester {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onStarted(callback: TestDelegate): void {
+  onStarted(callback: TestDelegate<this>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onTestStartedHandlers, callback);
   }
@@ -607,7 +619,7 @@ export abstract class AbstractTester {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offStarted(callback: TestDelegate): void {
+  offStarted(callback: TestDelegate<this>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onTestStartedHandlers, callback);
   }
@@ -627,7 +639,7 @@ export abstract class AbstractTester {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onStepUpdated(callback: TestUpdatedDelegate): void {
+  onStepUpdated(callback: TestUpdatedDelegate<this>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onTestUpdatedHandlers, callback);
   }
@@ -637,7 +649,7 @@ export abstract class AbstractTester {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offStepUpdated(callback: TestUpdatedDelegate): void {
+  offStepUpdated(callback: TestUpdatedDelegate<this>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onTestUpdatedHandlers, callback);
   }
@@ -657,7 +669,7 @@ export abstract class AbstractTester {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onSuccess(callback: SuccessDelegate): void {
+  onSuccess(callback: SuccessDelegate<this>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onSuccessHandlers, callback);
   }
@@ -667,7 +679,7 @@ export abstract class AbstractTester {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offSuccess(callback: SuccessDelegate): void {
+  offSuccess(callback: SuccessDelegate<this>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onSuccessHandlers, callback);
   }
@@ -687,7 +699,7 @@ export abstract class AbstractTester {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onFailure(callback: FailureDelegate): void {
+  onFailure(callback: FailureDelegate<this>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onFailureHandlers, callback);
   }
@@ -697,7 +709,7 @@ export abstract class AbstractTester {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offFailure(callback: FailureDelegate): void {
+  offFailure(callback: FailureDelegate<this>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onFailureHandlers, callback);
   }
@@ -717,7 +729,7 @@ export abstract class AbstractTester {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onSkipped(callback: SkippedDelegate): void {
+  onSkipped(callback: SkippedDelegate<this>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onSkippedHandlers, callback);
   }
@@ -727,7 +739,7 @@ export abstract class AbstractTester {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offSkipped(callback: SkippedDelegate): void {
+  offSkipped(callback: SkippedDelegate<this>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onSkippedHandlers, callback);
   }
@@ -747,7 +759,7 @@ export abstract class AbstractTester {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onDone(callback: TestDelegate): void {
+  onDone(callback: TestDelegate<this>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onDoneHandlers, callback);
   }
@@ -757,7 +769,7 @@ export abstract class AbstractTester {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offDone(callback: TestDelegate): void {
+  offDone(callback: TestDelegate<this>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onDoneHandlers, callback);
   }
@@ -780,7 +792,9 @@ export interface TestEvent {
 }
 
 /** Define a delegate for the event handler function signature. */
-export type TestDelegate = EventDelegateBase<AbstractTester, TestEvent, void>;
+export type TestDelegate<TTester extends AbstractTester = AbstractTester> = {
+  bivarianceHack(sender: TTester, event: TestEvent): void;
+}['bivarianceHack'];
 
 /** Define an event for the delegate. */
 export interface TestUpdatedEvent<T = BaseTestChangedEvent> extends TestEvent {
@@ -788,7 +802,9 @@ export interface TestUpdatedEvent<T = BaseTestChangedEvent> extends TestEvent {
 }
 
 /** Define a delegate for the event handler function signature. */
-export type TestUpdatedDelegate = EventDelegateBase<AbstractTester, TestUpdatedEvent, void>;
+export type TestUpdatedDelegate<TTester extends AbstractTester = AbstractTester> = {
+  bivarianceHack(sender: TTester, event: TestUpdatedEvent): void;
+}['bivarianceHack'];
 
 /** Define an event for the delegate. */
 export interface SuccessEvent<T = unknown> extends TestEvent {
@@ -796,7 +812,9 @@ export interface SuccessEvent<T = unknown> extends TestEvent {
 }
 
 /** Define a delegate for the event handler function signature. */
-export type SuccessDelegate = EventDelegateBase<AbstractTester, SuccessEvent, void>;
+export type SuccessDelegate<TTester extends AbstractTester = AbstractTester> = {
+  bivarianceHack(sender: TTester, event: SuccessEvent): void;
+}['bivarianceHack'];
 
 /** Define an event for the delegate. */
 export interface FailureEvent extends TestEvent {
@@ -804,7 +822,9 @@ export interface FailureEvent extends TestEvent {
 }
 
 /** Define a delegate for the event handler function signature. */
-export type FailureDelegate = EventDelegateBase<AbstractTester, FailureEvent, void>;
+export type FailureDelegate<TTester extends AbstractTester = AbstractTester> = {
+  bivarianceHack(sender: TTester, event: FailureEvent): void;
+}['bivarianceHack'];
 
 /** Define an event for the delegate. */
 export interface SkippedEvent extends TestEvent {
@@ -812,4 +832,6 @@ export interface SkippedEvent extends TestEvent {
 }
 
 /** Define a delegate for the event handler function signature. */
-export type SkippedDelegate = EventDelegateBase<AbstractTester, SkippedEvent, void>;
+export type SkippedDelegate<TTester extends AbstractTester = AbstractTester> = {
+  bivarianceHack(sender: TTester, event: SkippedEvent): void;
+}['bivarianceHack'];

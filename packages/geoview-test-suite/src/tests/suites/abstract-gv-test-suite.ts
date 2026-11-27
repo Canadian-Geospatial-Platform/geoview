@@ -1,4 +1,6 @@
+import { TestConstants } from '../testers/constants';
 import { AbstractTestSuite } from '../core/abstract-test-suite';
+import type { GVAbstractTester } from '../testers/abstract-gv-tester';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
@@ -6,7 +8,7 @@ import type { ControllerRegistry } from 'geoview-core/core/controllers/base/cont
 /**
  * Main GeoView Abstract Suite class.
  */
-export abstract class GVAbstractTestSuite extends AbstractTestSuite {
+export abstract class GVAbstractTestSuite extends AbstractTestSuite<GVAbstractTester> {
   /** The api */
   #api: API;
 
@@ -63,7 +65,7 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
   }
 
   /**
-   * Gets the MapViewer.
+   * Gets the MapViewer assigned for the current suite execution.
    *
    * @returns The map viewer
    */
@@ -87,6 +89,16 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
    */
   getControllersRegistry(): ControllerRegistry {
     return this.#controllerRegistry;
+  }
+
+  /**
+   * Restores the current map's initial extent using the shared test zoom-animation setting.
+   *
+   * @returns A promise that resolves when the zoom completes
+   */
+  zoomToInitialExtent(): Promise<void> {
+    this.addStep('Zooming back to initial extent before continuing the tests...');
+    return this.getControllersRegistry().mapController.zoomToInitialExtent(TestConstants.USE_ZOOM_ANIMATION);
   }
 
   // #endregion METHODS

@@ -2,7 +2,6 @@ import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { MapTester } from '../testers/map-tester';
-import { GVAbstractTester } from '../testers/abstract-gv-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
 
 /**
@@ -42,17 +41,19 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests map interactions, projection, basemap, and UI tabs:<br/>
-      <b>Map state</b> — Initial state verification, zoom operations, extent/coordinate navigation<br/>
-      <b>Projection</b> — Switch between EPSG:3978 and EPSG:3857, vector tile warning<br/>
+    return `Tests runtime map navigation, projection, basemap, and UI controller operations:<br/>
+      <b>Map state</b> — Initial state verification<br/>
+      <b>Crosshair</b> — Keyboard crosshair coordinates with padding, rotation and stale mouse positions<br/>
+      <b>Navigation</b> — Zoom operations, projection/extent switching between EPSG:3978 and EPSG:3857, extent and coordinate navigation<br/>
       <b>Basemap</b> — Runtime basemap creation and activation<br/>
       <b>North arrow</b> — Rotation computation under LCC projection<br/>
-      <b>UI tabs</b> — Footer bar select/create tab, app bar select tab<br/>
+      <b>Vector tiles</b> — Projection warning<br/>
+      <b>Geometry</b> — Geometry group z-index updates<br/>
       <b>Language</b> — Runtime language switch<br/>
-      <b>Layers</b> — Non-queryable exclusion from details, hoverable state, geometry group z-index<br/>
-      <b>Details</b> — Layer selection persistence across tab switches<br/>
+      <b>UI tabs</b> — Footer bar selection, app bar selection, then footer bar tab creation<br/>
       <b>Fullscreen</b> — Restore the original view without interaction; preserve the current view after interaction<br/>
-      <b>UI</b> — Details panel top anchor; footer-height getter for non-React consumers`;
+      <b>UI</b> — Details panel guide Top anchor; footer-height getter for non-React consumers<br/>
+      <b>Page scrolling</b> — Partially visible, transitioning, already visible, and oversized map sections, run with exclusive page access`;
   }
 
   /**
@@ -61,7 +62,7 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 24;
+    return 21;
   }
 
   /**
@@ -82,153 +83,74 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // Test the map state
-    const pmapState = this.#mapTester.testInitialMapState();
-
-    // Wait until this test finishes before starting manipulating the map
-    await pmapState;
+    await this.#mapTester.testInitialMapState();
 
     // Crosshair checks mutate padding, rotation, and pointer state; keep them sequential.
-    const pCrosshairCoordinates = this.#mapTester.testCrosshairCoordinates();
-    await pCrosshairCoordinates;
+    await this.#mapTester.testCrosshairCoordinates();
 
     // Test the zoom
-    const pZoom = this.#mapTester.testMapZoom(7);
-
-    // Wait until the zoom finishes before continuing manipulating the map
-    await pZoom;
+    await this.#mapTester.testMapZoom(7);
 
     // Test projection switch and zoom to initial extent
-    const pProjection = this.#mapTester.testSwitchProjectionAndExtent(3978, 3857, 1);
-
-    // Wait until the projection switch finishes before continuing manipulating the map
-    await pProjection;
+    await this.#mapTester.testSwitchProjectionAndExtent(3978, 3857, 1);
 
     // Test zoom to extent. The expected extent reflects the corrected fixed-height map shell after collapsed footer sizing is applied.
-    const pZoomToExtent = this.#mapTester.testZoomToExtent([-87, 51, -84, 53], [-88, 50, -82, 53]);
-
-    // Wait until the zoom finishes before continuing manipulating the map
-    await pZoomToExtent;
+    await this.#mapTester.testZoomToExtent([-87, 51, -84, 53], [-88, 50, -82, 53]);
 
     // Test zoom to coordinate
-    const pZoomToCoordinate = this.#mapTester.testZoomToCoordinate([-80, 50]);
-
-    // Wait until the zoom finishes before continuing manipulating the map
-    await pZoomToCoordinate;
+    await this.#mapTester.testZoomToCoordinate([-80, 50]);
 
     // Test create and set basemap
-    const pCreateAndSetBasemap = this.#mapTester.testCreateAndSetBasemap();
-
-    // Wait until the basemap change finishes before continuing manipulating the map
-    await pCreateAndSetBasemap;
+    await this.#mapTester.testCreateAndSetBasemap();
 
     // Test north arrow rotation in LCC projection for BC
-    const pNorthArrowRotationLCC = this.#mapTester.testNorthArrowRotationLCC();
-
-    // Wait until the north arrow rotation finishes, because there are zooms and projection changes happening in that test
-    await pNorthArrowRotationLCC;
+    await this.#mapTester.testNorthArrowRotationLCC();
 
     // Test vector tile projection warning
-    const pVectorTileProjectionWarning = this.#mapTester.testVectorTileProjectionWarning();
-
-    // Wait until the VT projection warning test finishes before continuing manipulating the map
-    await pVectorTileProjectionWarning;
+    await this.#mapTester.testVectorTileProjectionWarning();
 
     // Make sure the map is reset in its initial extent after the zooms
-    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+    await this.zoomToInitialExtent();
 
-    // Test geometry z-index, not awaiting on it, it can happen at the same time as the rest, even testDetailsLayerSelectionPersistence for example
+    // Test geometry z-index, not awaiting on it, it can happen at the same time as the rest
     const pZIndex = this.#mapTester.testGeometryGroupZIndex();
-
-    // Test footer bar select tab
-    const pFooterBarSelectTab = this.#mapTester.testFooterBarSelectTab();
-
-    // Wait until the selected tab test finishes before continuing manipulating the map
-    await pFooterBarSelectTab;
-
-    // Test app bar select tab
-    const pAppBarSelectTab = this.#mapTester.testAppBarSelectTab();
-
-    // Wait until the selected tab test finishes before continuing manipulating the map
-    await pAppBarSelectTab;
-
-    // Test footer bar create tab
-    const pFooterBarCreateTab = this.#mapTester.testFooterBarCreateTab();
-
-    // Wait until the selected tab test finishes before continuing manipulating the map
-    await pFooterBarCreateTab;
 
     // Test set language
     const pSetLanguage = this.#mapTester.testSetLanguage();
 
-    // Make sure the map is in its initial extent
-    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
-
-    // Test non-queryable layer not in details
-    const pNonQueryableLayerNotInDetails = this.#mapTester.testNonQueryableLayerNotInDetails('geojsonLYR5/polygons.json', [-88, 52]);
-
-    // Test layer hoverable state
-    const pLayerHoverableState = this.#mapTester.testLayerHoverableState('geojsonLYR5/polygons.json', [-88, 52]);
-
-    // Wait on all the tests of queryable/hoverable before continuing manipulating the map, those all happen in parallel
-    await Promise.all([pNonQueryableLayerNotInDetails, pLayerHoverableState]);
-
-    // Test details layer selection persistence, this test manipulates the map state too much as should run independently
-    const pDetailsLayerSelectionPersistence = this.#mapTester.testDetailsLayerSelectionPersistence(
-      'geojsonLYR5/polygons.json',
-      'esriFeatureLYR5/0',
-      [-87.4, 52.9],
-      [-73.9, 46.5]
-    );
-
-    // Wait on details layer selection persistence which manipulates the map state a lot and should run independently
-    await pDetailsLayerSelectionPersistence;
-
-    // Test fullscreen view restoration and interaction preservation
-    const pFullscreenViewRestoration = this.#mapTester.testFullscreenViewRestoration();
-
-    // Wait until fullscreen state cleanup completes before returning the suite result
-    await pFullscreenViewRestoration;
-
     // Finish remaining map tests before the UI tests change the active app-bar tab
     await Promise.all([pZIndex, pSetLanguage]);
 
+    // Test footer bar select tab
+    await this.#mapTester.testFooterBarSelectTab();
+
+    // Test app bar select tab
+    await this.#mapTester.testAppBarSelectTab();
+
+    // Test footer bar create tab
+    await this.#mapTester.testFooterBarCreateTab();
+
+    // Make sure the map is reset in its initial extent after the zooms
+    await this.zoomToInitialExtent();
+
+    // Test fullscreen view restoration and interaction preservation
+    await this.#mapTester.testFullscreenViewRestoration();
+
     // Test details panel guide and Top anchor
-    const pDetailsPanelTopAnchor = this.#mapTester.testGuideDetailsPanelTopAnchor();
-    await pDetailsPanelTopAnchor;
+    await this.#mapTester.testGuideDetailsPanelTopAnchor();
 
     // Test UIController.getFooterHeight from a non-React consumer
-    const pControllerGetFooterHeight = this.#mapTester.testControllerGetFooterHeight();
+    await this.#mapTester.testControllerGetFooterHeight();
 
     // Page-scrolling fixtures must not run alongside other UI/map mutations, including other maps under "Run all".
-    // TODO: ALEX - Fix the promise returns here in next PR
-    // TODO: It'd be great it we could know in the UI that the suite is waiting on something here (there's not test to write a step here.. we need a 'suite-step' logic too)
     await this.waitForPageExclusivity();
+
+    // Now that the suite has exclusivity, test scrolling
     await this.#mapTester.testMapSectionScroll('partial');
     await this.#mapTester.testMapSectionScroll('transitions');
     await this.#mapTester.testMapSectionScroll('visible');
     await this.#mapTester.testMapSectionScroll('oversized');
 
-    // Resolve when all
-    return Promise.all([
-      pmapState,
-      pCrosshairCoordinates,
-      pZoom,
-      pProjection,
-      pZoomToExtent,
-      pZoomToCoordinate,
-      pCreateAndSetBasemap,
-      pNorthArrowRotationLCC,
-      pZIndex,
-      pFooterBarSelectTab,
-      pAppBarSelectTab,
-      pFooterBarCreateTab,
-      pSetLanguage,
-      pNonQueryableLayerNotInDetails,
-      pLayerHoverableState,
-      pDetailsLayerSelectionPersistence,
-      pFullscreenViewRestoration,
-      pDetailsPanelTopAnchor,
-      pControllerGetFooterHeight,
-    ]);
+    return;
   }
 }
