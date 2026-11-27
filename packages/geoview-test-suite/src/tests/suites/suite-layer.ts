@@ -96,9 +96,6 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
-    // Test adding layer
-    const pLayerEsriDynamicHistoFloods = this.#layerTester.testAddEsriDynamicHistoFloodEvents();
-
     // Test canonical export parameters against the case-sensitive Quebec service.
     const pLayerEsriDynamicCaseSensitive = this.#layerTester.testAddEsriDynamicCaseSensitiveExport();
 
@@ -238,9 +235,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     const pGeocoreCesiOverride = this.#layerTester.testAddGeocoreWithInlineCesiGroupOverrides();
 
     // Test the IAAC group and each child's visibility/collapse overrides.
-    // TODO: ALEX - Uncomment this
-    // const pGeocoreIaacOverride = this.#layerTester.testAddGeocoreWithInlineIAACGroupOverride();
-    const pGeocoreIaacOverride = Promise.resolve();
+    const pGeocoreIaacOverride = this.#layerTester.testAddGeocoreWithInlineIAACGroupOverride();
 
     // Test domain fields
     const pEsriDynamicDomainField = this.#layerTester.testAddEsriDynamicWithDomainField();

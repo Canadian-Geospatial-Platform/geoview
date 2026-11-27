@@ -125,7 +125,8 @@ export class MapTester extends GVAbstractTester {
             uiController.setCrosshairActive(false);
 
             // eslint-disable-next-line no-await-in-loop -- Each case must commit crosshair deactivation before reactivation.
-            await delay(50);
+            await DomHelper.waitForReactIdle();
+
             view.padding = [0, 0, bottom, 0];
             view.setRotation(rotation);
             const center = view.getCenter()!;
@@ -137,7 +138,7 @@ export class MapTester extends GVAbstractTester {
             uiController.setCrosshairActive(true);
 
             // eslint-disable-next-line no-await-in-loop -- Observe the activation effect before dispatching this case's keys.
-            await delay(50);
+            await DomHelper.waitForReactIdle();
 
             const size = viewer.map.getSize()!;
             const mapRect = target.getBoundingClientRect();

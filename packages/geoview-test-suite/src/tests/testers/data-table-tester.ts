@@ -367,7 +367,7 @@ export class DataTableTester extends GVAbstractTester {
       'Test filter-by-extent toggle absent for Esri Dynamic layer...',
       async (test) => {
         // Add the Esri Dynamic layer
-        const layer = await this.addLayerEsriDynamicHistoFloodEvents(test, undefined, {
+        const layer = await this.addLayerEsriDynamicHistoFloodEvents(test, {
           onLayerPath: (rootPath): void => {
             rootLayerPath = rootPath;
           },

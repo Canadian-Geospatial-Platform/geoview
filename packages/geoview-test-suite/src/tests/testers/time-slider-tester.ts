@@ -63,7 +63,7 @@ export class TimeSliderTester extends GVAbstractTester {
       async (test) => {
         // Add the layer
         test.addStep('Adding the Historical Flood layer...');
-        gvLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, undefined, {
+        gvLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, {
           onLayerPath: (rootPath): void => {
             rootLayerPath = rootPath;
           },

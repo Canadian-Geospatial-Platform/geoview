@@ -8,13 +8,15 @@ import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { logger } from 'geoview-core/core/utils/logger';
 import { NotImplementedError } from 'geoview-core/core/exceptions/core-exceptions';
-import { delay, generateId } from 'geoview-core/core/utils/utilities';
+import { delay, generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import { GeoPackageReader } from 'geoview-core/api/config/reader/geopackage-reader';
 import type { ConfigBaseClass } from 'geoview-core/api/config/validation-classes/config-base-class';
+import type { GroupLayerEntryConfig } from 'geoview-core/api/config/validation-classes/group-layer-entry-config';
 import type { EsriDynamicLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import type { OgcWmsLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { EsriFeatureLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import { CONTAINER_TYPE } from 'geoview-core/core/utils/constant';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
 import { TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH } from 'geoview-core/core/stores/states/feature-info-state';
@@ -36,6 +38,7 @@ import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
 import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
 import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import type { GVGroupLayer } from 'geoview-core/geo/layer/gv-layers/gv-group-layer';
 import type { GVGeoJSON } from 'geoview-core/geo/layer/gv-layers/vector/gv-geojson';
 import type { GVWMTS } from 'geoview-core/geo/layer/gv-layers/tile/gv-wmts';
 import type { GVEsriDynamic } from 'geoview-core/geo/layer/gv-layers/raster/gv-esri-dynamic';
@@ -145,7 +148,6 @@ export abstract class GVAbstractTester extends AbstractTester {
    */
   async addLayerEsriDynamicHistoFloodEvents(
     test: Test,
-    gvLayerName = 'Esri Dynamic Histo Flood Events',
     callbacks?: LayerAdditionCallbacks<EsriDynamicLayerEntryConfig>
   ): Promise<GVEsriDynamic> {
     const gvLayerId = generateId();
@@ -153,7 +155,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     const layerUrl = TestConstants.HISTORICAL_FLOOD_URL_MAP_SERVER;
 
     // Create the geoview layer config
-    const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, true, [
+    const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, undefined, layerUrl, true, [
       { id: TestConstants.HISTORICAL_FLOOD_LAYER_ID },
     ]);
 
@@ -173,11 +175,10 @@ export abstract class GVAbstractTester extends AbstractTester {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.FOREST_INDUSTRY_LAYER_ID}`;
     const layerUrl = TestConstants.FOREST_INDUSTRY_MAP_SERVER;
-    const gvLayerName = 'Esri Feature Forest Industry';
 
     // Create the config
     test.addStep('Creating the GeoView Layer Configuration...');
-    const gvConfig = EsriFeature.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+    const gvConfig = EsriFeature.createGeoviewLayerConfig(gvLayerId, undefined, layerUrl, false, [
       { id: TestConstants.FOREST_INDUSTRY_LAYER_ID },
     ]);
 
@@ -1244,6 +1245,35 @@ export abstract class GVAbstractTester extends AbstractTester {
   }
 
   /**
+   * Adds an IAAC GeoCore fixture with an inline group override and waits for its generated group to be ready.
+   *
+   * @param test - The test instance used to log layer setup
+   * @param customLayerEntryConfig - Serialized inline group configuration without an explicit group layer ID
+   * @param callbacks - Optional selected-path and registered-configuration callbacks
+   * @returns A promise resolving with the group after its leaf layers load and its legend is queried
+   * @throws {TestError} When the generated entry is not a group
+   */
+  async addLayerIAACInlineViaGeocore(
+    test: Test,
+    customLayerEntryConfig: string,
+    callbacks?: LayerAdditionCallbacks<GroupLayerEntryConfig>
+  ): Promise<GVGroupLayer> {
+    test.addStep('Adding the IAAC GeoCore record with an inline group...');
+
+    const uuid = TestConstants.GEOCORE_IAAC_UUID;
+    const config = await this.addLayerOnMapFromUUID<GroupLayerEntryConfig>(
+      test,
+      uuid,
+      `${uuid}/base-group`,
+      customLayerEntryConfig,
+      callbacks
+    );
+
+    // Group legend events have no icons of their own.
+    return this.waitLayerAtLayerPath(test, config.layerPath, true);
+  }
+
+  /**
    * Adds the Major Economic Projects point WMS fixture through GeoCore.
    *
    * @param test - The test instance used to log layer setup and readiness
@@ -1318,15 +1348,16 @@ export abstract class GVAbstractTester extends AbstractTester {
     test.addStep('Adding the layer on the map...');
     const layerAddition = this.getControllersRegistry().layerCreatorController.addGeoviewLayer(gvConfig);
 
-    test.addStep('Waiting for the layer to be added on map...');
-    await layerAddition.promiseLayerOnMap;
-
-    // Wait for the layer to get registered
+    // Wait for the layer config to get registered
     test.addStep(`Wait for the layer config ${layerPath} to be registered...`);
     const config = (await this.getControllersRegistry().layerController.waitForLayerConfigRegistered(layerPath)) as T;
 
     // Callback with the config
     await callbacks?.onConfig?.(config);
+
+    // Wait for the layer to be added on the map
+    test.addStep('Waiting for the layer to be added on map...');
+    await layerAddition.promiseLayerOnMap;
 
     // Return the config
     return config;
@@ -1382,6 +1413,38 @@ export abstract class GVAbstractTester extends AbstractTester {
 
     // Return the config
     return config;
+  }
+
+  /**
+   * Waits for a layer's box to mount in both panels without changing group or tab state.
+   *
+   * @param test - The test instance used to record readiness steps
+   * @param layerPath - The full path of the layer to wait for
+   * @param timeout - Maximum wait in milliseconds for each readiness condition
+   * @returns The registered layer configuration
+   */
+  async waitForLayerBoxInLayersPanels(test: Test, layerPath: string, timeout = 60000): Promise<ConfigBaseClass> {
+    const mapId = this.getMapId();
+
+    // Wait for the layer config to be registered
+    test.addStep(`Waiting for layer config to be registered at layer path ${layerPath}...`);
+    const layerConfig = await this.getControllersRegistry().layerController.waitForLayerConfigRegistered(layerPath, timeout);
+
+    test.addStep('Waiting for fixture entries in the Legend and Layers panels...');
+    await whenThisThen(() => getStoreLayerLegendLayerByPath(mapId, layerPath), timeout);
+
+    test.addStep('Waiting for UI to hold the box...');
+    await whenThisThen(() => {
+      return (
+        (DomHelper.getLayerBoxInLayersPanel(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ||
+          DomHelper.getLayerBoxInLayersPanel(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR)) &&
+        (DomHelper.getLayerBoxInLegendPanel(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ||
+          DomHelper.getLayerBoxInLegendPanel(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR))
+      );
+    }, timeout);
+
+    // Return the layer config
+    return layerConfig;
   }
 
   /**

@@ -42,7 +42,6 @@ import type { GVEsriDynamic } from 'geoview-core/geo/layer/gv-layers/raster/gv-e
 import { GVGroupLayer } from 'geoview-core/geo/layer/gv-layers/gv-group-layer';
 import { GVWMS } from 'geoview-core/geo/layer/gv-layers/raster/gv-wms';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
-import type { ConfigBaseClass } from 'geoview-core/api/config/validation-classes/config-base-class';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-image';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
@@ -82,29 +81,35 @@ export class LayerTester extends GVAbstractTester {
   testAddEsriDynamicHistoFloodEvents(): Promise<Test<AbstractBaseGVLayer>> {
     let rootLayerPath: string | undefined;
     let configLayerPath: string | undefined;
-    let registeredConfigLayerPath: string | undefined;
+    let registeredLayerName: string | undefined;
     // Test
     return this.test(
       `Test Adding Esri Dynamic Histo Flood Events on map...`,
       (test) => {
         // Add the layer and return the added layer instance
-        return this.addLayerEsriDynamicHistoFloodEvents(test, undefined, {
-          onLayerPath: (rootPath, configPath): void => {
+        return this.addLayerEsriDynamicHistoFloodEvents(test, {
+          onLayerPath: (rootPath, confLayerPath): void => {
             rootLayerPath = rootPath;
-            configLayerPath = configPath;
+            configLayerPath = confLayerPath;
           },
-          onConfig: async (config): Promise<void> => {
-            await Promise.resolve();
-            registeredConfigLayerPath = config.layerPath;
+          onConfig: (config): Promise<void> => {
+            // Keep track of the layer name as the time the config has been registered
+            registeredLayerName = config.getLayerNameCascade();
+            return Promise.resolve();
           },
         });
       },
       (test, result) => {
         // Perform assertions
         test.addStep('Verifying the registered configuration callback completed for the loaded layer...');
-        Test.assertIsEqual(rootLayerPath, result.getGeoviewLayerId());
-        Test.assertIsEqual(configLayerPath, result.getLayerPath());
-        Test.assertIsEqual(registeredConfigLayerPath, configLayerPath);
+        Test.assertIsEqual(result.getGeoviewLayerId(), rootLayerPath);
+        Test.assertIsEqual(result.getLayerPath(), configLayerPath);
+
+        test.addStep(`Verifying the layer name at config creation default to layer path, as it's unread from metadata yet...`);
+        Test.assertIsEqual(registeredLayerName, rootLayerPath);
+
+        test.addStep('Verifying the layer name of the loaded layer is the name from the metadata...');
+        Test.assertIsEqual(result.getLayerName(), 'Historical Flood Events');
 
         // Redirect to helper to check if the layer exists
         LayerTester.#assertCheckLayerExistsInStore(
@@ -3136,7 +3141,6 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise resolving with the group and child state observations
    */
   testAddGeocoreWithInlineIAACGroupOverride(): Promise<Test<IaacGroupOverrideResult>> {
-    const uuid = TestConstants.GEOCORE_IAAC_UUID;
     const groupName = 'IAAC Projects';
     const customLayerEntryConfig = JSON.stringify([
       {
@@ -3149,48 +3153,36 @@ export class LayerTester extends GVAbstractTester {
         ],
       },
     ]);
-    let fixtureRootId: string | undefined;
 
+    let rootLayerPath: string | undefined;
     return this.test(
       'Test GeoCore IAAC inline group name and child initial states...',
       async (test) => {
         test.addStep('Adding the IAAC GeoCore record with the custom group and three child entries...');
-        // TODO: ALEX - Don't call addGeoviewLayerByGeoCoreUUID directly, call a this.addLayerXXXXXViaGeocore function equivalent
-        const added = await this.getControllersRegistry().layerCreatorController.addGeoviewLayerByGeoCoreUUID(uuid, customLayerEntryConfig);
-        if (!added) throw new TestError(`GeoCore did not create the IAAC fixture '${uuid}'`);
+        const group = await this.addLayerIAACInlineViaGeocore(test, customLayerEntryConfig, {
+          onLayerPath: (root) => {
+            rootLayerPath = root;
+          },
+        });
 
-        // Record the actual root before awaiting creation so failures still remove the correct fixture.
-        fixtureRootId = added.layer.getGeoviewLayerId();
-        await added.promiseLayerOnMap;
-        const groupPath = `${fixtureRootId}/base-group`;
-        const childPaths = ['0', '1', '2'].map((id) => `${groupPath}/${id}`);
-        const { layerController } = this.getControllersRegistry();
+        // Get the group
+        const childPaths = group.getLayersAllLeafs().map((layer) => layer.getLayerPath());
 
         // The API supplies base-group when the inline group has no explicit layerId.
-        test.addStep('Waiting for the generated group and its configured children...');
-        const [group, ...children] = await Promise.all(
-          [groupPath, ...childPaths].map((path) => layerController.waitForLayerRegistered(path, TestConstants.UI_STATE_TIMEOUT_MS))
-        );
-        if (!(group instanceof GVGroupLayer)) throw new TestError(`Expected the IAAC entry '${groupPath}' to be a group`);
-
-        // Initial OpenLayers visibility is set on first load, not necessarily at registration.
-        test.addStep('Waiting for each child to apply its initial visibility...');
-        await whenThisThen(() => {
-          if (children.some((child) => child.getLayerStatus() === 'error')) throw new TestError('An IAAC child layer failed to load');
-          return children.every((child) => child.loadedOnce);
-        }, TestConstants.UI_STATE_TIMEOUT_MS);
+        test.addStep('Waiting for the configured children...');
+        const children = await Promise.all(childPaths.map((path) => this.waitLayerAtLayerPath(test, path)));
 
         // Inspect the store directly without changing the requested collapsed states.
         test.addStep('Waiting for the group and child legend entries...');
         await whenThisThen(
-          () => [groupPath, ...childPaths].every((path) => getStoreLayerLegendLayerByPath(this.getMapId(), path) !== undefined),
+          () => [group.getLayerPath(), ...childPaths].every((path) => getStoreLayerLegendLayerByPath(this.getMapId(), path) !== undefined),
           TestConstants.UI_STATE_TIMEOUT_MS
         );
 
         return {
           groupId: group.getLayerConfig().layerId,
           groupName: group.getLayerName(),
-          groupLegendName: getStoreLayerLegendLayerByPath(this.getMapId(), groupPath)?.layerName,
+          groupLegendName: getStoreLayerLegendLayerByPath(this.getMapId(), group.getLayerPath())?.layerName,
           childIds: group.getLayers().map((child) => child.getLayerConfig().layerId),
           children: children.map((child) => {
             const legend = getStoreLayerLegendLayerByPath(this.getMapId(), child.getLayerPath());
@@ -3227,7 +3219,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
-        if (fixtureRootId) this.removeLayerConfigAndAssert(test, fixtureRootId);
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -3405,7 +3397,7 @@ export class LayerTester extends GVAbstractTester {
       `Test getGeoviewLayerByRootId resolves the first layer under a root id...`,
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        const gvLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, 'Root Id Resolver', {
+        const gvLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, {
           onLayerPath: (rootPath): void => {
             rootLayerPath = rootPath;
           },
@@ -3452,9 +3444,9 @@ export class LayerTester extends GVAbstractTester {
         const onLayerPath = (path: string): void => {
           rootLayerPaths.push(path);
         };
-        const precedingLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, 'Reload A', { onLayerPath });
-        const layerToReload = await this.addLayerEsriDynamicHistoFloodEvents(test, 'Reload B', { onLayerPath });
-        const followingLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, 'Reload C', { onLayerPath });
+        const precedingLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, { onLayerPath });
+        const layerToReload = await this.addLayerEsriDynamicHistoFloodEvents(test, { onLayerPath });
+        const followingLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, { onLayerPath });
 
         // Get the layer of the layer to reload
         const layerPath = layerToReload.getLayerPath();
@@ -3686,39 +3678,6 @@ export class LayerTester extends GVAbstractTester {
   // #endregion LAYER FUNCTIONS
 
   // #region PRIVATE METHODS
-
-  /**
-   * Waits for a layer's box to mount in both panels without changing group or tab state.
-   *
-   * @param test - The test instance used to record readiness steps
-   * @param layerPath - The full path of the layer to wait for
-   * @param timeout - Maximum wait in milliseconds for each readiness condition
-   * @returns The registered layer configuration
-   */
-  // TODO: ALEX - Turn this function private
-  async waitForLayerBoxInLayersPanels(test: Test, layerPath: string, timeout = 60000): Promise<ConfigBaseClass> {
-    const mapId = this.getMapId();
-
-    // Wait for the layer config to be registered
-    test.addStep('Waiting for layer config to be registered...');
-    const layerConfig = await this.getControllersRegistry().layerController.waitForLayerConfigRegistered(layerPath, timeout);
-
-    test.addStep('Waiting for fixture entries in the Legend and Layers panels...');
-    await whenThisThen(() => getStoreLayerLegendLayerByPath(mapId, layerPath), timeout);
-
-    test.addStep('Waiting for UI to hold the box...');
-    await whenThisThen(() => {
-      return (
-        (DomHelper.getLayerBoxInLayersPanel(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ||
-          DomHelper.getLayerBoxInLayersPanel(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR)) &&
-        (DomHelper.getLayerBoxInLegendPanel(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ||
-          DomHelper.getLayerBoxInLegendPanel(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR))
-      );
-    }, timeout);
-
-    // Return the layer config
-    return layerConfig;
-  }
 
   /**
    * Adds the ZPEGT WMS group and verifies its resolved name and metadata-derived sublayer names.
