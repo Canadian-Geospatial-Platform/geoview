@@ -100,6 +100,9 @@ export const OVERVIEW_MAP_MIN_CONTAINER_WIDTH = 700;
  */
 export const OVERVIEW_MAP_MIN_CONTAINER_HEIGHT = 361;
 
+/** The geometry group key for navbar measurement features. */
+export const MEASURE_GROUP_KEY = 'geoview-measurement';
+
 /** Gap (in pixels) above the map section or below the footer when scrolling into view. */
 export const PAGE_SCROLL_GAP_PX = 25;
 

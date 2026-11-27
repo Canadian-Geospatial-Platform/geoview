@@ -72,9 +72,9 @@ const geom = cgpv.api.utilities.geo.wktToGeometry(wktString);
 // Format coordinates as DMS
 const dms = cgpv.api.utilities.geo.coordFormatDMS(45.4215);
 
-// Measurements
-const area = cgpv.api.utilities.geo.getArea(polygonGeometry);
-const length = cgpv.api.utilities.geo.getLength(lineGeometry);
+// Measurements (geodesic; pass the projection of the geometry coordinates, e.g. the map projection)
+const area = cgpv.api.utilities.geo.getArea(polygonGeometry, "EPSG:3978");
+const length = cgpv.api.utilities.geo.getLength(lineGeometry, "EPSG:3978");
 const distance = cgpv.api.utilities.geo.calculateDistance(
   coords,
   "EPSG:4326",

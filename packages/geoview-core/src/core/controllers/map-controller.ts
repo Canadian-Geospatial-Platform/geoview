@@ -121,7 +121,7 @@ import {
   isStoreSwiperInitialized,
   type TypeSwiperConfig,
 } from '@/core/stores/states/swiper-state';
-import { TIMEOUT, type GVFitOptions } from '@/core/utils/constant';
+import { MEASURE_GROUP_KEY, TIMEOUT, type GVFitOptions } from '@/core/utils/constant';
 import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
 import { doTimeout, isValidUUID } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -1836,6 +1836,9 @@ export class MapController extends AbstractMapViewerController {
     // Save in the store
     setStoreMapProjection(this.getMapId(), Projection.readEPSGNumber(event.projection) as TypeValidMapProjectionCodes);
 
+    // Reproject the completed measurements so they stay at the same geographic location
+    this.#reprojectMeasurements(event);
+
     // Reload the basemap from new projection
     this.resetBasemap()
       .then(() => {
@@ -2123,6 +2126,34 @@ export class MapController extends AbstractMapViewerController {
   }
 
   // #endregion PRIVATE METHODS - MAP
+
+  // #region PRIVATE METHODS - MEASUREMENT
+
+  /**
+   * Reprojects the completed measurement geometries from the previous map projection to the new one.
+   *
+   * Any in-progress measurement sketch is stopped first, because its coordinates belong to the previous projection.
+   *
+   * @param event - The projection changed event containing the new and previous projections
+   */
+  #reprojectMeasurements(event: MapProjectionChangedEvent): void {
+    // Stop the active sketch, it was drawn in the previous projection
+    this.stopActiveMeasurement();
+
+    // Check if the measurement group exists (it is created on the first measurement)
+    const geometryApi = this.getGeometryApi();
+    if (!geometryApi.hasGeometryGroup(MEASURE_GROUP_KEY)) return;
+
+    // Transform every completed measurement once, in place, so feature styles and references are preserved
+    geometryApi
+      .getGeometryGroup(MEASURE_GROUP_KEY)
+      .vectorSource.getFeatures()
+      .forEach((feature) => {
+        feature.getGeometry()?.transform(event.previousProjection, event.projection);
+      });
+  }
+
+  // #endregion PRIVATE METHODS - MEASUREMENT
 
   // #region STATIC METHODS - CONFIG CREATION
 

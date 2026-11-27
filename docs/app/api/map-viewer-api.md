@@ -304,6 +304,12 @@ mapViewer.onMapComponentRemoved((sender, payload) => {
 });
 ```
 
+Geometries in your own geometry groups are not reprojected for you. In an `onMapProjectionChanged` handler, transform them once
+with `geometry.transform(payload.previousProjection, payload.projection)`, as the core Drawer and Measure tools do. To measure them,
+pass the current map projection to `GeoUtilities.getLength(geometry, projection)` and `GeoUtilities.getArea(geometry, projection)`.
+The projection is required: the underlying `ol/sphere` functions assume EPSG:3857 coordinates otherwise, which is wrong in other
+projections such as EPSG:3978.
+
 ---
 
 ## Best Practices

@@ -31,12 +31,11 @@ import { formatLength, formatArea } from '@/core/utils/utilities';
 import { DomHelper } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
+import { useStoreMapCurrentProjectionEPSG } from '@/core/stores/states/map-state';
 import { useShellContainer } from '@/core/containers/shell-container-context';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { useMapController, useUIController } from '@/core/controllers/use-controllers';
-
-/** The geometry group key for measurement features. */
-const MEASURE_GROUP_KEY = 'geoview-measurement';
+import { MEASURE_GROUP_KEY } from '@/core/utils/constant';
 
 /** Stroke color for measurement lines. */
 const STROKE_COLORS = '#ff0000';
@@ -46,6 +45,18 @@ const FILL_COLORS = 'rgba(255, 0, 0, 0.2)';
 
 /** Stroke width for measurement lines. */
 const STROKE_WIDTH = 2;
+
+/** Base geometry style for measurement lines. */
+const LINE_BASE_STYLE = new Style({ stroke: new Stroke({ color: STROKE_COLORS, width: STROKE_WIDTH }) });
+
+/** Base geometry style for measurement areas. */
+const POLYGON_BASE_STYLE = new Style({
+  stroke: new Stroke({ color: STROKE_COLORS, width: STROKE_WIDTH }),
+  fill: new Fill({ color: FILL_COLORS }),
+});
+
+/** Minimum number of placed vertices before a polygon sketch shows its live total. */
+const POLYGON_SKETCH_MIN_VERTICES = 3;
 
 /** Base style values for measurement segment labels. */
 const SEGMENT_LABEL_BASE_STYLE = {
@@ -73,6 +84,22 @@ const LABEL_HALO_STROKE = new Stroke({ color: LABEL_STYLE_CONFIG.haloColor, widt
 type MeasureType = 'line' | 'area' | null;
 
 /**
+ * Creates the style function for an in-progress measurement sketch, which shows only the live total.
+ *
+ * A polygon sketch ring is [vertices..., cursor, first vertex], so its total waits for the minimum placed vertices.
+ *
+ * @param geometry - The sketch geometry
+ * @param totalStyle - The style function that renders the geometry and its total
+ * @returns The sketch style function
+ */
+function createSketchStyle(geometry: LineString | Polygon, totalStyle: StyleFunction): StyleFunction {
+  if (geometry instanceof LineString) return totalStyle;
+
+  return (feature: FeatureLike, resolution: number): ReturnType<StyleFunction> =>
+    (geometry.getCoordinates()[0]?.length ?? 0) - 2 >= POLYGON_SKETCH_MIN_VERTICES ? totalStyle(feature, resolution) : POLYGON_BASE_STYLE;
+}
+
+/**
  * Creates a measurement button to open the measurement panel.
  *
  * @returns The measurement button
@@ -88,6 +115,7 @@ export default function Measurement(): JSX.Element {
   // Stores
   const mapId = useStoreGeoViewMapId();
   const displayLanguage = useStoreAppDisplayLanguage();
+  const mapProjection = useStoreMapCurrentProjectionEPSG();
   const shellContainer = useShellContainer();
   const mapController = useMapController();
   const uiController = useUIController();
@@ -103,6 +131,9 @@ export default function Measurement(): JSX.Element {
 
   /** Listener for point-count changes in the active sketch. */
   const sketchGeometryChangeKey = useRef<EventsKey | undefined>(undefined);
+
+  /** Current segment-label visibility, read when a measurement completes. */
+  const showSegmentLabelsRef = useRef<boolean>(showSegmentLabels);
 
   /**
    * Builds custom sx classes for the measurement component.
@@ -133,33 +164,19 @@ export default function Measurement(): JSX.Element {
   const createSegmentStyle = useCallback(
     (includeSegmentLabels = true): StyleFunction => {
       return (feature: FeatureLike): Style[] => {
-        const styles: Style[] = [];
         const geometry = feature.getGeometry();
 
-        if (!geometry) return styles;
-
-        // Base stroke style
-        const stroke = new Stroke({
-          color: STROKE_COLORS,
-          width: STROKE_WIDTH,
-        });
+        if (!geometry) return [];
 
         // Add base geometry style
-        if (geometry instanceof Polygon) {
-          const fill = new Fill({
-            color: FILL_COLORS,
-          });
-          styles.push(new Style({ stroke, fill }));
-        } else {
-          styles.push(new Style({ stroke }));
-        }
+        const styles: Style[] = [geometry instanceof Polygon ? POLYGON_BASE_STYLE : LINE_BASE_STYLE];
 
         // Add segment labels
         let coordinates: number[][];
         if (geometry instanceof LineString) {
           coordinates = geometry.getCoordinates();
         } else if (geometry instanceof Polygon) {
-          coordinates = geometry.getCoordinates()[0];
+          coordinates = geometry.getCoordinates()[0] ?? [];
         } else {
           return styles;
         }
@@ -168,7 +185,7 @@ export default function Measurement(): JSX.Element {
         if (includeSegmentLabels) {
           for (let i = 0; i < coordinates.length - 1; i++) {
             const segment = new LineString([coordinates[i], coordinates[i + 1]]);
-            const segmentLength = GeoUtilities.getLength(segment);
+            const segmentLength = GeoUtilities.getLength(segment, mapProjection);
             const segmentLabel = formatLength(segmentLength, displayLanguage);
 
             // Get midpoint of segment
@@ -208,19 +225,20 @@ export default function Measurement(): JSX.Element {
         // Keep totals canvas-based so the text, rounded backing and pointer appear in map exports.
         let labelCoord: number[];
         let totalLabel = '';
-        let labelOffsetY = -15; // Default offset for line (above end point)
+        // Line total sits above the end point: half the 29px label + 6px pointer + a 6px gap keeps the vertex and cursor visible
+        let labelOffsetY = -26;
 
         if (geometry instanceof LineString) {
           labelCoord = coordinates[coordinates.length - 1];
-          const length = GeoUtilities.getLength(geometry);
+          const length = GeoUtilities.getLength(geometry, mapProjection);
           totalLabel = formatLength(length, displayLanguage);
         } else if (geometry instanceof Polygon) {
           // Position at an interior point so the total stays inside the polygon.
           labelCoord = geometry.getInteriorPoint().getCoordinates();
           labelCoord.pop(); // Remove the third coordinate
           labelOffsetY = 0; // No offset for polygon - keep label inside
-          const area = GeoUtilities.getArea(geometry);
-          const length = GeoUtilities.getLength(geometry);
+          const area = GeoUtilities.getArea(geometry, mapProjection);
+          const length = GeoUtilities.getLength(geometry, mapProjection);
           // Convert HTML <sup> tags to Unicode superscript for canvas rendering
           const areaText = formatArea(area, displayLanguage).replace(/<sup>2<\/sup>/g, '²');
           totalLabel = `${formatLength(length, displayLanguage)}\n${areaText}`;
@@ -228,12 +246,15 @@ export default function Measurement(): JSX.Element {
           return styles;
         }
 
+        // A collinear polygon sketch has no interior point, skip its total until the polygon has an area
+        if (!labelCoord.every(Number.isFinite)) return styles;
+
         styles.push(...createMeasurementLabelStyles(feature, labelCoord, totalLabel, labelOffsetY));
 
         return styles;
       };
     },
-    [displayLanguage]
+    [displayLanguage, mapProjection]
   );
 
   /**
@@ -271,6 +292,9 @@ export default function Measurement(): JSX.Element {
         const geometry = event.feature.getGeometry();
         if (!(geometry instanceof LineString || geometry instanceof Polygon)) return;
 
+        // Show only the live total while drawing, segment labels would overlap it near the cursor
+        event.feature.setStyle(createSketchStyle(geometry, createSegmentStyle(false)));
+
         setHint(true);
 
         sketchVertexCount.current = 1;
@@ -298,24 +322,20 @@ export default function Measurement(): JSX.Element {
         const geometry = feature.getGeometry();
 
         if (geometry && (geometry instanceof LineString || geometry instanceof Polygon)) {
-          // Use current state value for segment labels visibility
-          setShowSegmentLabels((currentShowSegments) => {
-            // Apply final style with segment labels (canvas-based)
-            feature.setStyle(createSegmentStyle(currentShowSegments));
-            return currentShowSegments;
-          });
+          // Apply final style with segment labels (canvas-based)
+          feature.setStyle(createSegmentStyle(showSegmentLabelsRef.current));
 
           // Store feature reference
           setMeasurementFeatures((prev) => [...prev, feature]);
 
           // Announce measurement completion with actual values
           if (geometry instanceof LineString) {
-            const length = GeoUtilities.getLength(geometry);
+            const length = GeoUtilities.getLength(geometry, mapProjection);
             const distance = formatLength(length, displayLanguage);
             setStatusMessage(t('measurement.status.completedLine', { distance }));
           } else if (geometry instanceof Polygon) {
-            const perimeter = GeoUtilities.getLength(geometry);
-            const area = GeoUtilities.getArea(geometry);
+            const perimeter = GeoUtilities.getLength(geometry, mapProjection);
+            const area = GeoUtilities.getArea(geometry, mapProjection);
             const perimeterFormatted = formatLength(perimeter, displayLanguage);
             const areaFormatted = formatArea(area, displayLanguage);
             setStatusMessage(
@@ -340,8 +360,18 @@ export default function Measurement(): JSX.Element {
       const measurementType = type === 'line' ? t('measurement.line') : t('measurement.area');
       setStatusMessage(t('measurement.status.started', { type: measurementType }));
     },
-    [clearSketchListener, createSegmentStyle, mapController, uiController, displayLanguage, t]
+    [clearSketchListener, createSegmentStyle, mapController, uiController, displayLanguage, mapProjection, t]
   );
+
+  /**
+   * Reapplies measurement styles when the projection or language changes, so existing labels use the current values.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('MEASUREMENT - refresh measurement styles', mapProjection, displayLanguage);
+    measurementFeatures.forEach((feature) => feature.setStyle(createSegmentStyle(showSegmentLabels)));
+    // Only refresh when the style inputs change, feature additions and label toggles already apply their own style
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createSegmentStyle]);
 
   /**
    * Synchronizes the measurement controls when measurement stops, including when drawer drawing or editing takes over.
@@ -450,6 +480,7 @@ export default function Measurement(): JSX.Element {
 
       // Set the segments hook state
       setShowSegmentLabels(shouldShow);
+      showSegmentLabelsRef.current = shouldShow;
 
       // Update all stored measurement features with new style
       setMeasurementFeatures((currentFeatures) => {
