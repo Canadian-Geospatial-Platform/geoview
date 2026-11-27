@@ -208,7 +208,8 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         <Typography component="h3" variant="h6" sx={memoSxClasses.infoSectionTitle}>
           {t('layers.layerInfoServiceInfo')}
         </Typography>
-        <List sx={memoSxClasses.infoList}>
+        {/* Preserve list semantics in Safari/VoiceOver while list markers are hidden. */}
+        <List role="list" sx={memoSxClasses.infoList}>
           {isLocalhost() && <Box component="li">{`${t('layers.layerPath')}: ${layerPath}`}</Box>}
           <Box component="li">{`${t('layers.layerType')}${memoLocalizedTypeName}`}</Box>
           {memoResources !== '' && (
@@ -281,7 +282,8 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         <Typography component="h3" variant="h6" sx={memoSxClasses.infoSectionTitle}>
           {t('layers.layerInfoActiveFilters')}
         </Typography>
-        <List sx={memoSxClasses.infoList}>
+        {/* Preserve list semantics in Safari/VoiceOver while list markers are hidden. */}
+        <List role="list" sx={memoSxClasses.infoList}>
           {layerFilter && <Box component="li">{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
           {classFilter && <Box component="li">{`${t('layers.layerClassFilter')}${classFilter}`}</Box>}
           {dataFilter && <Box component="li">{`${t('layers.layerDataTableFilter')}${dataFilter}`}</Box>}
@@ -303,7 +305,8 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
           <Typography component="h3" variant="h6" sx={memoSxClasses.infoSectionTitle}>
             {t('layers.layerInfoTemporalInformation')}
           </Typography>
-          <List sx={memoSxClasses.infoList}>
+          {/* Preserve list semantics in Safari/VoiceOver while list markers are hidden. */}
+          <List role="list" sx={memoSxClasses.infoList}>
             {layerDisplayDateFormat && (
               <Box component="li">{`${t('layers.layerDisplayDateFormat')}${layerDisplayDateFormat[language]}`}</Box>
             )}
@@ -329,7 +332,8 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
           <Typography component="h3" variant="h6" sx={memoSxClasses.infoSectionTitle}>
             {t('layers.layerInfoTemporalDimension')}
           </Typography>
-          <List sx={memoSxClasses.infoList}>
+          {/* Preserve list semantics in Safari/VoiceOver while list markers are hidden. */}
+          <List role="list" sx={memoSxClasses.infoList}>
             {timeSliderDimension.displayDateFormat?.[language] && (
               <Box component="li">{`${t('layers.layerDisplayDateFormat')}${timeSliderDimension.displayDateFormat[language]}`}</Box>
             )}
