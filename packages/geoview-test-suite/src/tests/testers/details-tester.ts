@@ -304,17 +304,16 @@ export class DetailsTester extends GVAbstractTester {
    * @returns A promise resolving with the observed feature and rendered table fields
    */
   testAirborneFeatureDetailsTable(isRunningOnVPN: boolean): Promise<Test<WmsFeatureTableResult>> {
-    let rootLayerPath: string | undefined;
-    let initialExtent: Extent | undefined;
+    const initialExtent = this.getMapViewer().getView().calculateExtent();
     const clickCoordinate = [-71.35, 46.7]; // Quebec
 
+    let rootLayerPath: string | undefined;
     return this.test(
       'Test Airborne WMS feature details table via WFS...',
       async (test) => {
         if (!isRunningOnVPN) throw new TestSkippedError('Not running on VPN');
 
         // The Airborne fixture changes the zoom before adding the layer.
-        initialExtent = this.getMapViewer().getView().calculateExtent();
         const layer = await this.addLayerWMSAirborneWithWFS(test, {
           onLayerPath: (rootPath): void => {
             rootLayerPath = rootPath;
@@ -363,16 +362,12 @@ export class DetailsTester extends GVAbstractTester {
         });
       },
       async (test) => {
-        try {
-          // Clear the layer from the map and assert it was removed
-          if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
-        } finally {
-          if (initialExtent) {
-dddd
-            test.addStep('Restoring the pre-test map extent...');
-            await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
-          }
-        }
+        // Restore zoom extent
+        test.addStep('Restoring the pre-test map extent...');
+        await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
+
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -642,14 +637,12 @@ dddd
         Test.assertIsEqual(result.zoom.centerPixelX <= result.zoom.mapWidth - result.zoom.paddingRight, true);
       },
       async (test) => {
-ddddd
-        try {
-          // Clear the layer from the map and assert it was removed
-          if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
-        } finally {
-          test.addStep('Restoring the pre-test map extent...');
-          await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
-        }
+        // Restore zoom extent
+        test.addStep('Restoring the pre-test map extent...');
+        await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
+
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -1035,14 +1028,12 @@ ddddd
         Test.assertIsEqual(zoom.backToSmallIsFeatureZoomView, false);
       },
       async (test) => {
-ddd
-        try {
-          // Clear the layer from the map and assert it was removed
-          if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
-        } finally {
-          test.addStep('Restoring the pre-test map extent...');
-          await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
-        }
+        // Restore zoom extent
+        test.addStep('Restoring the pre-test map extent...');
+        await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
+
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -1148,14 +1139,12 @@ ddd
         Test.assertIsEqual(result.followsAfterLayerSwitch, false);
       },
       async (test) => {
-ddd
-        try {
-          // Clear the layer from the map and assert it was removed
-          if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
-        } finally {
-          test.addStep('Restoring the pre-test map extent...');
-          await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
-        }
+        // Restore zoom extent
+        test.addStep('Restoring the pre-test map extent...');
+        await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
+
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -1226,14 +1215,9 @@ ddd
         Test.assertIsEqual(result.secondFeatureCount, 1);
       },
       (test) => {
-ddd
-        try {
-          // Clear the layer from the map and assert it was removed
-          if (projectRootLayerPath) this.removeLayerConfigAndAssert(test, projectRootLayerPath);
-        } finally {
-          // Clear the layer from the map and assert it was removed
-          if (polygonRootLayerPath) this.removeLayerConfigAndAssert(test, polygonRootLayerPath);
-        }
+        // Clear the layer from the map and assert it was removed
+        if (projectRootLayerPath) this.removeLayerConfigAndAssert(test, projectRootLayerPath);
+        if (polygonRootLayerPath) this.removeLayerConfigAndAssert(test, polygonRootLayerPath);
       }
     );
   }
