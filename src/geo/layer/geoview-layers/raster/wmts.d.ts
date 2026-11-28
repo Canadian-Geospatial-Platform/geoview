@@ -1,14 +1,14 @@
 import WMTSSource from 'ol/source/WMTS';
 import type { Projection as OLProjection } from 'ol/proj';
-import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { TypeSourceTileInitialConfig, TypeGeoviewLayerConfig, TypeMetadataWMTSCapabilities, TypeMetadataWMTSLayer } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
-import { GVWMTS } from '@/geo/layer/gv-layers/tile/gv-wmts';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { GVWMTS } from '@/geo/layer/gv-layers/tile/gv-wmts';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { type FetchWithProxyResult } from '@/geo/utils/utilities';
-import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 export interface TypeSourceImageWMTSInitialConfig extends TypeSourceTileInitialConfig {
     wmtsStyle?: string;
     resolutionLevels?: number;

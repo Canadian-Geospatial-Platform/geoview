@@ -2,7 +2,7 @@ import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TypeContainerBox, TypeHTMLElement } from '@/core/types/global-types';
 import { type TypeMapFitPadding } from '@/core/utils/constant';
 /**
- * Provides stateless, map-scoped DOM utilities.
+ * Provides map-scoped DOM utilities and shared page scroll locking.
  */
 export declare abstract class DomHelper {
     #private;
@@ -65,6 +65,13 @@ export declare abstract class DomHelper {
      * @throws {Error} When the root element is not found
      */
     static queryGVSelector<T extends Element = HTMLElement>(mapId: string, selector: string): T | undefined;
+    /**
+     * Checks whether a modal in this viewer owns keyboard input, including during its exit transition.
+     *
+     * @param mapId - The map identifier
+     * @returns Whether this viewer contains a mounted modal dialog
+     */
+    static hasOpenModal(mapId: string): boolean;
     /**
      * Runs a CSS selector scoped inside a map's root element and returns all matches.
      *
@@ -142,6 +149,14 @@ export declare abstract class DomHelper {
      */
     static isContentEditableElement(element: Element | null | undefined): boolean;
     /**
+     * Locks the page scrolling while a viewer fills the browser viewport (fullscreen fallback).
+     *
+     * Saves the page state on the first lock and restores it only after the last lock is released.
+     *
+     * @returns An idempotent release function restoring overflow, scroll position and lost focus after the last lock
+     */
+    static lockPageScroll(): () => void;
+    /**
      * Checks whether an element is fully visible in the viewport.
      *
      * @param element - The element to check
@@ -159,6 +174,27 @@ export declare abstract class DomHelper {
      * @param offset - Optional offset in pixels for 'start' and 'end' positions (default: 100)
      */
     static scrollIfNotVisible(element: HTMLElement, blockValue: ScrollLogicalPosition, offset?: number): void;
+    /**
+     * Reveals the complete map section (app bar, map, nav bar and map info) of a map.
+     *
+     * Leaves up to PAGE_SCROLL_GAP_PX above fitting sections; oversized sections keep a stable gap of that size.
+     * Shared by the app bar, map info and the zoom-to-feature actions so they all align the map the same way.
+     *
+     * @param mapId - The map identifier
+     */
+    static scrollMapSectionIntoView(mapId: string): void;
+    /**
+     * Scrolls the footer into view, aligning its bottom when it fits or its top when it is taller than the viewport.
+     *
+     * @param mapId - The map identifier
+     */
+    static scrollFooterIntoView(mapId: string): void;
+    /**
+     * Schedules footer scrolling after layout and focus updates, unless the footer has been removed.
+     *
+     * @param mapId - The map identifier
+     */
+    static scrollFooterIntoViewAfterResize(mapId: string): void;
     /**
      * Scrolls a list item into view within its scrollable container only, without scrolling the page.
      *

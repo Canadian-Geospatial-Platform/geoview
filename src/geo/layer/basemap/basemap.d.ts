@@ -10,7 +10,7 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { MapViewer } from '@/geo/map/map-viewer';
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
- * can be filtered by projection (currently only WM and LCC projections are listed,
+ * can be filtered by projection (currently only WM, LCC, and North Pole LAEA projections are listed,
  * in case other projections needed, they need to be added to the list).
  */
 export declare class BasemapApi {

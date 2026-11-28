@@ -54,8 +54,10 @@ export interface IUIState {
     actions: {
         /** Enables the focus trap on a specific UI element. */
         enableFocusTrap: (uiFocus: FocusItemProps) => void;
+        /** Updates the current focus item's scoped Escape return target. */
+        setFocusEscapeReturn: (escapeReturn: FocusItemProps['escapeReturn']) => void;
         /** Disables the focus trap and publishes an optional focus restoration request. */
-        disableFocusTrap: (callbackElementId?: string) => void;
+        disableFocusTrap: (callbackElementId?: string, reactivateCrosshair?: boolean) => void;
         /** Clears a focus restoration request after the UI shell handles it. */
         clearFocusRestoreRequest: (requestId: number) => void;
         /** Sets the active footer-bar tab by id. */
@@ -170,12 +172,33 @@ export declare const useStoreUIAppBarPanelIds: () => string[];
 export declare const useStoreUINavBarButtonPanelVersion: () => number;
 /** Hooks the map-control popover close request counter. */
 export declare const useStoreUIPopoverCloseVersion: () => number;
+/**
+ * Gets the map-control popover close request counter.
+ *
+ * @param mapId - The map identifier
+ * @returns The current close request version
+ */
+export declare const getStoreUIPopoverCloseVersion: (mapId: string) => number;
 /** Hooks the current focus-trap item from the UI state. */
 export declare const useStoreUIActiveFocusItem: () => FocusItemProps;
+/**
+ * Gets the current focus-trap item from the map's UI state.
+ *
+ * @param mapId - The map identifier
+ * @returns The focus item and its focus-entry behavior
+ */
+export declare const getStoreUIFocusItem: (mapId: string) => FocusItemProps;
 /** Hooks the pending focus restoration request for the UI shell. */
 export declare const useStoreUIFocusRestoreRequest: () => TypeFocusRestoreRequest | undefined;
 /** Hooks whether the GeoView-level keyboard focus trap is active. */
 export declare const useStoreUIActiveTrapGeoView: () => boolean;
+/**
+ * Gets whether the GeoView-level keyboard focus trap is active.
+ *
+ * @param mapId - The map identifier
+ * @returns Whether keyboard navigation mode is enabled
+ */
+export declare const getStoreUIActiveTrapGeoView: (mapId: string) => boolean;
 /** Hooks the footer panel resize value. */
 export declare const useStoreUIFooterPanelResizeValue: () => number;
 /** Hooks the list of hidden tab identifiers. */
@@ -220,14 +243,22 @@ export declare const setStoreUIFooterBarIsOpen: (mapId: string, isOpen: boolean)
  */
 export declare const enableStoreUIFocusTrap: (mapId: string, uiFocus: FocusItemProps) => void;
 /**
+ * Updates the focus item's scoped Escape return target.
+ *
+ * @param mapId - The map identifier
+ * @param escapeReturn - The scoped return target, or undefined to cancel it
+ */
+export declare const setStoreUIFocusEscapeReturn: (mapId: string, escapeReturn: FocusItemProps["escapeReturn"]) => void;
+/**
  * Disables the focus trap and restores focus to a callback element.
  *
  * Uses requestAnimationFrame to ensure DOM updates complete before focus restoration.
  *
  * @param mapId - The map identifier
  * @param callbackElementId - Optional element identifier to restore focus to. If 'no-focus' is passed, focus is not restored
+ * @param reactivateCrosshair - Whether to reactivate the crosshair after restoring map focus
  */
-export declare const disableStoreUIFocusTrap: (mapId: string, callbackElementId?: string) => void;
+export declare const disableStoreUIFocusTrap: (mapId: string, callbackElementId?: string, reactivateCrosshair?: boolean) => void;
 /** Clears a focus restoration request after the UI shell handles it.
  *
  * @param mapId - The map identifier
@@ -315,6 +346,15 @@ export type FocusItemProps = {
     activeElementId: string | false;
     /** The id of the element to restore focus to when the trap is released, or false. */
     callbackElementId: string | false;
+    /** Whether acquiring this focus owner should move focus to its Exit control. */
+    focusOnEntry?: boolean;
+    /** Escape restores this target only while focus remains within the originating container. */
+    escapeReturn?: {
+        /** The container whose Escape dismissal may restore focus. */
+        containerId: string;
+        /** The element to focus after that container closes. */
+        elementId: string;
+    };
 };
 /** A one-shot request for the UI shell to restore focus after a focus trap closes. */
 export type TypeFocusRestoreRequest = {
@@ -322,6 +362,8 @@ export type TypeFocusRestoreRequest = {
     requestId: number;
     /** Map-scoped element id to receive focus. */
     elementId: string;
+    /** Whether this request should reactivate the crosshair after restoring map focus. */
+    reactivateCrosshair?: boolean;
 };
 /** Describes the active app-bar tab state. */
 export type ActiveAppBarTabType = {

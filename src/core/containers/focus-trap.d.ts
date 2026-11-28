@@ -2,6 +2,10 @@
 interface FocusTrapProps {
     /** The map identifier. */
     mapId: string;
+    /** Whether the viewer supports dynamic interactions and Settings. */
+    isDynamic: boolean;
+    /** Registers the coordinated keyboard-navigation mode lifecycle with the viewer shell. */
+    registerModeAction: (action: (active: boolean) => void) => () => void;
 }
 /**
  * Creates a dialog component to explain to keyboard user how to trigger and remove FocusTrap.

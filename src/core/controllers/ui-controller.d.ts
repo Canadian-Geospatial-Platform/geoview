@@ -104,6 +104,19 @@ export declare class UIController extends AbstractMapViewerController {
      */
     bumpNavBarButtonPanelVersion(): void;
     /**
+     * Sets or cancels the scoped Escape return target on the existing focus item.
+     *
+     * @param escapeReturn - The scoped return target, or undefined to cancel it
+     */
+    setFocusEscapeReturn(escapeReturn: FocusItemProps['escapeReturn']): void;
+    /**
+     * Releases focus ownership and requests restoration when the originating container closes via Escape.
+     *
+     * @param containerId - The container being dismissed
+     * @returns Whether this dismissal consumed a scoped Escape return target
+     */
+    restoreFocusOnEscape(containerId: string): boolean;
+    /**
      * Enables the focus trap with the given focus item properties.
      *
      * @param uiFocus - The focus item properties to apply
@@ -181,6 +194,10 @@ export declare class UIController extends AbstractMapViewerController {
      */
     closeMapPopovers(): void;
     /**
+     * Closes app-bar panels and map popovers without restoring their triggers or changing footer panels.
+     */
+    closeMapControls(): void;
+    /**
      * Returns focus to the measurement button.
      *
      * Does nothing unless the map itself has focus, and not in fullscreen, where Escape exits fullscreen instead.
@@ -207,10 +224,12 @@ export declare class UIController extends AbstractMapViewerController {
     /**
      * Toggles the fullscreen state.
      *
-     * When entering fullscreen, saves the current view (center, resolution, rotation) and requests fullscreen on the provided element.
-     * When exiting, only asks the browser to leave fullscreen; the view is handled once the browser reports the exit
-     * (same path for the fullscreen button, the `Esc` key and this API). If the user did not change the view while in fullscreen,
-     * the saved view is restored exactly; otherwise the current center and resolution are kept.
+     * When entering fullscreen, saves the current view (center, resolution, rotation) and requests native fullscreen on the provided element.
+     * When native fullscreen is unavailable (e.g. iPhone, or an iframe without fullscreen permission) or the request is rejected,
+     * the viewer fills the browser viewport instead (fallback mode); browser chrome may remain visible.
+     * When exiting, only asks the browser to leave native fullscreen; the view is handled once the browser reports the exit
+     * (same path for the fullscreen button, the `Esc` key and this API). The fallback mode exits immediately. If the user did not
+     * change the view while in fullscreen, the saved view is restored exactly; otherwise the current center and resolution are kept.
      * Calls that do not change the state (entering while active, exiting while inactive) are ignored.
      *
      * @param status - Whether to enter or exit fullscreen

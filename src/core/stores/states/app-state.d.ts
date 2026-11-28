@@ -52,6 +52,8 @@ export interface IAppState {
     drawingHint: TypeDrawingHint;
     /** Whether the viewer is currently in fullscreen mode. */
     isFullscreenActive: boolean;
+    /** Whether the active fullscreen mode fills the browser viewport because native fullscreen is unavailable. */
+    isFullscreenFallback: boolean;
     /** The list of active notification messages shown to the user. */
     notifications: Array<NotificationDetailsType>;
     /** Whether to display features that have no associated symbology. */
@@ -74,7 +76,7 @@ export interface IAppState {
         setDisplayDateMode: (displayDateMode: DisplayDateMode) => void;
         setDisplayDateTimezone: (displayDateTimezone: TimeIANA) => void;
         setDisplayTheme: (theme: TypeDisplayTheme) => void;
-        setFullScreenActive: (active: boolean) => void;
+        setFullScreenActive: (active: boolean, isFallback?: boolean) => void;
         setHeight: (height: number) => void;
         setGuide: (guide: TypeGuideObject) => void;
         setNotifications: (notifications: NotificationDetailsType[]) => void;
@@ -182,6 +184,15 @@ export declare const useStoreAppDisplayDateTimezone: () => TimeIANA;
 export declare const getStoreAppIsFullscreenActive: (mapId: string) => boolean;
 /** Hook that returns whether fullscreen mode is active. */
 export declare const useStoreAppIsFullscreenActive: () => boolean;
+/**
+ * Gets whether the active fullscreen mode is the viewport-filling fallback for the given map.
+ *
+ * @param mapId - The map identifier
+ * @returns True if the fullscreen fallback is active
+ */
+export declare const getStoreAppIsFullscreenFallback: (mapId: string) => boolean;
+/** Hook that returns whether the active fullscreen mode is the viewport-filling fallback. */
+export declare const useStoreAppIsFullscreenFallback: () => boolean;
 /**
  * Gets the geolocator service URL for the given map.
  *
@@ -313,8 +324,9 @@ export declare const setStoreAppDrawingHint: (mapId: string, drawingHint: TypeDr
  *
  * @param mapId - The map identifier
  * @param active - Whether fullscreen mode is active
+ * @param isFallback - Whether fullscreen fills the browser viewport instead of using the native API
  */
-export declare const setStoreAppFullScreenActive: (mapId: string, active: boolean) => void;
+export declare const setStoreAppFullScreenActive: (mapId: string, active: boolean, isFallback?: boolean) => void;
 /**
  * Sets the map container height.
  *
