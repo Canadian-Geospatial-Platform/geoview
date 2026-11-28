@@ -2,8 +2,12 @@ import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import type { AppBarApi } from '@/core/components/app-bar/app-bar-api';
 /** Props for the AppBar component. */
 type AppBarProps = {
+    /** The app-bar API. */
     api: AppBarApi;
+    /** Scrolls the shell into view when a panel opens. */
     onScrollShellIntoView: () => void;
+    /** Changes the existing keyboard-navigation mode. */
+    onKeyboardNavigationModeChange: (active: boolean) => void;
 };
 /** Record of button panel ids to their configuration. */
 export interface ButtonPanelType {

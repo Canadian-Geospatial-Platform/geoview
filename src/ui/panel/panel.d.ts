@@ -5,10 +5,14 @@ import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 export type TypePanelAppProps = {
     panel: TypePanelProps;
     button: IconButtonPropsExtend;
-    onGeneralClose?: () => void;
+    /** Callback when the user clicks the general close button. */
+    onGeneralClose?: (buttonId: string) => void;
+    /** Callback when the panel has completed opening and transitioning in. */
     onOpen?: () => void;
+    /** Callback when the panel has been closed. */
     onClose?: () => void;
-    onKeyDown?: (event: KeyboardEvent) => void;
+    /** Callback when the panel receives a keydown event. */
+    onKeyDown?: (event: KeyboardEvent, buttonId: string) => void;
 };
 /**
  * Creates the Material-UI Panel component for displaying collapsible content with header and close button.

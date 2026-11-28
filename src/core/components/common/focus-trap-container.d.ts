@@ -13,12 +13,9 @@ interface FocusTrapContainerProps {
 /**
  * Traps keyboard tab focus within a container.
  *
- * TODO: Remove memo — children prop (ReactNode) creates new references on every parent render,
- * making shallow comparison always fail and negating any memo performance benefit.
- *
  * @param props - FocusTrapContainer properties
  * @returns The focus trap wrapper element
  */
-export declare const FocusTrapContainer: import("react").MemoExoticComponent<({ children, open, focusTrapContainerId, restoreFocusElementId, containerType, }: FocusTrapContainerProps) => JSX.Element>;
+export declare function FocusTrapContainer({ children, open, focusTrapContainerId, restoreFocusElementId, containerType, }: FocusTrapContainerProps): JSX.Element;
 export {};
 //# sourceMappingURL=focus-trap-container.d.ts.map

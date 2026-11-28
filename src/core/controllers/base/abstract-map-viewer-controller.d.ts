@@ -71,7 +71,7 @@ export declare class AbstractMapViewerController extends AbstractController {
      * Checks whether focus can return from the map to a tool button.
      *
      * @param mapId - The map identifier
-     * @returns True when the map target has focus and fullscreen mode is inactive
+     * @returns True when the map target has focus and native fullscreen (where the browser reserves Escape) is inactive
      */
     protected static isToolButtonFocusable(mapId: string): boolean;
 }

@@ -16,6 +16,8 @@ interface ResponsiveGridLayoutProps {
     containerType: TypeContainerBox;
     titleFullscreen: string;
     toggleMode?: boolean;
+    /** Allows automatically opened content to take focus without affecting explicit user navigation. */
+    focusOnEntry?: boolean;
 }
 /** Methods exposed by the ResponsiveGridLayout component via ref. */
 interface ResponsiveGridLayoutExposedMethods {

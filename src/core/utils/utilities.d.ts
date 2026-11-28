@@ -373,6 +373,16 @@ export declare function enhanceLinksAccessibility(html: string, announcementText
  */
 export declare function linkifyAndSanitizeHtml(content: string, announcementText: string, options?: Parameters<typeof linkifyHtml>[1]): string;
 /**
+ * Indicates whether the browser can display the given element in native fullscreen mode.
+ *
+ * Checks the standard and vendor-prefixed availability flags (false on iPhone, or in an iframe without fullscreen permission)
+ * and the presence of a request method, instead of relying on browser-name detection.
+ *
+ * @param element - The element to display in fullscreen mode
+ * @returns True when a native fullscreen request can be made for the element
+ */
+export declare function isFullscreenSupported(element: TypeHTMLElement): boolean;
+/**
  * Attempts to place the given HTML element into fullscreen mode.
  *
  * This function handles browser compatibility by trying the standard

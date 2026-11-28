@@ -6,7 +6,7 @@ interface ExtendedSwitchProps extends SwitchProps {
  * Material-UI Switch component with integrated label using FormControlLabel.
  *
  * Wraps Material-UI's Switch with FormControlLabel for proper labeling and accessibility.
- * Auto-generates unique IDs to associate labels with switch controls.
+ * Uses a supplied ID or generates a unique ID to associate labels with switch controls.
  * All Material-UI Switch props are supported and passed through directly.
  *
  * @param props - Switch configuration (see ExtendedSwitchProps)

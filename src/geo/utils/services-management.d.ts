@@ -24,6 +24,15 @@ export declare class ServicesManagement {
      */
     static checkUrlSwitchWFSToWMS(url: string): string;
     /**
+     * Upgrades an advertised HTTP resource URL when the viewer is hosted on HTTPS.
+     *
+     * Only the leading scheme is changed; relative URLs, query strings, and other schemes are preserved.
+     *
+     * @param url - The metadata-advertised resource URL
+     * @returns The HTTPS URL on secure pages, or the unchanged URL otherwise
+     */
+    static ensureHttpsOnSecurePage(url: string): string;
+    /**
      * Toggles the MapServer `ms:` prefix on a WFS/WMS layer identifier.
      *
      * @param layerId - The layer identifier to transform

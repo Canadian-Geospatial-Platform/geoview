@@ -7,7 +7,7 @@ interface DataPanelType {
 /**
  * Renders the data panel with layer list and data table.
  *
- * @param props - Datapanel properties
+ * @param props - Properties defined in DataPanelType interface
  * @returns The data panel element
  */
 export declare function Datapanel({ containerType }: DataPanelType): JSX.Element;
